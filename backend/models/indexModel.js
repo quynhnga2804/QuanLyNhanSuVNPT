@@ -4,6 +4,15 @@ const User = require('./userModel');
 const Division = require('./divisionModel');
 const Department = require('./departmentModel');
 const Employee = require('./employeeModel');
+const LaborContract = require('./laborcontractModel');
+const EmployeeContract = require('./employeecontractModel');
+const Notification = require('./notificationModel');
+const UserNotification = require('./userNotificationModel');
+const Attendance = require('./attendanceModel');
+const PayrollCycle = require('./payrollCycleModel');
+const OverTime = require('./overtimeModel');
+const MonthlySalary = require('./monthlysalaryModel');
+
 
 // Thiết lập quan hệ giữa các bảng
 
@@ -19,10 +28,49 @@ Department.hasMany(Employee, { foreignKey: 'DepartmentID' });
 Employee.belongsTo(User, { foreignKey: 'WorkEmail' });
 User.hasOne(Employee, { foreignKey: 'WorkEmail' });
 
+// 👉 Thiết lập quan hệ giữa EmployeeContract và LaborContract:
+EmployeeContract.belongsTo(LaborContract, { foreignKey: 'ID_Contract' });
+LaborContract.hasMany(EmployeeContract, { foreignKey: 'ID_Contract' });
+
+// 👉 Thiết lập quan hệ giữa EmployeeContract và Employee:
+EmployeeContract.belongsTo(Employee, { foreignKey: 'EmployeeID' });
+Employee.hasMany(EmployeeContract, { foreignKey: 'EmployeeID' });
+
+Notification.hasMany(UserNotification, { foreignKey: 'NotificationID' });
+UserNotification.belongsTo(Notification, { foreignKey: 'NotificationID' });
+
+Employee.hasMany(UserNotification, { foreignKey: 'EmployeeID' });
+UserNotification.belongsTo(Employee, { foreignKey: 'EmployeeID' });
+
+Employee.hasMany(Attendance, { foreignKey: 'EmployeeID'});
+Attendance.belongsTo(Employee, { foreignKey: 'EmployeeID'});
+
+PayrollCycle.hasMany(Attendance, {foreignKey: 'ID_PayrollCycle'});
+Attendance.belongsTo(PayrollCycle, { foreignKey: 'ID_PayrollCycle'});
+
+Employee.hasMany(OverTime, { foreignKey: 'EmployeeID'});
+OverTime.belongsTo(Employee, { foreignKey: 'EmployeeID'});
+
+PayrollCycle.hasMany(OverTime, {foreignKey: 'ID_PayrollCycle'});
+OverTime.belongsTo(PayrollCycle, { foreignKey: 'ID_PayrollCycle'});
+
+Employee.hasMany(MonthlySalary, { foreignKey: 'EmployeeID'});
+MonthlySalary.belongsTo(Employee, { foreignKey: 'EmployeeID'});
+
+PayrollCycle.hasMany(MonthlySalary, {foreignKey: 'ID_PayrollCycle'});
+MonthlySalary.belongsTo(PayrollCycle, { foreignKey: 'ID_PayrollCycle'});
+
+
 module.exports = {
   sequelize,
   User,
   Division,
   Department,
   Employee,
+  LaborContract,
+  EmployeeContract,
+  Attendance,
+  PayrollCycle,
+  OverTime,
+  MonthlySalary,
 };

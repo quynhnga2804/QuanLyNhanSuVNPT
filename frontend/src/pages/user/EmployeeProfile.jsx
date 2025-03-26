@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Layout, Spin, message, Avatar, Typography, Flex, Row, Col, Image } from "antd";
 import axios from "axios";
-// import '../../Usercss/EmployeeProfile.css';
 import '../../App.css';
 
 const { Header } = Layout;
 const { Title, Text } = Typography;
 
-const EmployeeProfile = () => {
-    const [employee, setEmployee] = useState(null);
+const EmployeeProfile = ({employeeinfo}) => {
+    // const [employeeinfo, setEmployee] = useState(null);
     const [jobProfile, setJobProfile] = useState(null);
     const [personalProfile, setPersonalProfile] = useState(null);
-    const [familyMembers, setFamilyMembers] = useState([]); // Dùng để lưu danh sách thành viên gia đình
+    const [familyMembers, setFamilyMembers] = useState([]);
+    const [managerList, setManagerList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [imageUrl, setImageUrl] = useState(null);
 
@@ -21,12 +21,12 @@ const EmployeeProfile = () => {
                 const token = localStorage.getItem("token");
 
                 // Gọi API lấy thông tin nhân viên
-                const employeeResponse = await fetch("http://localhost:5000/api/user/employeeinfo", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const employeeData = await employeeResponse.json();
-                if (!employeeResponse.ok) throw new Error(employeeData.message);
-                setEmployee(employeeData);
+                // const employeeResponse = await fetch("http://localhost:5000/api/user/employeeinfo", {
+                //     headers: { Authorization: `Bearer ${token}` }
+                // });
+                // const employeeData = await employeeResponse.json();
+                // if (!employeeResponse.ok) throw new Error(employeeData.message);
+                // setEmployee(employeeData);
 
                 // Gọi API lấy thông tin công việc
                 const jobResponse = await fetch("http://localhost:5000/api/user/jobinfo", {
@@ -35,6 +35,15 @@ const EmployeeProfile = () => {
                 const jobData = await jobResponse.json();
                 if (!jobResponse.ok) throw new Error(jobData.message);
                 setJobProfile(jobData);
+
+                //Gọi API lấy manager
+                const managerResponse = await fetch("http://localhost:5000/api/user/get-managers", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const managerData = await managerResponse.json();
+                if (!managerResponse.ok) throw new Error(managerData.message);
+                setManagerList(managerData);
+
 
                 // Gọi API lấy thông tin cá nhân
                 const personalResponse = await fetch("http://localhost:5000/api/user/personalinfo", {
@@ -63,12 +72,12 @@ const EmployeeProfile = () => {
     }, []);
 
     useEffect(() => {
-        if (employee?.Image) {
+        if (employeeinfo?.Image) {
             const fetchImage = async () => {
                 try {
                     const token = localStorage.getItem("token"); // Lấy token
                     const response = await axios.get(
-                        `http://localhost:5000/uploads/${employee.Image}`,
+                        `http://localhost:5000/uploads/${employeeinfo.Image}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             responseType: "blob",
@@ -82,7 +91,7 @@ const EmployeeProfile = () => {
             };
             fetchImage();
         }
-    }, [employee]);
+    }, [employeeinfo]);
     
 
     return (
@@ -94,11 +103,9 @@ const EmployeeProfile = () => {
                     {/* Phần trên: Ảnh + Thông tin nhân viên */}
                     <Flex gap={20} style={{ width: '100%' }}>
                         <Flex vertical align="center" style={{ flex: 1 }}>
-                            {/* <Avatar src={`/Images/${employee?.Image}`} size={220} style={{ border: '2px solid #ddd' }} /> */}
-                            {/* <Avatar src={`http://localhost:5000/uploads/${employee?.Image}`} size={220} style={{ border: '2px solid #ddd' }} /> */}
                             <Image src={imageUrl} style={{ border: '2px solid #ddd', }} />
-                            <Title level={3} style={{ marginTop: '10px' }}>{employee?.FullName}</Title>
-                            <Text>Mã NV: {employee?.EmployeeID}</Text>
+                            <Title level={3} style={{ marginTop: '10px' }}>{employeeinfo?.FullName}</Title>
+                            <Text>Mã NV: {employeeinfo.EmployeeID}</Text>
                         </Flex>
 
                         <Flex vertical style={{ flex: 2 }}>
@@ -107,34 +114,45 @@ const EmployeeProfile = () => {
                                 <hr />
                             </Header>
 
-                            <Flex className="sub-info-employee">
+                            <Flex className="sub-info-employeeinfo">
                                 <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
-                                    <Text><strong>Số Điện Thoại:</strong> {employee?.PhoneNumber}</Text>
-                                    <Text><strong>Ngày Sinh:</strong> {employee?.DateOfBirth}</Text>
-                                    <Text><strong>Giới Tính:</strong> {employee?.Gender}</Text>
-                                    <Text><strong>Địa Chỉ:</strong> {employee?.Address}</Text>
-                                    <Text><strong>Email Cá Nhân:</strong> {employee?.PersonalEmail}</Text>
+                                    <Text><strong>Số Điện Thoại:</strong> {employeeinfo?.PhoneNumber}</Text>
+                                    <Text><strong>Ngày Sinh:</strong> {employeeinfo?.DateOfBirth}</Text>
+                                    <Text><strong>Giới Tính:</strong> {employeeinfo?.Gender}</Text>
+                                    <Text><strong>Địa Chỉ:</strong> {employeeinfo?.Address}</Text>
+                                    <Text><strong>Email Cá Nhân:</strong> {employeeinfo?.PersonalEmail}</Text>
                                 </Flex>
                                 <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
-                                    <Text><strong>Email Công Việc:</strong> {employee?.WorkEmail}</Text>
-                                    <Text><strong>Chức Vụ:</strong> {employee?.Position}</Text>
-                                    <Text><strong>Ngày Bắt Đầu:</strong> {employee?.StartDate}</Text>
-                                    <Text><strong>Phòng Ban:</strong> {employee.Department ? employee.Department.DepartmentName : "Chưa có phòng ban"}</Text>
+                                    <Text><strong>Email Công Việc:</strong> {employeeinfo?.WorkEmail}</Text>
+                                    <Text><strong>Chức Danh:</strong> {employeeinfo?.JobTitle}</Text>
+                                    <Text><strong>Chức Vụ:</strong> {employeeinfo?.Position}</Text>
+                                    <Text><strong>Ngày Bắt Đầu:</strong> {employeeinfo?.StartDate}</Text>
+                                    <Text><strong>Phòng Ban:</strong> {employeeinfo.Department ? employeeinfo.Department.DepartmentName : "Chưa có phòng ban"}</Text>
                                 </Flex>
                             </Flex>
                         </Flex>
                     </Flex>
 
                     {/* Thông tin công việc */}
-                    <Flex vertical className="container-employee-info">
-                        <Header className='header-employee-info' style={{ textAlign: 'left', background: 'none', padding: '0' }}>
+                    <Flex vertical className="container-employeeinfo-info">
+                        <Header className='header-employeeinfo-info' style={{ textAlign: 'left', background: 'none', padding: '0' }}>
                             <Title level={3}>Thông tin công việc</Title>
                             <hr />
                         </Header>
-                        <Flex className="sub-info-employee">
+                        <Flex className="sub-info-employeeinfo">
                             <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
                                 <Text><strong>Trạng thái làm việc:</strong> {jobProfile?.EmploymentStatus}</Text>
-                                <Text><strong>Quản lý trực tiếp:</strong> {jobProfile?.Manager}</Text>
+                                {/* <Text><strong>Quản lý trực tiếp:</strong> {jobProfile?.Manager}</Text> */}
+                                <Text><strong>Quản lý trực tiếp:</strong></Text>
+                                <div style={{padding:'0 0 0 2rem', lineHeight:'2.5rem'}}>
+                                        {managerList.length > 0 ? (
+                                            managerList.map((m) => <Text key={m.EmployeeID}>{m.FullName} ({m.Position}) <br/></Text> 
+                                            )
+                                        ) : (
+                                            <Text>Chưa có</Text>
+                                        )}
+                                        
+                                    </div>
                                 <Text><strong>Số giờ làm tiêu chuẩn:</strong> {jobProfile?.StandardWorkingHours} giờ</Text>
                             </Flex>
                             <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
@@ -152,18 +170,19 @@ const EmployeeProfile = () => {
                     </Flex>
 
                     {/* Thông tin cá nhân */}
-                    <Flex vertical className="container-employee-info">
-                        <Header className='header-employee-info' style={{ textAlign: 'left', background: 'none', padding: '0' }}>
+                    <Flex vertical className="container-employeeinfo-info">
+                        <Header className='header-employeeinfo-info' style={{ textAlign: 'left', background: 'none', padding: '0' }}>
                             <Title level={3}>Thông tin cá nhân</Title>
                             <hr />
                         </Header>
-                        <Flex className="sub-info-employee">
+                        <Flex className="sub-info-employeeinfo">
                             <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
                                 <Text><strong>Quốc tịch:</strong> {personalProfile?.Nationality}</Text>
                                 <Text><strong>Nơi sinh:</strong> {personalProfile?.PlaceOfBirth}</Text>
                                 <Text><strong>Số CCCD:</strong> {personalProfile?.ID_Card}</Text>
                             </Flex>
                             <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
+                            <Text><strong>Số sổ bảo hiểm:</strong> {personalProfile?.InsurancesNumber}</Text>
                                 <Text><strong>Nơi cấp CCCD:</strong> {personalProfile?.ID_CardIssuedPlace}</Text>
                                 <Text><strong>Trình độ học vấn:</strong> {personalProfile?.Education}</Text>
                                 <Text><strong>Bằng cấp:</strong> {personalProfile?.Degree}</Text>
@@ -178,12 +197,12 @@ const EmployeeProfile = () => {
                     </Flex>
 
                     {/* Thông tin thành viên gia đình */}
-                    <Flex vertical className="container-employee-info">
-                        <Header className='header-employee-info' style={{ textAlign: 'left', background: 'none', padding: '0' }}>
+                    <Flex vertical className="container-employeeinfo-info">
+                        <Header className='header-employeeinfo-info' style={{ textAlign: 'left', background: 'none', padding: '0' }}>
                             <Title level={3}>Thông tin thành viên gia đình</Title>
                             <hr />
                         </Header>
-                        <Flex className="sub-info-employee">
+                        <Flex className="sub-info-employeeinfo">
                             <Flex vertical className="sub-info" style={{ flex: 1 }}>
                                 {familyMembers.length > 0 ? (
                                     familyMembers.map((member, index) => (
