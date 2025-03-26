@@ -19,6 +19,10 @@ const Overtime = sequelize.define('Overtime', {
     type: DataTypes.STRING(10),
     allowNull: false,
   },
+  ReasonOT: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
   OTType: {
     type: DataTypes.STRING(20),
     allowNull: false,
