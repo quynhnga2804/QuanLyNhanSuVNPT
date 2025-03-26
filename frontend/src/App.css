@@ -284,7 +284,7 @@
 
   /* Main app */
   .header {
-    height: 50px;
+    height: 4rem;
     padding-top: 10px;
     background: #fff;
   }
@@ -538,7 +538,6 @@
     /* border-radius: 10px !important; */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 2rem 4rem;
-    margin: 2rem;
   }
 
   .employee-profile strong {
@@ -568,8 +567,17 @@
   /* HomeUser */
   .home-container {
     width: 100%;
-    height: 94.5vh;
+    height: 93.2vh;
     margin: 0;
+  }
+  .home-container a
+  {
+    color: #9bb8ed;
+  }
+
+  .home-container a:hover
+  {
+    color: #2994C1;
   }
 
   .home-container .ant-card-body {
@@ -582,8 +590,34 @@
   }
 
   .home-container .marquee {
-    height: 50% !important;
+    height: 70% !important;
     padding: 0 3rem !important;
+    line-height: 2rem;
+  }
+  .table_TQ th{
+    text-align: center !important;
+  }
+
+  .table_TQ .ant-table-content table {
+    table-layout: fixed !important;
+  }
+
+  .table_TQ .ant-table-tbody>tr:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+
+  .table_TQ .ant-table-tbody>tr:nth-child(even) {
+    background-color: #ffffff;
+  }
+
+  .table_TQ .ant-table-tbody>tr:hover {
+    background-color: #e6f7ff !important;
+  }
+  
+  .recharts-legend-wrapper{
+    position: unset !important;
+    width: unset !important;
+    margin-top: -11px !important;
   }
 }
 

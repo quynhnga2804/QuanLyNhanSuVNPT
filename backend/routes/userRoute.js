@@ -9,10 +9,26 @@ router.get('/employeeinfo', authenticateToken, userController.getEmployeeInfo);
 router.get('/jobinfo', authenticateToken, userController.getJobProfile);
 router.get('/personalinfo', authenticateToken, userController.getPersonalProfile);
 router.get('/familymembers', authenticateToken, userController.getFamilyMember);
+router.get('/contractinfo', authenticateToken, userController.getContractUser);
+router.get('/attendances', authenticateToken, userController.getAttendancesUser);
+router.get('/overtimes', authenticateToken, userController.getOverTimeUser);
+router.get('/monthlysalaries', authenticateToken, userController.getMonthlySalaryUser);
+// Lấy danh sách thông báo
+router.get('/notifications', authenticateToken, userController.getNotifications);
 
-// Gửi OTP để đổi mật khẩu
+// Đánh dấu thông báo đã đọc
+router.put('/notifications/:id/read', authenticateToken, userController.markNotificationAsRead);
+
+// Xóa thông báo
+router.delete('/notifications/:id', authenticateToken, userController.deleteNotification);
+
 router.post('/send-otp', authenticateToken, userController.sendOTP);
-
-// Đổi mật khẩu
 router.post('/change-password', authenticateToken, userController.ChangePassword);
+
+// Lấy kỳ lương gần nhất
+router.get('/latest-payrollcycle', authenticateToken, userController.getLatestPayrollCycle);
+// lấy manager theo phòng ban của nhân viên
+router.get('/get-managers', authenticateToken, userController.getUserManager);
+// request tăng ca
+router.post('/req-overtime', authenticateToken, userController.addOvertimeEmployeeRe);
 module.exports = router;

@@ -1,7 +1,7 @@
-import { Flex, Image, Menu, Input, Avatar } from 'antd';
+import { Flex, Image, Menu, Input, Avatar, Tooltip} from 'antd';
 // import Search from 'antd/es/transfer/search';
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     TeamOutlined,
     ProfileOutlined,
@@ -10,7 +10,7 @@ import {
     FieldTimeOutlined,
     CalendarOutlined,
     DollarOutlined,
-    FileTextOutlined,
+    BookOutlined ,
     LogoutOutlined
 } from '@ant-design/icons';
 import logo from '../../assets/images/logo.png';
@@ -19,6 +19,9 @@ const { Search } = Input;
 
 const SidebarUser = ({collapsed}) => {
     const navigate = useNavigate(); // Hook điều hướng
+    const location = useLocation();
+
+    const selectedKey = location.pathname.split('/')[2] || 'generalinfo';
 
     const handleMenuClick = (e) => {
         if (e.key === 'logout') {
@@ -49,62 +52,53 @@ const SidebarUser = ({collapsed}) => {
 
             <Menu
                 mode="inline"
+                selectedKeys={[selectedKey]}
                 defaultSelectedKeys={['profile']}
                 className="menu-bar"
                 onClick={handleMenuClick}
                 items={[
                     {
                         label: !collapsed ? 'Thông tin chung' : null,
-                        key: 'profile',
+                        key: 'generalinfo',
                         icon: <TeamOutlined />,
-                        // children: [
-                        //     {
-                        //         key: 'profile',
-                        //         icon: <ProfileOutlined />,
-                        //         label: 'Thông tin nhân viên',
-                        //     },
-                        //     {
-                        //         key: 'work-info',
-                        //         icon: <ProfileOutlined />,
-                        //         label: 'Thông tin công việc',
-                        //     },
-                        //     {
-                        //         key: 'personal-info',
-                        //         icon: <ContactsOutlined />,
-                        //         label: 'Thông tin cá nhân',
-                        //     }
-                        // ]
+                        title: 'Thông tin chung',
                     },
                     {
-                        key: 'attendance',
+                        key: 'attendances',
                         icon: <ClockCircleOutlined />,
                         label: !collapsed ? 'Chấm công' : null,
+                        title: 'Chấm công',
                     },
                     {
-                        key: 'overtime',
+                        key: 'overtimes',
                         icon: <FieldTimeOutlined />,
                         label: !collapsed ? 'OverTime' : null,
+                        title: 'Tăng ca',
                     },
                     {
-                        key: 'leave',
-                        icon: <CalendarOutlined />,
-                        label: !collapsed ? 'Nghỉ phép' : null,
-                    },
-                    {
-                        key: 'salary',
+                        key: 'monthlysalaries',
                         icon: <DollarOutlined />,
                         label: !collapsed ? 'Lương tháng' : null,
+                        title: 'Lương tháng',
                     },
                     {
-                        key: 'contracts',
-                        icon: <FileTextOutlined />,
-                        label: !collapsed ? 'Hợp đồng lao động' : null,
+                        key: 'policyinfo',
+                        icon: <BookOutlined />,
+                        label: !collapsed ? 'Chính sách' : null,
+                        title: 'Lương tháng',
+                    },
+                    {
+                        key: 'policyinfo',
+                        icon: <BookOutlined />,
+                        label: !collapsed ? 'Báo cáo' : null,
+                        title: 'Báo cáo',
                     },
                     {
                         key: 'logout',
                         label: !collapsed ? 'Đăng xuất' : null,
                         icon: <LogoutOutlined />,
                         danger: true,
+                        title: 'Đăng xuất',
                     }
                 ]}
             />

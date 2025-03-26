@@ -30,7 +30,7 @@ const Notifications = ({ fetchUnreadCount }) => {
 
         if (filterType === 'sent') return item.sentID === EmployeeID;
         if (filterType === 'received') return item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All');
-        if (filterType === 'expired') return item.ExpiredAt && dayjs(item.ExpiredAt).isBefore(dayjs());
+        if (filterType === 'expired') return (item.sentID === EmployeeID || item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All')) && item.ExpiredAt && dayjs(item.ExpiredAt).isBefore(dayjs());
         return item.sentID === EmployeeID || item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All');
     });
 

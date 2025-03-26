@@ -34,8 +34,6 @@ createRoot(document.getElementById('root')).render(
 
           <Route path="/user/*" element={<ProtectedRoute element={<AppUser />} allowedRoles={['User']} />} />
 
-          {/* <Route path="/user/home" element={<ProtectedRoute element={<HomeUser/>} allowedRoles={['User']} />} /> */}
-
           <Route path="/" element={<Navigate to="/login" replace />} />
 
           <Route path="/unauthorized" element={<h1>Bạn không có quyền truy cập trang này!!!</h1>} />
