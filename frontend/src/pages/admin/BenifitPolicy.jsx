@@ -14,7 +14,7 @@ const BenefitPolicy = () => {
                     <Text strong>✅ Phúc lợi bắt buộc:</Text> Theo quy định của nhà nước.
                     <ul>
                         <li><Text strong>Bảo hiểm xã hội (BHXH), Bảo hiểm y tế (BHYT), Bảo hiểm thất nghiệp (BHTN).</Text></li>
-                        <li>Chế độ thai sản, ốm đau, nghỉ phép năm theo luật lao động.</li>
+                        <li>Chế độ thai sản, ốm đau và nghỉ phép năm được áp dụng theo quy định của luật lao động, nhằm đảm bảo quyền lợi cho người lao động trong các trường hợp sinh con, mắc bệnh hoặc cần thời gian nghỉ ngơi hàng năm.</li>
                     </ul>
                 </Paragraph>
                 <Paragraph>

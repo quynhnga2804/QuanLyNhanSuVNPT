@@ -39,9 +39,13 @@ const Employee = sequelize.define('Employee', {
       key: 'WorkEmail',
     },
   },
+  JobTitle: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+  },
   Position: {
     type: DataTypes.STRING(100),
-    allowNull: true,
+    allowNull: false,
   },
   StartDate: {
     type: DataTypes.DATE,

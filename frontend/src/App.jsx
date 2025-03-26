@@ -120,6 +120,7 @@ const App = () => {
     localStorage.removeItem('workEmail');
     localStorage.removeItem('activeKey');
     localStorage.removeItem('username');
+    // localStorage.Clear();
     setToken(null);
     navigate('/', { replace: true });
   };

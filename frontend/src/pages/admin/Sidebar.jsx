@@ -60,7 +60,6 @@ const Sidebar = ({ collapsed, onLogout }) => {
 
             <Menu
                 mode='inline'
-                // defaultSelectedKeys={['employees']}
                 selectedKeys={[selectedKey]}
                 defaultOpenKeys={['sub1']}
                 onClick={ handleMenuClick }

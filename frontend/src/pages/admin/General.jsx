@@ -292,6 +292,11 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
         },
         {
             title: 'CHỨC DANH',
+            dataIndex: 'JobTitle',
+            minWidth: 110,
+        },
+        {
+            title: 'CHỨC VỤ',
             dataIndex: 'Position',
             minWidth: 110,
             filters: uniquePositions.map(pt => ({ text: pt, value: pt })),

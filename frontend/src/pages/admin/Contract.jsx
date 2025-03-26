@@ -6,7 +6,6 @@ import LaborContract from './LaborContract';
 
 const Contract = ({ employeecontracts }) => {
     const [activeKey, setActiveKey] = useState('1');
-    // const [employeecontracts, setemployeecontracts] = useState([]);
     const [laborcontracts, setlaborcontracts] = useState([]);
     const [employees, setemployees] = useState([]);
 
@@ -18,23 +17,10 @@ const Contract = ({ employeecontracts }) => {
 
     useEffect(() => {
         if (token) {
-            // fetchEmployeeContracts(token);
             fetchLaborContracts(token);
             fetchEmployees(token);
         }
     }, []);
-
-    // const fetchEmployeeContracts = async () => {
-    //     try {
-    //         const response = await axios.get('http://localhost:5000/api/admin/employeecontracts', {
-    //             headers: { "Authorization": `Bearer ${token}` }
-    //         });
-    //         setemployeecontracts(response.data);
-    //     } catch (error) {
-    //         console.error('Lỗi khi lấy danh sách hồ sơ nhân sự:', error);
-    //     }
-    // };
-
     const fetchEmployees = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/employees', {

@@ -223,17 +223,18 @@ const LaborContract = ({ employeecontracts, laborcontracts, employees }) => {
                     </Button>
                 </Flex>
             </Flex>
+
             <div style={{ display: 'flex' }}>
                 <Flex vertical style={{ width: '70%' }}>
                     <Table
                         className='table_HD'
                         columns={columns}
-                        dataSource={filteredEmployeeContracts.map((item) => ({ ...item, key: `${item.ID_Contract}-${item.EmployeeID}`, }))}
+                        dataSource={filteredEmployeeContracts.map((item) => ({ ...item, key: `${item.ID_Contract}-${item.EmployeeID}` }))}
                         bordered
                         size='middle'
                         scroll={{
                             x: 'max-content',
-                            y: 52.5 * 10,
+                            y: 51 * 9,
                         }}
                         pagination={false}
                         onChange={onChange}

@@ -186,7 +186,7 @@
   .table_HD th,
   .table_HD tr,
   .table_HD td {
-    padding: 7px 11px !important;
+    padding: 4px 11px !important;
     font-size: 12px;
     white-space: nowrap;
   }
