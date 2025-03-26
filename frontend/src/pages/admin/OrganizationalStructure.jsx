@@ -1,0 +1,74 @@
+import React, { useEffect, useState } from 'react';
+import { Tabs } from 'antd';
+import DivisionList from './DivisionList';
+import DepartmentList from './DepartmentList';
+import axios from 'axios';
+
+const OrganizationalStructure = () => {
+    const [divisions, setDivisions] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [activeKey, setActiveKey] = useState('1');
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetchDivisions(token);
+            fetchDepartments(token);
+        }
+    }, []);
+
+    const fetchDivisions = async () => {
+        const token = localStorage.getItem('token');
+
+        try {
+            const url = 'http://localhost:5000/api/admin/divisions';
+            const response = await axios.get(url, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+            setDivisions(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách bộ phận:', error);
+        }
+    };
+
+    const fetchDepartments = async () => {
+        const token = localStorage.getItem('token');
+
+        try {
+            const url = 'http://localhost:5000/api/admin/departments';
+            const response = await axios.get(url, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+            setDepartments(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        }
+    };
+
+    return (
+        <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+            <Tabs
+                className='menu-horizontal'
+                activeKey={activeKey}
+                onChange={setActiveKey}
+                items={[
+                    { key: '1', label: 'DANH SÁCH BỘ PHẬN', children: <DivisionList divisions={divisions} fetchDivisions={fetchDivisions} /> },
+                    { key: '2', label: 'DANH SÁCH PHÒNG BAN', children: <DepartmentList divisions={divisions} departments={departments} /> },
+                    { key: '3', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
+                    { key: '4', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
+                    { key: '5', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
+                    { key: '6', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
+                    { key: '7', label: 'Page 1', children: 'Nội dung Page 1' },
+                ]}
+            />
+        </div>
+    )
+}
+
+export default OrganizationalStructure;
