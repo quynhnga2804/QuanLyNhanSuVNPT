@@ -6,13 +6,13 @@ const PolicyInfo = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const activeKey = location.pathname.includes('contract') ? '2' : '1';
+    const activeKey = location.pathname.includes('salary-policy') ? '1' : location.pathname.includes('benefit-policy') ? '2' : '3';
 
     const handleChange = (key) => {
         if (key === '1') {
             navigate('/user/policyinfo/salary-policy');
         } else if (key === '2') {
-            navigate('/user/policyinfo/benifit-policy');
+            navigate('/user/policyinfo/benefit-policy');
         } else if (key === '3') {
             navigate('/user/policyinfo/hr-policy');
         }

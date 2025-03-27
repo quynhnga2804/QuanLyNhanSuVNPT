@@ -17,7 +17,10 @@ import { NotificationProvider } from './pages/user/NotificationContext';
 import AttendanceUser from './pages/user/AttendanceUser.jsx';
 import OvertimeUser from './pages/user/OvertimeUser.jsx';
 import MonthlySalaryUser from './pages/user/MonthlySalaryUser.jsx';
-
+import PolicyInfo from './pages/user/PolicyInfo.jsx';
+import HRPolicy from './pages/admin/HRPolicy.jsx';
+import BenifitPolicy from './pages/admin/BenifitPolicy.jsx';
+import SalaryPolicy from './pages/admin/SalaryPolicy.jsx';
 const { Sider, Content, Header } = Layout;
 
 const AppUser = () => {
@@ -123,11 +126,11 @@ const AppUser = () => {
                 <Route path='attendances' element={<AttendanceUser/>} />
                 <Route path='overtimes' element={<OvertimeUser/>} />
                 <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
-                <Route path="/policyinfo" element={<GeneralInfo />}>
-                  <Route path="salary-policy" element={<EmployeeProfile employeeinfo={employeeinfo}/>} />
-                  <Route path="benefit-policy" element={<ContractUser contractUsers={contractUsers} />} />
-                  <Route path="hr-policy" element={<ContractUser contractUsers={contractUsers} />} />
-                  <Route index element={<EmployeeProfile employeeinfo={employeeinfo} />} />
+                <Route path="/policyinfo" element={<PolicyInfo />}>
+                  <Route path="salary-policy" element={<SalaryPolicy />} />
+                  <Route path="benefit-policy" element={<BenifitPolicy />} />
+                  <Route path="hr-policy" element={<HRPolicy />} />
+                  <Route index element={<SalaryPolicy />} />
                 </Route>
               </Routes>
             </Flex>
