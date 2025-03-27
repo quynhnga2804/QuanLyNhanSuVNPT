@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Search from 'antd/es/transfer/search';
-import { Image, Divider, Card, Table, Progress, Flex, Typography, Space, Button, Col, Row } from 'antd';
-import {
-    FallOutlined,
-    FolderOutlined,
-    LineChartOutlined
-} from '@ant-design/icons';
+import { Divider, Card, Table, Progress, Flex, Typography, Space, Button, Col, Row } from 'antd';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -16,19 +10,6 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 const { Title: AntTitle, Text } = Typography;
 
 const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter] = useState('');
-
-    // const filteredPayrollCycles = payrollcycles.filter(pay =>
-    //     pay.PayRollName.toLowerCase().includes(searchQuery)
-    //     && (statusFilter ? pay.status === statusFilter : true)
-    // );
-
-    const handleSearch = debounce((value) => {
-        setSearchQuery(value.toLowerCase());
-    }, 500);
-
     const columns = [
         {
             title: 'MÃ',
@@ -47,6 +28,7 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             dataIndex: 'StartDate',
             minWidth: 64,
             align: 'center',
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {
             title: 'NGÀY KẾT THÚC',
@@ -54,16 +36,17 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             minWidth: 108,
             align: 'center',
             filterSearch: true,
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {
             title: 'TỔNG CHI TIÊU',
             dataIndex: 'ID_PayrollCycle',
             minWidth: 64,
             align: 'right',
-            // render: (id) => {
-            //     const payrollcycle = payrollcycles.find(payr => payr.ID_PayrollCycle === id);
-            //     return payrollcycle ? payrollcycle.PayrollName : '0';
-            // },
+            render: (id) => {
+                const totalSalary = monthlysalaries.filter(mon => mon.ID_PayrollCycle === id).reduce((sum, mon) => sum + mon.NetSalary, 0);
+                return new Intl.NumberFormat('vi-VN').format(totalSalary);
+            },
         },
         {
             title: 'TRẠNG THÁI',
@@ -72,15 +55,16 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             align: 'center',
             filterSearch: true,
             sorter: (a, b) => {
-                const order = ['Đang xử lý', 'Chờ xử lý', 'Sắp diễn ra']; // Thứ tự ưu tiên
+                const order = ['Đang xử lý', 'Chờ xử lý', 'Sắp diễn ra', 'Chưa bắt đầu']; // Thứ tự ưu tiên
                 return order.indexOf(a.Status) - order.indexOf(b.Status);
             },
             defaultSortOrder: 'ascend',
             render: (status) => {
                 const statusColors = {
                     'Đang xử lý': 'green',
-                    'Chờ xử lý': 'orange',
-                    'Sắp diễn ra': 'blue',
+                    'Chờ xử lý': 'blue',
+                    'Sắp diễn ra': 'orange',
+                    'Chưa bắt đầu': 'red',
                 };
 
                 return <span style={{ color: statusColors[status] || 'black' }}>{status.toUpperCase()}</span>;
@@ -104,15 +88,14 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
 
     const fetchData = async () => {
         try {
-            // Lọc ra các kỳ lương đã hoàn thành
-            const completedPayrolls = payrollcycles.filter((p) => p.Status.includes('Đã hoàn thành'));
+            const completedPayrolls = payrollcycles.filter((p) => p.Status.includes('Hoàn thành'));
 
             // Tổng hợp dữ liệu theo tháng
             const salaryByMonth = {};
 
             completedPayrolls.forEach((payroll) => {
                 const { ID_PayrollCycle, StartDate } = payroll;
-                const monthYear = dayjs(StartDate).format('YYYY-MM');
+                const monthYear = dayjs(StartDate).format('MM-YYYY');
 
                 const totalSalary = monthlysalaries
                     .filter((s) => s.ID_PayrollCycle === ID_PayrollCycle)
@@ -138,11 +121,11 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
                         {
                             label: "Tổng lương theo tháng",
                             data: dataPoints,
-                            borderColor: "blue",
-                            backgroundColor: "blue",
+                            borderColor: "#1168dd",
+                            backgroundColor: "#1168dd",
                             borderWidth: 2,
                             pointRadius: 5,
-                            pointBackgroundColor: "blue",
+                            pointBackgroundColor: "#1168dd",
                             tension: 0.4,
                         },
                     ],

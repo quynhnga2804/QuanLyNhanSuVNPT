@@ -29,11 +29,10 @@ const Login = () => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       const role = JSON.parse(localStorage.getItem('user')).role;
-      if (role === 'Admin') {
-        navigate('/admin/*');
-      } else if (role === 'User') {
+      if (role === 'Admin' || role === 'Director' || role === 'Manager' || role === 'Accountant' || role === 'Employee') {
         navigate('/user/home');
-      } else {
+      }
+      else {
         navigate('/unauthorized');
       }
     }

@@ -62,7 +62,7 @@ const upload = multer({ storage });
 // Lấy tất cả bản ghi
 const getAll = async (req, res) => {
   try {
-    if (req.user.role !== 'Admin')
+    if (req.user.role !== 'Admin' || req.user.role !== 'Director' || req.user.role !== 'Manager' || req.user.role !== 'Accountant')
       return res.status(403).json({ message: 'Bạn không có quyền truy cập!' });
 
     const Model = modelMap[req.params.model];
@@ -116,7 +116,7 @@ const create = async (req, res) => {
 // Thêm mới tài khoản người dùng
 const createUser = async (req, res) => {
   try {
-    if (req.user.role !== "Admin")
+    if (req.user.role !== 'Admin')
       return res.status(403).json({ message: "Bạn không có quyền tạo tài khoản!" });
 
     const { WorkEmail, UserName, Password, Role } = req.body;
@@ -161,8 +161,10 @@ const createUser = async (req, res) => {
 // Xóa tài khoản người dùng
 const deleteUser = async (req, res) => {
   try {
-    const { email } = req.params;
+    if (req.user.role !== 'Admin')
+      return res.status(403).json({ message: "Bạn không có quyền tạo tài khoản!" });
 
+    const { email } = req.params;
     const user = await User.findOne({ where: { WorkEmail: email } });
 
     if (!user) {

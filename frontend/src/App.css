@@ -47,7 +47,6 @@
   .contents {
     max-width: 100%;
     max-height: 9vh !important;
-    /* border-left: 1px solid rgb(214, 214, 214); */
   }
 
   /* Button thu-mở */
@@ -186,7 +185,7 @@
   .table_HD th,
   .table_HD tr,
   .table_HD td {
-    padding: 7px 11px !important;
+    padding: 4px 11px !important;
     font-size: 12px;
     white-space: nowrap;
   }

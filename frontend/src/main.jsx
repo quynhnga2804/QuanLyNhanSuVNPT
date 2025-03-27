@@ -16,9 +16,9 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  if (user.role === 'Admin' && window.location.pathname === "/admin/*") {
-    return <Navigate to="/admin/home" replace />;
-  }
+  // if (user.role === 'Admin' && window.location.pathname === "/admin/*") {
+  //   return <Navigate to="/admin/home" replace />;
+  // }
 
   return element;
 };
@@ -32,7 +32,7 @@ createRoot(document.getElementById('root')).render(
 
           <Route path="/admin/*" element={<ProtectedRoute element={<App />} allowedRoles={['Admin']} />} />
 
-          <Route path="/user/*" element={<ProtectedRoute element={<AppUser />} allowedRoles={['User']} />} />
+          <Route path="/user/*" element={<ProtectedRoute element={<AppUser />} allowedRoles={['Admin','Director', 'Manager', 'Accountant','Employee']} />} />
 
           <Route path="/" element={<Navigate to="/login" replace />} />
 

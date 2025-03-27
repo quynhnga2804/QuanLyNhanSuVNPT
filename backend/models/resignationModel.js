@@ -6,7 +6,6 @@ const Resignation = sequelize.define('Resignation', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    allowNull: false,
   },
   EmployeeID: {
     type: DataTypes.STRING(10),

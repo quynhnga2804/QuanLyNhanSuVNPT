@@ -197,7 +197,7 @@ const AttendanceList = ({ attendances }) => {
                 size='small'
                 scroll={{
                     x: 'max-content',
-                    y: 52.8 * 9,
+                    y: 51 * 9,
                 }}
                 pagination={false}
             />

@@ -401,7 +401,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                         <Select placeholder="Chọn nhân viên">
                             {employees.map(emp => (
                                 <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
-                                    {emp.FullName}
+                                    {emp.FullName} ({emp.EmployeeID})
                                 </Select.Option>
                             ))}
                         </Select>
@@ -409,9 +409,10 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
 
                     <Form.Item label='Chu kỳ lương' name='ID_PayrollCycle' rules={[{ required: true, message: 'Vui lòng chọn chu kỳ lương!' }]}>
                         <Select placeholder="Chọn chu kỳ lương" onChange={handlePayrollCycleChange}>
-                            {payrollcycles.map(payroll => (
+                            {payrollcycles.filter(payroll => payroll.Status.toLowerCase() === 'đang xử lý')
+                            .map(payroll => (
                                 <Select.Option key={payroll.ID_PayrollCycle} value={payroll.ID_PayrollCycle}>
-                                    {payroll.PayrollName}
+                                    {payroll.PayrollName} ({payroll.ID_PayrollCycle})
                                 </Select.Option>
                             ))}
                         </Select>

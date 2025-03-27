@@ -7,10 +7,16 @@ import axios from 'axios';
 const OrganizationalStructure = () => {
     const [divisions, setDivisions] = useState([]);
     const [departments, setDepartments] = useState([]);
-    const [activeKey, setActiveKey] = useState('1');
+    const [activeKey, setActiveKey] = useState(() => {
+        return localStorage.getItem('activeKey') || '1';
+    });
+
+    const token = localStorage.getItem('token');
+    useEffect(() => {
+        localStorage.setItem('activeKey', activeKey);
+    }, [activeKey]);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
         if (token) {
             fetchDivisions(token);
             fetchDepartments(token);
@@ -24,8 +30,8 @@ const OrganizationalStructure = () => {
             const url = 'http://localhost:5000/api/admin/divisions';
             const response = await axios.get(url, {
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
             });
             setDivisions(response.data);
@@ -41,8 +47,8 @@ const OrganizationalStructure = () => {
             const url = 'http://localhost:5000/api/admin/departments';
             const response = await axios.get(url, {
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
             });
             setDepartments(response.data);
@@ -58,8 +64,8 @@ const OrganizationalStructure = () => {
                 activeKey={activeKey}
                 onChange={setActiveKey}
                 items={[
-                    { key: '1', label: 'DANH SÁCH BỘ PHẬN', children: <DivisionList divisions={divisions} fetchDivisions={fetchDivisions} /> },
-                    { key: '2', label: 'DANH SÁCH PHÒNG BAN', children: <DepartmentList divisions={divisions} departments={departments} /> },
+                    { key: '1', label: 'DANH SÁCH BỘ PHẬN', children: <DivisionList onClick={() => setActiveKey('1')} divisions={divisions} fetchDivisions={fetchDivisions} /> },
+                    { key: '2', label: 'DANH SÁCH PHÒNG BAN', children: <DepartmentList onClick={() => setActiveKey('2')} divisions={divisions} fetchDepartments={fetchDepartments} departments={departments} /> },
                     { key: '3', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
                     { key: '4', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
                     { key: '5', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },

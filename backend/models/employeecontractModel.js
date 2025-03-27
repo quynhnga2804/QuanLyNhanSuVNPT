@@ -5,23 +5,23 @@ const EmployeeContract = sequelize.define('EmployeeContract', {
   employcontractID: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    allowNull: false,
+    autoIncrement: true,
   },
   ID_Contract: {
     type: DataTypes.STRING(10), 
     allowNull: false,
-    references: {
-      model: 'laborcontracts',
-      key: 'ID_Contract'
-    }
+    // references: {
+    //   model: 'laborcontracts',
+    //   key: 'ID_Contract'
+    // }
   },
   EmployeeID: {
     type: DataTypes.STRING(10),
     allowNull: false,
-    references: {
-      model: 'employees',
-      key: 'EmployeeID'
-    }
+    // references: {
+    //   model: 'employees',
+    //   key: 'EmployeeID'
+    // }
   },
   StartDate: {
     type: DataTypes.DATE,
@@ -32,7 +32,7 @@ const EmployeeContract = sequelize.define('EmployeeContract', {
     allowNull: true,
   },
 }, {
-  tableName: 'employeescontracts', 
+  tableName: 'employeescontracts',
   timestamps: false,
 });
 

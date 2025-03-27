@@ -27,55 +27,6 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
         editForm.resetFields();
     };
 
-    const handleAddNew = () => {
-        setIsAddModalOpen(true);
-    };
-
-    const handleAddCancel = () => {
-        setIsAddModalOpen(false);
-        addForm.resetFields();
-    };
-
-    const handleDelete = (record) => {
-        Modal.confirm({
-            title: 'Xác nhận xóa',
-            content: `Bạn có chắc chắn muốn xóa nhân sự ${record.DivisionsName} (Mã: ${record.DivisionID}) không?`,
-            okText: 'Xóa',
-            okType: 'danger',
-            cancelText: 'Hủy',
-            onOk: async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/divisions/${record.DivisionID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    message.success(`Xóa nhân sự ${record.DivisionsName} thành công!`);
-                    fetchDivisions();
-                } catch (error) {
-                    message.error('Xóa thất bại, vui lòng thử lại.');
-                }
-            },
-        });
-    };
-
-    const handleAddSave = async () => {
-        try {
-            const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/divisions', values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            fetchDivisions();
-            message.success('Thêm mới nhân sự thành công!');
-            handleAddCancel();
-        } catch (error) {
-            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
-        }
-    };
-
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
@@ -92,6 +43,55 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
         } catch (error) {
             message.error('Sửa thất bại, vui lòng thử lại.');
         }
+    };
+
+    const handleAddNew = () => {
+        setIsAddModalOpen(true);
+    };
+
+    const handleAddCancel = () => {
+        setIsAddModalOpen(false);
+        addForm.resetFields();
+    };
+
+    const handleAddSave = async () => {
+        try {
+            const values = await addForm.validateFields();
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:5000/api/admin/divisions', values, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            fetchDivisions();
+            message.success('Thêm mới thành công!');
+            handleAddCancel();
+        } catch (error) {
+            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
+        }
+    };
+
+    const handleDelete = (record) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa ${record.DivisionsName} (Mã: ${record.DivisionID}) không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    await axios.delete(`http://localhost:5000/api/admin/divisions/${record.DivisionID}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    message.success(`Xóa ${record.DivisionsName} thành công!`);
+                    fetchDivisions();
+                } catch (error) {
+                    message.error('Xóa thất bại, vui lòng thử lại.');
+                }
+            },
+        });
     };
 
     const columns = [
@@ -177,11 +177,11 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
                 pagination={false}
             />
 
-            {/* Chỉnh sửa */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh sửa thông tin bộ phận</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
-                <Form form={editForm} layout='vertical'>
-                    <Form.Item label='Mã bộ phận' name='DivisionID'>
-                        <Input disabled />
+            {/* Thêm mới */}
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Bộ Phận</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
+                <Form form={addForm} layout='vertical'>
+                    <Form.Item label='Mã bộ phận' name='DivisionID' rules={[{ required: true }]}>
+                        <Input />
                     </Form.Item>
                     <Form.Item label='Tên bộ phận' name='DivisionsName' rules={[{ required: true }]}>
                         <Input />
@@ -192,11 +192,11 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
                 </Form>
             </Modal>
 
-            {/* Thêm mới */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm mới bộ phận</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
-                <Form form={addForm} layout='vertical'>
-                    <Form.Item label='Mã bộ phận' name='DivisionID' rules={[{ required: true }]}>
-                        <Input />
+            {/* Chỉnh sửa */}
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Thông Tin</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
+                <Form form={editForm} layout='vertical'>
+                    <Form.Item label='Mã bộ phận' name='DivisionID'>
+                        <Input disabled />
                     </Form.Item>
                     <Form.Item label='Tên bộ phận' name='DivisionsName' rules={[{ required: true }]}>
                         <Input />

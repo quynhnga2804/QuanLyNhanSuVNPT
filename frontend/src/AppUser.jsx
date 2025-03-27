@@ -42,11 +42,8 @@ const AppUser = () => {
 
   useEffect(() => {
     if (!token) {
-        navigate('/login'); // Không có token thì về login
+        navigate('/login');
     } 
-    // else {
-    //     navigate('/user/'); // Có token thì sang home
-    // }
 }, []);
 
   const fetchEmployeeInfo = async () => {

@@ -7,7 +7,7 @@ import Sidebar from './pages/admin/Sidebar';
 import EmployeeList from './pages/admin/EmployeeList';
 import PeriodicSalary from './pages/admin/PeriodicSalary';
 import Contract from './pages/admin/Contract';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 import AdminHeader from './pages/admin/AdminHeader';
 import OrganizationalStructure from './pages/admin/OrganizationalStructure';
 import AdminHome from './pages/admin/AdminHome';
@@ -40,6 +40,8 @@ const App = () => {
       window.location.href = '/';
     }
   }, [token]);
+
+  const role = user?.role;
 
   useEffect(() => {
     fetchUnreadCount();
@@ -120,6 +122,7 @@ const App = () => {
     localStorage.removeItem('workEmail');
     localStorage.removeItem('activeKey');
     localStorage.removeItem('username');
+    // localStorage.Clear();
     setToken(null);
     navigate('/', { replace: true });
   };
@@ -145,13 +148,23 @@ const App = () => {
         <Content className='contents'>
           <Flex gap='large'>
             <Routes>
-              <Route path='home' element={<AdminHome employees={employees} employeecontracts={employeecontracts} />} />
-              <Route path='employees' element={<EmployeeList employees={employees} fetchEmployees={fetchEmployees} />} />
-              <Route path='contracts' element={<Contract employeecontracts={employeecontracts} />} />
+              {/* <Route path='home' element={<AdminHome employees={employees} employeecontracts={employeecontracts} />} />
+              <Route path='employees' element={<EmployeeList role={role} employees={employees} fetchEmployees={fetchEmployees} />} />
+              <Route path='contracts' element={<Contract employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} />
               <Route path='periodicsalaries' element={<PeriodicSalary />} />
               <Route path='humanreports' element={<HumanReport />} />
               <Route path='organizationalstructures' element={<OrganizationalStructure />} />
               <Route path='attendances' element={<Attendance />} />
+              <Route path='workregulations' element={<WorkRegulations />} />
+              <Route path='hrpolicies' element={<HRPolicy />} />
+              <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} /> */}
+              <Route path='home' element={<AdminHome employees={employees} employeecontracts={employeecontracts} />} />
+              {role === 'Admin' || role === 'Manager' ? <Route path='employees' element={<EmployeeList role={role} employees={employees} fetchEmployees={fetchEmployees} />} /> : <Route path='employees' element={<Navigate to='/home' />} />}
+              {role === 'Admin' || role === 'Director' || role === 'Manager' ? <Route path='contracts' element={<Contract employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} /> : <Route path='contracts' element={<Navigate to='/home' />} />}
+              {role === 'Admin' || role === 'Director' || role === 'Accountant' ? <Route path='periodicsalaries' element={<PeriodicSalary />} /> : <Route path='periodicsalaries' element={<Navigate to='/home' />} />}
+              {role === 'Admin' || role === 'Director' ? <Route path='humanreports' element={<HumanReport />} /> : <Route path='humanreports' element={<Navigate to='/home' />} />}
+              {role === 'Admin' || role === 'Director' ? <Route path='organizationalstructures' element={<OrganizationalStructure />} /> : <Route path='organizationalstructures' element={<Navigate to='/home' />} />}
+              {role === 'Admin' || role === 'Manager' ? <Route path='attendances' element={<Attendance />} /> : <Route path='attendances' element={<Navigate to='/home' />} />}
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
               <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} />
