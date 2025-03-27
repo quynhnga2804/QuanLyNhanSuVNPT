@@ -456,7 +456,7 @@ exports.getUserManager = async (req, res) => {
         // Lấy ra manager tương ứng của department
         const managers =  await Employee.findAll({ where: { DepartmentID: departmentID, Position: 'Quản lý bộ phận'}, });
         if (!managers) {
-            return res.status(404).json({ message: "Không tìm thấy lỳ lương mới nhất! "});
+            return res.status(404).json({ message: "Không tìm thấy kỳ lương mới nhất! "});
         }
         console.log("Managers: ", managers);
         return res.status(200).json(managers);
@@ -485,7 +485,7 @@ exports.getMonthlySalaryUser = async (req, res) => {
         });
 
         if (!monthlySalaryUser || monthlySalaryUser.length === 0) {
-            return res.status(404).json({ message: "Không tìm thấy thông tin tăng ca!" });
+            return res.status(404).json({ message: "Không tìm thấy thông tin lương tháng!" });
         }
 
         // Thêm Manager từ jobProfile vào từng monthlySalary record
