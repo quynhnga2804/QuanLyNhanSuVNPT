@@ -5,7 +5,7 @@ import General from './General';
 import Benefit_Salary from './Benefit_Salary';
 import DependentList from './DependentList';
 
-const EmployeeList = ({ employees, fetchEmployees }) => {
+const EmployeeList = ({ employees, fetchEmployees, role }) => {
     const [users, setUsers] = useState([]);
     const [overtimes, setOvertimes] = useState([]);
     const [departments, setDepartments] = useState([]);
@@ -19,6 +19,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     });
 
     const token = localStorage.getItem('token');
+
     useEffect(() => {
         localStorage.setItem('activeKey', activeKey);
     }, [activeKey]);

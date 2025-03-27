@@ -480,9 +480,10 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                     style={{ width: "100%" }}
                 >
                     <Select.Option value="Admin">Admin</Select.Option>
-                    <Select.Option value="Employee">Employee</Select.Option>
-                    <Select.Option value="Manager">Manager</Select.Option>
-                    <Select.Option value="Director">Director</Select.Option>
+                    <Select.Option value="Director">Giám đốc</Select.Option>
+                    <Select.Option value="Manager">Quản lý</Select.Option>
+                    <Select.Option value="Accountant">Kế toán</Select.Option>
+                    <Select.Option value="Employee">Nhân viên</Select.Option>
                 </Select>
             </Modal>
 

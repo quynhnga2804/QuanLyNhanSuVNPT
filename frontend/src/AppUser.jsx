@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Flex, Layout, } from 'antd';
+import { Button, Flex, Layout, message } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { UserContext } from './api/api.jsx';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
@@ -42,11 +42,8 @@ const AppUser = () => {
 
   useEffect(() => {
     if (!token) {
-        navigate('/login'); // Không có token thì về login
+        navigate('/login');
     } 
-    // else {
-    //     navigate('/user/'); // Có token thì sang home
-    // }
 }, []);
 
   const fetchEmployeeInfo = async () => {
