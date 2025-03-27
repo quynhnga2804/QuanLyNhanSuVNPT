@@ -21,7 +21,7 @@ const PayrollCycle = sequelize.define('PayrollCycle', {
   },
   Status: {
     type: DataTypes.STRING(20),
-    allowNull: true,
+    allowNull: false,
   },
 }, {
   tableName: 'payrollCycles',

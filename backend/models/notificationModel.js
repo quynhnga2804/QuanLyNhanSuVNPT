@@ -34,7 +34,7 @@ const Notification = sequelize.define('Notification', {
   },
   ExpiredAt: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: false,
   },
 }, {
   tableName: 'notifications',

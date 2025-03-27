@@ -30,7 +30,6 @@ function NotificationListUser() {
       // Lưu notifications và unreadCount
       if (!response.data.notifications) throw new Error("Dữ liệu không hợp lệ");
       setNotifications(response.data.notifications);
-      // setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
       message.error("Không thể tải danh sách thông báo.");
     }
@@ -125,7 +124,6 @@ function NotificationListUser() {
                         <Button type="link" danger size="small" icon={<DeleteOutlined />} />
                       </Popconfirm>
                     ]}>
-                    {/* <List.Item.Meta title={`${notification.Title} - ${new Date(notification.ExpriedAt).toLocaleDateString('vi-VN')}`} , background: '#e6f7ff'/> */}
                     <List.Item.Meta 
                       title={
                         <span style={{ color: notification.IsRead ? '#999' : '#000' }}>

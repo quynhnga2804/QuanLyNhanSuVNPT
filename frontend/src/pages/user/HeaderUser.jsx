@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Avatar, Badge, Flex, Typography, Dropdown, Menu } from "antd";
+import { Avatar, Badge, Flex, Affix, Dropdown, Menu } from "antd";
 import { BellOutlined, UserOutlined, LogoutOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import ChangePasswordModal from "./ChangePasswordModal"; 
@@ -28,26 +28,6 @@ const HeaderUser = ({employeeinfo}) => {
             navigate("/login");
         }
     };
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             // Gọi API lấy thông tin nhân viên
-    //             const employeeinfoResponse = await fetch("http://localhost:5000/api/user/employeeinfo", {
-    //                 headers: { Authorization: `Bearer ${token}` }
-    //             });
-    //             const employeeinfoData = await employeeinfoResponse.json();
-    //             if (!employeeinfoResponse.ok) throw new Error(employeeinfoData.message);
-    //             setemployeeinfo(employeeinfoData);
-    //         } catch (error) {
-    //             message.error(error.message);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     fetchData();
-    // }, []);
 
     useEffect(() => {
         if (employeeinfo?.Image) {
@@ -96,7 +76,8 @@ const HeaderUser = ({employeeinfo}) => {
     );
 
     return (
-        <div className="fixed-header">
+        // <div className="fixed-header">
+            <Affix offsetTop={0} style={{ width: '100%' }}>
             <Flex align="center" justify="end">
                 {/* <Typography.Title level={4} type="secondary"> </Typography.Title> */}
 
@@ -115,7 +96,6 @@ const HeaderUser = ({employeeinfo}) => {
 
                     <Dropdown overlay={menu} trigger={["click"]}>
                         <Flex align="center" gap="5px" style={{ cursor: "pointer" }}>
-                            {/* <Avatar icon={<UserOutlined />} /> */}
                             <Avatar src={imageUrl} size={40} style={{ border: '2px solid #ddd', margin:'3px 0' }} />
                             <p style={{ margin: 0, lineHeight: "1" }}>{username || "TÀI KHOẢN"}</p>
                         </Flex>
@@ -125,7 +105,8 @@ const HeaderUser = ({employeeinfo}) => {
 
             {/* Hiển thị modal đổi mật khẩu */}
             <ChangePasswordModal visible={isModalVisible} onClose={() => setModalVisible(false)} />
-        </div>
+            </Affix>
+        // </div>
     );
 };
 

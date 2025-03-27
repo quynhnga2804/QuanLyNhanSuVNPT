@@ -9,7 +9,7 @@ const LaborContract = sequelize.define('LaborContract', {
   },
   ContractType: {
     type: DataTypes.STRING(50),
-    allowNull: true,
+    allowNull: false,
   },
 }, {
   tableName: 'laborcontracts',

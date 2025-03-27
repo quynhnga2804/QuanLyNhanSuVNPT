@@ -14,12 +14,9 @@ dayjs.extend(isSameOrBefore);
 const AttendanceUser = () => {
     const [attendanceUser, setAttendanceUser] = useState([]);
     const [dateRange, setDateRange] = useState([]);
-    // const [searchQuery, setSearchQuery] = useState('');
     const token = localStorage.getItem('token');
 
     const uniquePayroll = Array.from( new Map(attendanceUser.map(att => [att.ID_PayrollCycle, { text: att.PayrollCycle?.PayrollName, value: att.ID_PayrollCycle }])).values());
-    // const uniqueOTType = [...new Set(mappedattertimeData.map(att => att.OTType))];
-    // const uniqueStatus = [...new Set(mappedattertimeData.map(att => att.Status))];
 
 
     useEffect(() => {
@@ -110,15 +107,6 @@ const AttendanceUser = () => {
             sorter: (a, b) => a.TotalHoursWorked - b.TotalHoursWorked,
         }
     ];
-
-    // const handleSearch = debounce((value) => setSearchQuery(value.toLowerCase()), 500);
-    
-    // const filteredAttendances = attendanceUser.filter(att =>
-    //     att.Status?.toLowerCase().includes(searchQuery) ||
-    //     att.OTType?.toLowerCase().includes(searchQuery) ||
-    //     att.ManagerName?.toLowerCase().includes(searchQuery)
-    // );
-
     return (
         <Flex vertical style={{ width: '100%' }}>
             <Flex justify='end' style={{ padding: '10px 20px 0 20px', backgroundColor: 'lightslategray'}}>

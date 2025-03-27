@@ -28,7 +28,7 @@ const GeneralInfo = () => {
                 ]}
             />
             <div style={{ marginTop: 0 }}>
-                <Outlet /> {/* chỗ này render nội dung tab tương ứng */}
+                <Outlet />
             </div>
         </div>
     );

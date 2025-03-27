@@ -177,9 +177,13 @@ const HomeUser = ({employeeinfo, monthlySalaryUser, contractUsers}) => {
 
         {/* Phần dưới - Biểu đồ lương & Danh sách hợp đồng */}
         <Flex gap={16}>
-          <Card style={{ flex: 1 }}>
+          <Card style={{ flex: 1, minHeight: '350px' }}>
             {/* <div style={{ padding: 10 }}> */}
               <Title level={5}>Biểu đồ Lương và Thưởng/Phạt</Title>
+              {
+                salaryChartData.length === 0 ? (
+                    <Text className="none-info">Chưa có dữ liệu lương!</Text>
+                ) : (
               <ResponsiveContainer width="100%" height={270} style={{ padding: '6px' }}>
                 <ComposedChart data={salaryChartDatas}  margin={{ top: 20, right: 40, left: 20, bottom: 0 }} >
                   <XAxis dataKey="PayrollCycle.PayrollName" label={{ value: 'Kỳ lương', position: 'insideBottom', offset: -5 }} />
@@ -226,21 +230,37 @@ const HomeUser = ({employeeinfo, monthlySalaryUser, contractUsers}) => {
                   <Bar yAxisId="left" dataKey="Forfeit" fill="#E16A54" name="Phạt" />
                 </ComposedChart>
               </ResponsiveContainer>
+              )}
             {/* </div> */}
           </Card>
 
 
           <Card style={{ flex: 1 }}>
             <Title level={5}>Danh sách hợp đồng</Title>
+            {
+                contractUsers.length === 0 ? (
+                  <Text className="none-info">Chưa có dữ liệu hợp đồng!</Text>
+                ) : (
+            
             <Table dataSource={contractUsers} columns={[
-              { title: "Mã Hợp Đồng", dataIndex: "ID_Contract", key: "" },
+              { title: "Mã HĐ", dataIndex: "ID_Contract"},
               { title: "Loại HĐ", dataIndex: "ContractID", 
                 render: (text, record) => record.LaborContract ? record.LaborContract.ContractType : "Chưa có hợp đồng",
                },
-              { title: "Ngày bắt đầu", dataIndex: "StartDate", key: "date" },
-              { title: "Ngày kết thúc", dataIndex: "EndDate", key: "name" },
-              { title: "Trạng thái", dataIndex: "Status", key: "date" },
+              { title: "Ngày bắt đầu", dataIndex: "StartDate"},
+              { title: "Ngày kết thúc", dataIndex: "EndDate" },
+              { title: "Trạng thái", dataIndex: "Status",
+                render: (text, record) => {
+                  const today = new Date();
+                  const endDate = record.EndDate ? new Date(record.EndDate) : null;
+                  const isExpired = endDate && endDate < today;
+                  const statusContract = isExpired ? "Đã hết hạn" : "Hoạt động";
+                  const statusColor = isExpired ? '#FF3333' : '#339933';
+                  return <span style={{color: statusColor, fontWeight: 'bold'}}>{statusContract}</span>
+                }
+              },
             ]} pagination={false} />
+          )}
           </Card>
         </Flex>
       </Content>

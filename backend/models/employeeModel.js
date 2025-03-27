@@ -57,7 +57,7 @@ const Employee = sequelize.define('Employee', {
   },
   DepartmentID: {
     type: DataTypes.STRING(10),
-    allowNull: true,
+    allowNull: false,
     references: {
       model: 'departments',
       key: 'DepartmentID',
