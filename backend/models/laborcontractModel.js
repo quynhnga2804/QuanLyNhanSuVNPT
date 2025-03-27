@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 
 const LaborContract = sequelize.define('LaborContract', {
   ID_Contract: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING(10),
     primaryKey: true,
     autoIncrement: true,
   },

@@ -148,7 +148,7 @@ const App = () => {
             <Routes>
               <Route path='home' element={<AdminHome employees={employees} employeecontracts={employeecontracts} />} />
               <Route path='employees' element={<EmployeeList employees={employees} fetchEmployees={fetchEmployees} />} />
-              <Route path='contracts' element={<Contract employeecontracts={employeecontracts} />} />
+              <Route path='contracts' element={<Contract employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} />
               <Route path='periodicsalaries' element={<PeriodicSalary />} />
               <Route path='humanreports' element={<HumanReport />} />
               <Route path='organizationalstructures' element={<OrganizationalStructure />} />

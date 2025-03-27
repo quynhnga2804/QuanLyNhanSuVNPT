@@ -6,13 +6,14 @@ import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-const DepartmentList = ({ departments, divisions }) => {
+const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter] = useState('');
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingDepartment, setEditingDepartment] = useState(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
 
@@ -22,6 +23,11 @@ const DepartmentList = ({ departments, divisions }) => {
         setEditingDepartment(record);
         editForm.setFieldsValue(record);
         setIsEditModalOpen(true);
+    };
+
+    const handleEditCancel = () => {
+        setIsEditModalOpen(false);
+        editForm.resetFields();
     };
 
     const handleEditSave = async () => {
@@ -34,9 +40,9 @@ const DepartmentList = ({ departments, divisions }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            fetchEmployees();
+            fetchDepartments();
             message.success('Chỉnh sửa thành công!');
-            handleCancel();
+            handleEditCancel();
         } catch (error) {
             message.error('Sửa thất bại, vui lòng thử lại.');
         }
@@ -45,7 +51,7 @@ const DepartmentList = ({ departments, divisions }) => {
     const handleDelete = (record) => {
         Modal.confirm({
             title: 'Xác nhận xóa',
-            content: `Bạn có chắc chắn muốn xóa nhân sự ${record.DepartmentName} (Mã: ${record.DepartmentID}) không?`,
+            content: `Bạn có chắc chắn muốn xóa ${record.DepartmentName} (Mã: ${record.DepartmentID}) không?`,
             okText: 'Xóa',
             okType: 'danger',
             cancelText: 'Hủy',
@@ -55,13 +61,46 @@ const DepartmentList = ({ departments, divisions }) => {
                     await axios.delete(`http://localhost:5000/api/admin/departments/${record.DepartmentID}`, {
                         headers: { Authorization: `Bearer ${token}` },
                     });
-                    message.success(`Xóa nhân sự ${record.DepartmentName} thành công!`);
-                    fetchEmployees();
+                    message.success(`Xóa ${record.DepartmentName} thành công!`);
+                    fetchDepartments();
                 } catch (error) {
                     message.error('Xóa thất bại, vui lòng thử lại.');
                 }
             },
         });
+    };
+
+    const handleAddNew = () => {
+        setIsAddModalOpen(true);
+    };
+
+    const handleAddCancel = () => {
+        setIsAddModalOpen(false);
+        addForm.resetFields();
+    };
+
+    const handleAddSave = async () => {
+        try {
+            const values = await addForm.validateFields();
+            const token = localStorage.getItem('token');
+
+            const formData = new FormData();
+            Object.keys(values).forEach(key => {
+                formData.append(key, values[key]);
+            });
+
+            await axios.post('http://localhost:5000/api/admin/departments', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            fetchDepartments();
+            message.success('Thêm mới thành công!');
+            handleAddCancel();
+        } catch (error) {
+            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
+        }
     };
 
     const columns = [
@@ -83,15 +122,15 @@ const DepartmentList = ({ departments, divisions }) => {
             align: 'left',
             render: (id) => {
                 const division = divisions.find(dvs => dvs.DivisionID === id);
-                return division ? division.DivisionsName : 'Không xác định';
+                return division ? division.DivisionsName : '';
             },
             filters: uniqueDivisionIDs.map(id => {
                 const division = divisions.find(dep => dep.DivisionID === id);
-                return division ? { text: division.DivisionName, value: division.DivisionName } : null;
+                return division ? { text: division?.DivisionsName, value: division?.DivisionID } : null;
             }).filter(item => item !== null),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.DivisionsName?.includes(value),
+            onFilter: (value, record) => record.DivisionID === value,
         },
         {
             title: 'CHỨC NĂNG',
@@ -134,8 +173,7 @@ const DepartmentList = ({ departments, divisions }) => {
                         />
                     </Space>
 
-                    {/* <Button type='primary' onClick={handleAddNew}> */}
-                    <Button type='primary'>
+                    <Button type='primary' onClick={handleAddNew}>
                         <Space>
                             Tạo mới <UserAddOutlined />
                         </Space>
@@ -156,6 +194,44 @@ const DepartmentList = ({ departments, divisions }) => {
                 }}
                 pagination={false}
             />
+
+            {/* Thêm mới phòng ban */}
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Phòng Ban</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered >
+                <Form form={addForm} layout='vertical'>
+                    <Form.Item label='Mã phòng ban' name='DepartmentID' rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label='Tên phòng ban' name='DepartmentName' rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label='Tên bộ phận' name='DivisionID' rules={[{ required: true }]}>
+                        <Select>
+                            {divisions.map(divs => (
+                                <Select.Option key={divs.DivisionID} value={divs.DivisionID}>{divs.DivisionsName}</Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* Chỉnh sửa phòng ban */}
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Phòng Ban</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
+                <Form form={editForm} layout='vertical'>
+                    <Form.Item label='Mã phòng ban' name='DepartmentID' rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label='Tên phòng ban' name='DepartmentName' rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label='Tên bộ phận' name='DivisionID' rules={[{ required: true }]}>
+                        <Select>
+                            {divisions.map(divs => (
+                                <Select.Option key={divs.DivisionID} value={divs.DivisionID}>{divs.DivisionsName}</Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </>
     )
 }

@@ -21,8 +21,8 @@ const SalaryPolicy = () => {
 
                 <Title level={4}>🔹 1. Cách xác định lương cơ bản</Title>
                 <Paragraph>
-                    - Dựa trên <Text strong>chức danh công việc</Text> và <Text strong>bậc lương</Text>.
-                    <br />- Tham chiếu theo <Text strong>mặt bằng thị trường</Text>, năng lực nhân viên và mức lương tối thiểu vùng.
+                    - Mức lương của nhân viên được xác định dựa trên <Text strong>chức danh công việc</Text> và <Text strong>bậc lương</Text>, đảm bảo tính công bằng và phù hợp với hệ thống phân cấp trong tổ chức.<br/>
+                    - Bên cạnh đó, việc xác định mức lương còn được tham chiếu theo mặt <Text strong>mặt bằng chung thị trường</Text>, đánh giá năng lực thực tế của nhân viên, cũng như tuân thủ quy định về mức lương tối thiểu vùng theo quy định của pháp luật, nhằm đảm bảo sự cạnh tranh và thu hút nhân tài.
                 </Paragraph>
                 <Table columns={columns} dataSource={salaryData} pagination={false} style={{border: '1px solid lightgray'}} />
 
@@ -70,8 +70,8 @@ const SalaryPolicy = () => {
                     <pre>
                         Lương trước thuế: 15,000,000 VNĐ
                         - Bảo hiểm (10.5%): 1,575,000 VNĐ
-                        - Thuế TNCN: 300,000 VNĐ
-                        = Lương thực nhận: 13,125,000 VNĐ
+                        - Thuế thu nhập cá nhân: 300,000 VNĐ
+                        - Lương thực nhận: 13,125,000 VNĐ
                     </pre>
                 </Paragraph>
 

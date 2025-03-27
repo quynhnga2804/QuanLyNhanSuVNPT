@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Regination = sequelize.define('Regination', {
+const Resignation = sequelize.define('Resignation', {
     ID_Resignation: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -24,7 +24,7 @@ const Regination = sequelize.define('Regination', {
     allowNull: false,
   },
 }, {
-  tableName: 'reginations',
+  tableName: 'resignations',
   timestamps: false, // Không sử dụng timestamps
 });
-module.exports = Regination;
+module.exports = Resignation;

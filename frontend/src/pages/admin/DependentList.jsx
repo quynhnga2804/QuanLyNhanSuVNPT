@@ -1,195 +1,283 @@
-import { Table } from 'antd'
-import React, { useState } from 'react'
+import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
+import React, { useState } from 'react';
+import Search from 'antd/es/transfer/search';
+import { UserAddOutlined } from '@ant-design/icons';
+import { debounce } from 'lodash';
+import dayjs from 'dayjs';
+import axios from 'axios';
 
-const columns = [
-  {
-    title: 'NHÂN SỰ',
-    dataIndex: 'name',
-    fixed: 'left',
-    filters: [
-      {
-        text: 'Phạm Thị Quỳnh Nga',
-        value: 'Phạm Thị Quỳnh Nga',
-      },
-      {
-        text: 'Họ tên',
-        value: 'Họ tên',
-      }
-    ],
-    filterMode: 'tree',
-    filterSearch: true,
-    onFilter: (value, record) => record.name.includes(value),
-  },
-  {
-    title: 'MÃ',
-    dataIndex: 'id',
-    fixed: 'left',
-    filters: [
-      {
-        text: 'NV08367232',
-        value: 'NV08367232',
-      },
-      {
-        text: 'Mã nhân sự',
-        value: 'Mã nhân sự',
-      }
-    ],
-    filterMode: 'tree',
-    filterSearch: true,
-    onFilter: (value, record) => record.id.includes(value),
-  },
-  {
-    title: 'TÀI KHOẢN',
-    dataIndex: 'account',
-    minWidth: 89,
-    align: 'right',
-  },
-  {
-    title: 'TRẠNG THÁI',
-    dataIndex: 'status',
-    minWidth: 95,
-    filters: [
-      {
-        text: 'Đang làm việc',
-        value: 'Đang làm việc',
-      },
-      {
-        text: 'Đã nghỉ việc',
-        value: 'Đã nghỉ việc',
-      }
-    ],
-    filterMode: 'tree',
-    filterSearch: true,
-    onFilter: (value, record) => record.status.includes(value),
-  },
-  {
-    title: 'CHÍNH SÁCH',
-    dataIndex: 'policy',
-  },
-  {
-    title: 'MÃ SỐ THUẾ',
-    dataIndex: 'vat',
-    minWidth: 145,
-  },
-  {
-    title: 'CĂN CƯỚC',
-    dataIndex: 'identity',
-    minWidth: 144,
-  },
-  {
-    title: 'GIẢM TRỪ THUẾ',
-    dataIndex: 'taxDeductions',
-    minWidth: 83,
-    align: 'right',
-  },
-  {
-    title: 'NGÀY CÔNG',
-    dataIndex: 'workDay',
-    minWidth: 95,
-    align: 'right',
-  },
-  {
-    title: 'LƯƠNG THÁNG',
-    dataIndex: 'salaryMonth',
-    minWidth: 112,
-    align: 'right',
-  },
-  {
-    title: 'TIỀN CƠM TRƯA',
-    dataIndex: 'lunchAllowance',
-    minWidth: 119,
-    align: 'right',
-  },
-  {
-    title: 'TIỀN ĐIỆN THOẠI',
-    dataIndex: 'phoneAllowance',
-    minWidth: 120,
-    align: 'right',
-  },
-  {
-    title: 'TIỀN XĂNG XE',
-    dataIndex: 'fuelAllowance',
-    minWidth: 105,
-    align: 'right',
-  },
-  {
-    title: 'TIỀN PHỤ CẤP KHÁC',
-    dataIndex: 'otherAllowance',
-    minWidth: 142,
-    align: 'right',
-  },
-  {
-    title: 'LƯƠNG OT',
-    dataIndex: 'otSalary',
-    minWidth: 88,
-    align: 'right',
-  },
-  {
-    title: 'THỰC LÃNH',
-    dataIndex: 'actualSalary',
-    fixed: 'right',
-    minWidth: 92,
-    align: 'right',
-  },
-  {
-    title: 'GHI CHÚ',
-    dataIndex: 'note',
-    fixed: 'right',
-    minWidth: 73,
-  },
-];
+const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingFamilyMember, setEditingFamilyMember] = useState(null);
+    const [editForm] = Form.useForm();
+    const [addForm] = Form.useForm();
 
-const onChange = (pagination, filters, sorter, extra) => {
-  console.log('params', pagination, filters, sorter, extra);
+    const handleEdit = (record) => {
+        setEditingFamilyMember(record);
+        editForm.setFieldsValue(record);
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditCancel = () => {
+        setIsEditModalOpen(false);
+        editForm.resetFields();
+    };
+
+    const handleAddNew = () => {
+        setIsAddModalOpen(true);
+    };
+
+    const handleAddCancel = () => {
+        setIsAddModalOpen(false);
+        addForm.resetFields();
+    };
+
+    const handleDelete = (record) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa ${record.FullName} không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    await axios.delete(`http://localhost:5000/api/admin/familymembers/${record.FamilyMemberID}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    message.success(`Xóa ${record.FullName} thành công!`);
+                    fetchFamilyMembers();
+                } catch (error) {
+                    message.error('Xóa thất bại, vui lòng thử lại.');
+                }
+            },
+        });
+    };
+
+    const handleAddSave = async () => {
+        try {
+            const values = await addForm.validateFields();
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:5000/api/admin/familymembers', values, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            fetchFamilyMembers();
+            message.success('Thêm mới thành công!');
+            handleAddCancel();
+        } catch (error) {
+            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
+        }
+    };
+
+    const handleEditSave = async () => {
+        try {
+            const values = await editForm.validateFields();
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:5000/api/admin/familymembers/${editingFamilyMember.FamilyMemberID}`, values, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            fetchFamilyMembers();
+            message.success('Chỉnh sửa thành công!');
+            handleEditCancel();
+        } catch (error) {
+            message.error('Sửa thất bại, vui lòng thử lại.');
+        }
+    };
+
+    const columns = [
+        {
+            title: 'STT',
+            dataIndex: 'stt',
+            minWidth: 45,
+            fixed: 'left',
+            align: 'center',
+            render: (_, __, index) => index + 1,
+        },
+        {
+            title: 'TÊN NHÂN VIÊN',
+            dataIndex: 'EmployeeID',
+            minWidth: 115,
+            align: 'left',
+            render: (id) => {
+                const employee = employees.find(emp => emp.EmployeeID === id);
+                return employee ? employee.FullName : '';
+            },
+        },
+        {
+            title: 'TÊN NGƯỜI THÂN',
+            dataIndex: 'FullName',
+            minWidth: 80,
+            align: 'left',
+        },
+        {
+            title: 'MỐI QUAN HỆ',
+            dataIndex: 'Relationship',
+            align: 'left',
+        },
+        {
+            title: 'NGÀY SINH',
+            dataIndex: 'DateOfBirth',
+            minWidth: 80,
+            align: 'left',
+            render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
+        },
+        {
+            title: 'GIỚI TÍNH',
+            dataIndex: 'Gender',
+            align: 'left',
+        },
+        {
+            title: 'ĐỊA CHỈ',
+            dataIndex: 'Address',
+            align: 'left',
+        },
+        {
+            title: 'SĐT',
+            dataIndex: 'PhoneNumber',
+            align: 'left',
+        },
+        {
+            title: 'CHỨC NĂNG',
+            dataIndex: 'actions',
+            fixed: 'right',
+            align: 'center',
+            minWidth: 113,
+            render: (_, record) => (
+                <>
+                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
+                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+                </>
+            ),
+        }
+    ];
+
+    const handleSearch = debounce((value) => {
+        setSearchQuery(value.toLowerCase());
+    }, 500);
+
+    const filteredDivisions = familyMembers.filter(fam =>
+        employees.find(emp => emp.EmployeeID === fam.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        fam.FullName.toLowerCase().includes(searchQuery)
+    );
+
+    return (
+        <>
+            <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#fff' }}>
+                <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', paddingTop: '2px', fontWeight: '100', fontSize: '1rem' }}>
+                    Số lượng: {filteredDivisions.length}
+                </Typography.Title>
+
+                <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
+                    <Space>
+                        <Search
+                            placeholder='Search...'
+                            allowClear
+                            onChange={(e) => handleSearch(e.target.value)}
+                        />
+                    </Space>
+
+                    <Button type='primary' onClick={handleAddNew}>
+                        <Space>
+                            Tạo mới <UserAddOutlined />
+                        </Space>
+                    </Button>
+                </Flex>
+            </Flex>
+
+            <Table
+                className='table_TQ'
+                columns={columns}
+                dataSource={filteredDivisions.map(dvs => ({ ...dvs, key: dvs.familyMemberID }))}
+                bordered
+                size='medium'
+                scroll={{
+                    x: 'max-content',
+                    y: 51.7 * 9,
+                }}
+                pagination={false}
+            />
+
+            {/* Chỉnh sửa */}
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh sửa thông tin bộ phận</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
+                <Form form={editForm} layout='vertical'>
+                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
+                        <Select>
+                            {employees.map(emp => (
+                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                                    ({emp.EmployeeID}) {emp.FullName}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item label="Tên người thân" name="FullName" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Mối quan hệ" name="Relationship" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Ngày sinh" name="DateOfBirth">
+                        <Input type='Date' />
+                    </Form.Item>
+                    <Form.Item label='Giới tính' name='Gender'>
+                        <Select>
+                            <Select.Option value='Nam'>Nam</Select.Option>
+                            <Select.Option value='Nữ'>Nữ</Select.Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item label="Địa chỉ" name="Address" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Số điện thoại" name="PhoneNumber">
+                        <Input />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* Thêm mới */}
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
+                <Form form={addForm} layout='vertical'>
+                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
+                        <Select>
+                            {employees.map(emp => (
+                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                                    ({emp.EmployeeID}) {emp.FullName}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item label="Tên người thân" name="FullName" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Mối quan hệ" name="Relationship" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Ngày sinh" name="DateOfBirth">
+                        <Input type='Date' />
+                    </Form.Item>
+                    <Form.Item label='Giới tính' name='Gender'>
+                        <Select>
+                            <Select.Option value='Nam'>Nam</Select.Option>
+                            <Select.Option value='Nữ'>Nữ</Select.Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item label="Địa chỉ" name="Address" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Số điện thoại" name="PhoneNumber">
+                        <Input />
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </>
+    );
 };
-
-const dataSource = new Array(46).fill(null).map((_, i) => ({
-  key: i,
-  name: 'Phạm Thị Quỳnh Nga',
-  id: 'NV08367232',
-  account: 'ngaptq',
-  status: 'Đang làm việc',
-  position: 'Nhân viên',
-  classification: 'Nhân viên chính thức',
-  salaryPolicy: 'Lương cố định',
-  annualLeave: 12,
-  workDay: 20,
-  salaryMonth: (5000000).toLocaleString('vi-VN'),
-  lunchAllowance: (10000).toLocaleString('vi-VN'),
-  phoneAllowance: (50000).toLocaleString('vi-VN'),
-  fuelAllowance: (100000).toLocaleString('vi-VN'),
-  otherAllowance: (200000).toLocaleString('vi-VN'),
-  otSalary: (100000).toLocaleString('vi-VN'),
-  actualSalary: (5000000 + 10000 + 50000 + 100000 + 200000 + 100000).toLocaleString('vi-VN'),
-  note: '',
-}));
-
-const DependentList = () => {
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: setSelectedRowKeys,
-  };
-
-  return (
-    <>
-      <Table
-        className='table_TQ'
-        rowSelection={rowSelection}
-        columns={columns}
-        dataSource={dataSource}
-        bordered
-        size='midium'
-        scroll={{
-          x: 'max-content',
-          y: 52.5 * 10,
-        }}
-        pagination={false}
-        onChange={onChange}
-      />
-    </>
-  )
-}
 
 export default DependentList

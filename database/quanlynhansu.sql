@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 26, 2025 at 10:56 AM
+-- Generation Time: Mar 27, 2025 at 04:52 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -136,6 +136,7 @@ CREATE TABLE `employees` (
 --
 
 INSERT INTO `employees` (`EmployeeID`, `FullName`, `PhoneNumber`, `DateOfBirth`, `Gender`, `Address`, `PersonalEmail`, `WorkEmail`, `JobTitle`, `Position`, `StartDate`, `Image`, `DepartmentID`) VALUES
+('E0011', 'Lê Thị Thuyết', '048673473', '1994-07-22', 'Nữ', 'Hải Phòng', 'thuyet.lt@gmail.com', 'thithuyet@vnpt.nghean.vn', 'Nhân viên chăm sóc khach hàng', 'Nhân viên', '2025-03-05', '1743010558765-OIP.jpg', 'DEP03'),
 ('E002', 'Nguyễn Hoàng Anh', '0976543210', '1999-12-12', 'Nữ', 'Hải Phòng', 'hoanganhpersonal@gmail.com', 'vhanh.dhkt15a13hn@sv.uneti.edu.vn', 'Nhân viên IT', 'Tester', '2023-06-15', '1742980177542-e25.png', 'DEP01'),
 ('E003', 'Phạm Thị Quỳnh Nga', '0965432109', '2001-03-20', 'Nữ', 'Đà Nẵng', 'quynhngapersonal@gmail.com', 'ptqnga.dhti15a10hn@sv.uneti.edu.vn', 'CEO', 'Giáo đốc', '2023-07-20', '1742980138153-e3.jpg', 'DEP03'),
 ('E004', 'Phạm Minh Đức', '0969988776', '1988-06-18', 'Nam', 'Hải Phòng', 'duc.pm@gmail.com', 'duc.pm@vnpt.nghean.vn', 'Trưởng nhóm IT', 'Quản lý', '2017-09-25', '1742980194677-e24.png', 'DEP04'),
@@ -150,25 +151,25 @@ INSERT INTO `employees` (`EmployeeID`, `FullName`, `PhoneNumber`, `DateOfBirth`,
 ('E013', 'Đỗ Hữu Hạnh', '0959998877', '1989-06-22', 'Nam', 'Hà Tĩnh', 'hanh.dh@gmail.com', 'hanh.dh@vnpt.nghean.vn', 'Nhân viên nhân sự', 'Nhân viên', '2020-12-19', '1742980396246-e7.jpg', 'DEP03'),
 ('E014', 'Trịnh Thị Lan', '0948887766', '1992-09-15', 'Nữ', 'Thái Nguyên', 'lan.tt@gmail.com', 'lan.tt@vnpt.nghean.vn', 'Kế toán viên', 'Kế toán', '2017-06-07', '1742980412034-e6.jpg', 'DEP02'),
 ('E015', 'Tạ Văn Tú', '0965789012', '1991-01-17', 'Nam', 'Bình Dương', 'tai.nguyen@example.com', 'tvtu.dhti15a18hn@sv.uneti.edu.vn', 'Nhân viên IT', 'IT Consultant', '2019-02-28', '1742980425025-e21.jpg', 'DEP03'),
-('E016', 'Hồ Minh Sang', '0926665544', '1997-03-19', 'Nam', 'Bạc Liêu', 'sang.hm@gmail.com', 'sang.hm@vnpt.nghean.vn', 'Nhân viên IT', 'Nhân viên', '2021-09-30', NULL, 'DEP04'),
+('E016', 'Hồ Minh Sang', '0926665544', '1997-03-19', 'Nam', 'Bạc Liêu', 'sang.hm@gmail.com', 'sang.hm@vnpt.nghean.vn', 'Nhân viên IT', 'Nhân viên', '2021-09-30', '1743003441043-e40.png', 'DEP04'),
 ('E017', 'Nguyễn Thu Hà', '0915554433', '1990-12-05', 'Nữ', 'Vĩnh Long', 'ha.nt@gmail.com', 'ha.nt@vnpt.nghean.vn', 'Nhân viên kế toán', 'Nhân viên', '2020-10-01', '1742981062316-e15.jpg', 'DEP02'),
-('E018', 'Trần Đình Phúc', '0984443322', '1984-11-10', 'Nam', 'Phú Yên', 'phuc.td@gmail.com', 'phuc.td@vnpt.nghean.vn', 'Quản lý vận hành', 'Quản lý', '2013-03-22', NULL, 'DEP05'),
-('E019', 'Lê Quốc Thịnh', '0973332211', '1985-02-17', 'Nam', 'Bình Phước', 'thinh.lq@gmail.com', 'thinh.lq@vnpt.nghean.vn', 'Trưởng nhóm kỹ thuật', 'Quản lý', '2014-12-29', NULL, 'DEP06'),
+('E018', 'Trần Đình Phúc', '0984443322', '1984-11-10', 'Nam', 'Phú Yên', 'phuc.td@gmail.com', 'phuc.td@vnpt.nghean.vn', 'Quản lý vận hành', 'Quản lý', '2013-03-22', '1743003459172-e39.png', 'DEP05'),
+('E019', 'Lê Quốc Thịnh', '0973332211', '1985-02-17', 'Nam', 'Bình Phước', 'thinh.lq@gmail.com', 'thinh.lq@vnpt.nghean.vn', 'Trưởng nhóm kỹ thuật', 'Quản lý', '2014-12-29', '1743003468068-e38.png', 'DEP06'),
 ('E020', 'Võ Hồng Nhung', '0962221100', '1995-06-12', 'Nữ', 'Cà Mau', 'nhung.vh@gmail.com', 'nhung.vh@vnpt.nghean.vn', 'Nhân viên nhân sự', 'Nhân viên', '2022-07-01', '1742981094985-e16.jpg', 'DEP03'),
-('E021', 'Nguyễn Hoàng Nam', '0901122334', '1993-04-01', 'Nam', 'Bắc Ninh', 'nam.nh@gmail.com', 'nam.nh@vnpt.nghean.vn', 'Nhân viên CSKH', 'Nhân viên', '2021-08-10', NULL, 'DEP05'),
+('E021', 'Nguyễn Hoàng Nam', '0901122334', '1993-04-01', 'Nam', 'Bắc Ninh', 'nam.nh@gmail.com', 'nam.nh@vnpt.nghean.vn', 'Nhân viên CSKH', 'Nhân viên', '2021-08-10', '1743003479496-e37.png', 'DEP05'),
 ('E022', 'Lê Thanh Hương', '0982233445', '1991-07-20', 'Nữ', 'Hà Nam', 'huong.lt@gmail.com', 'huong.lt@vnpt.nghean.vn', 'Nhân viên hành chính', 'Nhân viên', '2020-11-22', '1742981112076-e14.jpg', 'DEP06'),
-('E023', 'Phạm Văn Tuấn', '0973344556', '1988-03-15', 'Nam', 'Tuyên Quang', 'tuan.pv@gmail.com', 'tuan.pv@vnpt.nghean.vn', 'Trưởng phòng CSKH', 'Quản lý', '2017-05-18', NULL, 'DEP05'),
-('E024', 'Hoàng Thu Trang', '0964455667', '1994-09-11', 'Nữ', 'Hòa Bình', 'trang.ht@gmail.com', 'trang.ht@vnpt.nghean.vn', 'Nhân viên kế toán', 'Nhân viên', '2021-04-30', NULL, 'DEP02'),
-('E025', 'Đỗ Hải Sơn', '0955566778', '1986-12-08', 'Nam', 'Quảng Trị', 'son.dh@gmail.com', 'son.dh@vnpt.nghean.vn', 'Trưởng nhóm kỹ thuật', 'Quản lý', '2015-09-14', NULL, 'DEP01'),
-('E026', 'Nguyễn Thanh Vũ', '0946677889', '1992-05-23', 'Nam', 'Kon Tum', 'vu.nt@gmail.com', 'vu.nt@vnpt.nghean.vn', 'Nhân viên IT', 'Nhân viên', '2019-10-25', NULL, 'DEP04'),
-('E027', 'Trần Hoài Nam', '0937788990', '1997-11-02', 'Nam', 'Sơn La', 'nam.th@gmail.com', 'nam.th@vnpt.nghean.vn', 'Nhân viên kinh doanh', 'Nhân viên', '2022-03-19', NULL, 'DEP03'),
-('E028', 'Vũ Bảo Trâm', '0928899001', '1990-06-14', 'Nữ', 'Bình Thuận', 'tram.vb@gmail.com', 'tram.vb@vnpt.nghean.vn', 'Nhân viên nhân sự', 'Nhân viên', '2021-07-15', NULL, 'DEP03'),
-('E029', 'Lý Văn Bình', '0919900112', '1984-01-09', 'Nam', 'Cần Thơ', 'binh.lv@gmail.com', 'binh.lv@vnpt.nghean.vn', 'Trưởng phòng kỹ thuật', 'Giám đốc', '2012-12-01', NULL, 'DEP06'),
+('E023', 'Phạm Văn Tuấn', '0973344556', '1988-03-15', 'Nam', 'Tuyên Quang', 'tuan.pv@gmail.com', 'tuan.pv@vnpt.nghean.vn', 'Trưởng phòng CSKH', 'Quản lý', '2017-05-18', '1743003523253-e36.jpg', 'DEP05'),
+('E024', 'Hoàng Thu Trang', '0964455667', '1994-09-11', 'Nữ', 'Hòa Bình', 'trang.ht@gmail.com', 'trang.ht@vnpt.nghean.vn', 'Nhân viên kế toán', 'Nhân viên', '2021-04-30', '1743003536288-e35.jpg', 'DEP02'),
+('E025', 'Đỗ Hải Sơn', '0955566778', '1986-12-08', 'Nam', 'Quảng Trị', 'son.dh@gmail.com', 'son.dh@vnpt.nghean.vn', 'Trưởng nhóm kỹ thuật', 'Quản lý', '2015-09-14', '1743003548740-e34.jpg', 'DEP01'),
+('E026', 'Nguyễn Thanh Vũ', '0946677889', '1992-05-23', 'Nam', 'Kon Tum', 'vu.nt@gmail.com', 'vu.nt@vnpt.nghean.vn', 'Nhân viên IT', 'Nhân viên', '2019-10-25', '1743003562143-e33.jpg', 'DEP04'),
+('E027', 'Trần Hoài Nam', '0937788990', '1997-11-02', 'Nam', 'Sơn La', 'nam.th@gmail.com', 'nam.th@vnpt.nghean.vn', 'Nhân viên kinh doanh', 'Nhân viên', '2022-03-19', '1743003575337-e32.jpg', 'DEP03'),
+('E028', 'Vũ Bảo Trâm', '0928899001', '1990-06-14', 'Nữ', 'Bình Thuận', 'tram.vb@gmail.com', 'tram.vb@vnpt.nghean.vn', 'Nhân viên nhân sự', 'Nhân viên', '2021-07-15', '1743003595299-e31.jpg', 'DEP03'),
+('E029', 'Lý Văn Bình', '0919900112', '1984-01-09', 'Nam', 'Cần Thơ', 'binh.lv@gmail.com', 'binh.lv@vnpt.nghean.vn', 'Trưởng phòng kỹ thuật', 'Giám đốc', '2012-12-01', '1743003941609-e43.jpg', 'DEP06'),
 ('E030', 'Hà Thị Mai', '0900011223', '1996-08-28', 'Nữ', 'An Giang', 'mai.ht@gmail.com', 'mai.ht@vnpt.nghean.vn', 'Nhân viên CSKH', 'Nhân viên', '2023-01-10', '1742981134663-e13.jpg', 'DEP05'),
-('E031', 'Nguyễn Văn An', '0912345678', '1990-01-15', 'Nam', 'Hà Nội', 'an.nv@gmail.com', 'an.nv@vnpt.nghean.vn', 'Trưởng phòng', 'Giám đốc', '2015-05-20', NULL, 'DEP01'),
+('E031', 'Nguyễn Văn An', '0912345678', '1990-01-15', 'Nam', 'Hà Nội', 'an.nv@gmail.com', 'an.nv@vnpt.nghean.vn', 'Trưởng phòng', 'Giám đốc', '2015-05-20', '1743003999220-e44.jpg', 'DEP01'),
 ('E032', 'Trần Thị Bích', '0987654321', '1985-03-22', 'Nữ', 'TP. Hồ Chí Minh', 'bich.tt@gmail.com', 'bich.tt@vnpt.nghean.vn', 'Kế toán trưởng', 'Quản lý', '2016-08-15', '1742981150594-e19.jpg', 'DEP02'),
-('E033', 'Lê Văn Cường', '0971122334', '1992-07-10', 'Nam', 'Đà Nẵng', 'cuong.lv@gmail.com', 'cuong.lv@vnpt.nghean.vn', 'Chuyên viên nhân sự', 'Nhân viên', '2018-02-11', NULL, 'DEP03'),
-('E034', 'Phan Văn Mạnh', '0937776655', '1986-07-28', 'Nam', 'Bình Định', 'manh.pv@gmail.com', 'manh.pv@vnpt.nghean.vn', 'Nhân viên kỹ thuật', 'Nhân viên', '2016-05-10', NULL, 'DEP01');
+('E033', 'Lê Văn Cường', '0971122334', '1992-07-10', 'Nam', 'Đà Nẵng', 'cuong.lv@gmail.com', 'cuong.lv@vnpt.nghean.vn', 'Chuyên viên nhân sự', 'Nhân viên', '2018-02-11', '1743004360671-e45.jpg', 'DEP03'),
+('E034', 'Phan Văn Mạnh', '0937776655', '1986-07-28', 'Nam', 'Bình Định', 'manh.pv@gmail.com', 'manh.pv@vnpt.nghean.vn', 'Nhân viên kỹ thuật', 'Nhân viên', '2016-05-10', '1743004763497-e46.jpg', 'DEP01');
 
 -- --------------------------------------------------------
 
@@ -180,45 +181,44 @@ CREATE TABLE `employeescontracts` (
   `ID_Contract` varchar(10) NOT NULL,
   `EmployeeID` varchar(10) NOT NULL,
   `StartDate` date DEFAULT NULL,
-  `EndDate` date DEFAULT NULL,
-  `Status` varchar(20) DEFAULT NULL
+  `EndDate` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `employeescontracts`
 --
 
-INSERT INTO `employeescontracts` (`ID_Contract`, `EmployeeID`, `StartDate`, `EndDate`, `Status`) VALUES
-('C001', 'E011', '2023-03-01', '2024-03-01', 'Đang hoạt động'),
-('C001', 'E015', '2023-01-01', '2024-01-01', 'Đang hoạt động'),
-('C001', 'E021', '2023-05-01', '2024-05-01', 'Đang hoạt động'),
-('C002', 'E002', '2023-02-01', '2025-02-01', 'Đang hoạt động'),
-('C002', 'E012', '2023-04-01', '2025-04-01', 'Đang hoạt động'),
-('C002', 'E022', '2023-07-01', '2025-07-01', 'Đang hoạt động'),
-('C003', 'E003', '2022-06-15', NULL, 'Hợp đồng lâu dài'),
-('C003', 'E013', '2022-08-10', NULL, 'Hợp đồng lâu dài'),
-('C003', 'E023', '2022-09-20', NULL, 'Hợp đồng lâu dài'),
-('C004', 'E004', '2024-03-01', '2024-06-01', 'Thử việc'),
-('C004', 'E014', '2024-05-01', '2024-08-01', 'Thử việc'),
-('C004', 'E024', '2024-06-01', '2024-09-01', 'Thử việc'),
-('C005', 'E005', '2023-07-01', '2024-01-01', 'Thời vụ'),
-('C005', 'E015', '2023-10-01', '2024-04-01', 'Thời vụ'),
-('C005', 'E025', '2023-11-01', '2024-05-01', 'Thời vụ'),
-('C006', 'E006', '2023-08-15', '2024-02-15', 'Đang hoạt động'),
-('C006', 'E016', '2023-12-15', '2024-06-15', 'Đang hoạt động'),
-('C006', 'E026', '2024-01-15', '2024-07-15', 'Đang hoạt động'),
-('C007', 'E007', '2024-01-01', '2024-07-01', 'Thực tập'),
-('C007', 'E017', '2024-02-01', '2024-08-01', 'Thực tập'),
-('C007', 'E027', '2024-03-01', '2024-09-01', 'Thực tập'),
-('C008', 'E008', '2023-09-01', NULL, 'Đang hoạt động'),
-('C008', 'E018', '2023-06-01', NULL, 'Đang hoạt động'),
-('C008', 'E028', '2023-10-01', NULL, 'Đang hoạt động'),
-('C009', 'E009', '2023-11-01', '2024-05-01', 'Đang hoạt động'),
-('C009', 'E019', '2023-09-01', '2024-03-01', 'Đang hoạt động'),
-('C009', 'E029', '2023-12-01', '2024-06-01', 'Đang hoạt động'),
-('C010', 'E010', '2022-12-01', NULL, 'Hợp đồng lâu dài'),
-('C010', 'E020', '2022-11-01', NULL, 'Hợp đồng lâu dài'),
-('C010', 'E030', '2022-10-01', NULL, 'Hợp đồng lâu dài');
+INSERT INTO `employeescontracts` (`ID_Contract`, `EmployeeID`, `StartDate`, `EndDate`) VALUES
+('C001', 'E011', '2023-03-01', '2026-03-05'),
+('C001', 'E015', '2023-01-01', '2024-01-01'),
+('C001', 'E021', '2023-05-01', '2024-05-01'),
+('C002', 'E002', '2023-02-01', NULL),
+('C002', 'E012', '2023-04-01', '2025-04-01'),
+('C002', 'E022', '2023-07-01', '2025-07-01'),
+('C003', 'E003', '2022-06-15', NULL),
+('C003', 'E013', '2022-08-10', NULL),
+('C003', 'E023', '2022-09-20', NULL),
+('C004', 'E004', '2024-03-01', '2024-06-01'),
+('C004', 'E014', '2024-05-01', '2024-08-01'),
+('C004', 'E024', '2024-06-01', '2024-09-01'),
+('C005', 'E005', '2023-07-01', '2024-01-01'),
+('C005', 'E015', '2023-10-01', '2024-04-01'),
+('C005', 'E025', '2023-11-01', '2024-05-01'),
+('C006', 'E006', '2023-08-15', '2024-02-15'),
+('C006', 'E016', '2023-12-15', '2024-06-15'),
+('C006', 'E026', '2024-01-15', '2024-07-15'),
+('C007', 'E007', '2024-01-01', '2024-07-01'),
+('C007', 'E017', '2024-02-01', '2024-08-01'),
+('C007', 'E027', '2024-03-01', '2024-09-01'),
+('C008', 'E008', '2023-09-01', NULL),
+('C008', 'E018', '2023-06-01', NULL),
+('C008', 'E028', '2023-10-01', NULL),
+('C009', 'E009', '2023-11-01', '2024-05-01'),
+('C009', 'E019', '2023-09-01', '2024-03-01'),
+('C009', 'E029', '2023-12-01', '2024-06-01'),
+('C010', 'E010', '2022-12-01', NULL),
+('C010', 'E020', '2022-11-01', NULL),
+('C010', 'E030', '2022-10-01', NULL);
 
 -- --------------------------------------------------------
 
@@ -835,7 +835,7 @@ ALTER TABLE `usernotifications`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- Constraints for dumped tables

@@ -10,18 +10,18 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter] = useState('');
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
 
-    const uniqueGenders = [...new Set(employees.map(emp => emp.Gender))];
-    const uniquePositions = [...new Set(employees.map(emp => emp.Position))];
-    const uniqueDepartmentIDs = [...new Set(employees.map(emp => emp.DepartmentID))];
+    const uniqueGenders = [...new Set(employees.map(emp => emp.Gender).filter(Boolean))];
+    const uniquePositions = [...new Set(employees.map(emp => emp.Position).filter(Boolean))];
+    const uniqueDepartmentIDs = [...new Set(employees.map(emp => emp.DepartmentID).filter(Boolean))];
 
     const userAccount = users.find(user => user.WorkEmail === selectedEmployee?.WorkEmail);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -125,11 +125,10 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     };
 
     const filteredEmployees = employees.filter(emp =>
-        emp.FullName.toLowerCase().includes(searchQuery)
-        || emp.EmployeeID.toLowerCase().includes(searchQuery)
-        || emp.Address.toLowerCase().includes(searchQuery)
-        || emp.PhoneNumber.includes(searchQuery)
-        && (statusFilter ? emp.status === statusFilter : true)
+        emp.FullName.toLowerCase().includes(searchQuery) ||
+        emp.EmployeeID.toLowerCase().includes(searchQuery) ||
+        emp.Address.toLowerCase().includes(searchQuery) ||
+        emp.PhoneNumber.includes(searchQuery)
     );
 
     const handleDelete = (record) => {
@@ -318,7 +317,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             align: 'left',
             render: (id) => {
                 const department = departments.find(dept => dept.DepartmentID === id);
-                return department ? department.DepartmentName : 'Không xác định';
+                return department ? department.DepartmentName : '';
             },
             filters: departments.filter(dept => uniqueDepartmentIDs.includes(dept.DepartmentID)).map(dept => ({
                 text: dept.DepartmentName,
@@ -327,28 +326,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             filterMode: 'tree',
             filterSearch: true,
             onFilter: (value, record) => record.DepartmentID === value,
-        },
-        {
-            title: 'TRẠNG THÁI',
-            dataIndex: 'EmployeeID',
-            minWidth: 115,
-            filters: [
-                { text: 'Đang làm việc', value: 'Hoạt động' },
-                { text: 'Đã nghỉ việc', value: 'Hết hạn' },
-            ],
-            onFilter: (value, record) => {
-                const contract = employeecontracts.find(emct => emct.EmployeeID === record.EmployeeID);
-                return contract ? contract.Status === value : false;
-            },
-            filterMode: 'tree',
-            filterSearch: true,
-            render: (id) => {
-                const employeecontract = employeecontracts.find(emct => emct.EmployeeID === id);
-                if (employeecontract) {
-                    return employeecontract.Status === 'Hoạt động' ? 'Đang làm việc' : 'Đã nghỉ việc';
-                }
-                return 'Không xác định';
-            },
         },
         {
             title: 'CHỨC NĂNG',
@@ -407,35 +384,9 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                 pagination={false}
             />
 
-            {/* Tạo tài khoản */}
-            <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Tạo Tài Khoản Người Dùng</div>} open={isCreateModalOpen} onCancel={() => setIsCreateModalOpen(false)} onOk={async () => { await createUser(); setIsCreateModalOpen(false); }} centered>
-                <Input
-                    placeholder="Nhập Username"
-                    value={newUser.UserName}
-                    onChange={(e) => setNewUser({ ...newUser, UserName: e.target.value })}
-                    style={{ marginBottom: "10px" }}
-                />
-                <Input.Password
-                    placeholder="Nhập Password"
-                    value={newUser.Password}
-                    onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
-                    style={{ marginBottom: "10px" }}
-                />
-                <Select
-                    value={newUser.Role}
-                    onChange={(value) => setNewUser({ ...newUser, Role: value })}
-                    style={{ width: "100%" }}
-                >
-                    <Select.Option value="Admin">Admin</Select.Option>
-                    <Select.Option value="Employee">Employee</Select.Option>
-                    <Select.Option value="Manager">Manager</Select.Option>
-                    <Select.Option value="Director">Director</Select.Option>
-                </Select>
-            </Modal>
 
-
-            {/* MODAL CHI TIẾT NHÂN SỰ */}
-            <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Chi Tiết Nhân Sự</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={700} centered>
+            {/* Chi tiết nhân sự */}
+            <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Chi Tiết Nhân Sự</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={750} centered>
                 {selectedEmployee && (
                     <Descriptions column={2} size="small">
                         {/* Hình ảnh */}
@@ -471,21 +422,21 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             {selectedEmployee.EmployeeID}
                         </Descriptions.Item>
                         <Descriptions.Item label="Chức Danh">
-                            {selectedEmployee.Position}
+                            {selectedEmployee.JobTitle}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Họ và Tên">
                             {selectedEmployee.FullName}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Ngày Bắt Đầu">
-                            {selectedEmployee.StartDate ? dayjs(selectedEmployee.StartDate).format("DD-MM-YYYY") : ""}
+                        <Descriptions.Item label="Chức vụ">
+                            {selectedEmployee.Position}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Ngày Sinh">
                             {selectedEmployee.DateOfBirth ? dayjs(selectedEmployee.DateOfBirth).format("DD-MM-YYYY") : ""}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Trạng Thái">
-                            {employeecontracts.find((emct) => emct.EmployeeID === selectedEmployee.EmployeeID)?.Status === "Hoạt động" ? "Đang làm việc" : "Đã nghỉ việc"}
+                        <Descriptions.Item label="Ngày Bắt Đầu">
+                            {selectedEmployee.StartDate ? dayjs(selectedEmployee.StartDate).format("DD-MM-YYYY") : ""}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Số Điện Thoại">
@@ -502,8 +453,37 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             {selectedEmployee.WorkEmail}
                         </Descriptions.Item>
 
+                        <Descriptions.Item label="Trạng Thái">
+                            {employeecontracts.find((emct) => emct.EmployeeID === selectedEmployee.EmployeeID)?.Status}
+                        </Descriptions.Item>
                     </Descriptions>
                 )}
+            </Modal>
+
+            {/* Tạo tài khoản người dùng */}
+            <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Tạo Tài Khoản Người Dùng</div>} open={isCreateModalOpen} onCancel={() => setIsCreateModalOpen(false)} onOk={async () => { await createUser(); setIsCreateModalOpen(false); }} centered>
+                <Input
+                    placeholder="Nhập Username"
+                    value={newUser.UserName}
+                    onChange={(e) => setNewUser({ ...newUser, UserName: e.target.value })}
+                    style={{ marginBottom: "10px" }}
+                />
+                <Input.Password
+                    placeholder="Nhập Password"
+                    value={newUser.Password}
+                    onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
+                    style={{ marginBottom: "10px" }}
+                />
+                <Select
+                    value={newUser.Role}
+                    onChange={(value) => setNewUser({ ...newUser, Role: value })}
+                    style={{ width: "100%" }}
+                >
+                    <Select.Option value="Admin">Admin</Select.Option>
+                    <Select.Option value="Employee">Employee</Select.Option>
+                    <Select.Option value="Manager">Manager</Select.Option>
+                    <Select.Option value="Director">Director</Select.Option>
+                </Select>
             </Modal>
 
             {/* Chỉnh sửa */}
@@ -545,7 +525,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                         <Select>
                             <Select.Option value='Nam'>Nam</Select.Option>
                             <Select.Option value='Nữ'>Nữ</Select.Option>
-                            <Select.Option value='Khác'>Khác</Select.Option>
                         </Select>
                     </Form.Item>
                     <Form.Item label='Địa chỉ' name='Address'>
@@ -564,7 +543,10 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label='Chức danh' name='Position'>
+                    <Form.Item label='Chức danh' name='JobTitle'>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label='Chức vụ' name='Position'>
                         <Input />
                     </Form.Item>
                     <Form.Item label='Ngày bắt đầu' name='StartDate'>
@@ -612,7 +594,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                         <Select>
                             <Select.Option value='Nam'>Nam</Select.Option>
                             <Select.Option value='Nữ'>Nữ</Select.Option>
-                            <Select.Option value='Khác'>Khác</Select.Option>
                         </Select>
                     </Form.Item>
                     <Form.Item label='Địa chỉ' name='Address'>
@@ -631,7 +612,10 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label='Chức danh' name='Position'>
+                    <Form.Item label='Chức danh' name='JobTitle'>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label='Chức vụ' name='Position'>
                         <Input />
                     </Form.Item>
                     <Form.Item label='Ngày bắt đầu' name='StartDate'>

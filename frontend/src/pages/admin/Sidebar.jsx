@@ -4,7 +4,7 @@ import {
     TeamOutlined,
     ReconciliationOutlined,
     WalletOutlined,
-    AccountBookOutlined,
+    DollarOutlined,
     CarryOutOutlined,
     ClusterOutlined,
     SolutionOutlined,
@@ -68,7 +68,7 @@ const Sidebar = ({ collapsed, onLogout }) => {
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="base" title={!collapsed ? 'Base.vn' : null}>
                     {getItem('employees', <TeamOutlined />, 'Danh sách nhân sự')}
                     {getItem('contracts', <CarryOutOutlined />, 'Hợp đồng lao động')}
-                    {getItem('periodicsalaries', <AccountBookOutlined />, 'Bảng lương định kỳ')}
+                    {getItem('periodicsalaries', <DollarOutlined />, 'Bảng lương định kỳ')}
                     {getItem('humanreports', <ReconciliationOutlined />, 'Báo cáo nhân sự')}
                 </Menu.ItemGroup>
 

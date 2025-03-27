@@ -15,12 +15,12 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const [payrollcycles, setPayrollCycles] = useState([]);
     const [jobprofiles, setJobProfiles] = useState([]);
     const [activeKey, setActiveKey] = useState(() => {
-        return localStorage.getItem("activeKey") || "1";
+        return localStorage.getItem('activeKey') || '1';
     });
 
     const token = localStorage.getItem('token');
     useEffect(() => {
-        localStorage.setItem("activeKey", activeKey);
+        localStorage.setItem('activeKey', activeKey);
     }, [activeKey]);
 
     useEffect(() => {
@@ -39,7 +39,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchUsers = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/users', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setUsers(response.data);
         } catch (error) {
@@ -50,7 +50,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchOverTimes = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/overtimes', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setOvertimes(response.data);
         } catch (error) {
@@ -61,7 +61,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchEmployeeContracts = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/employeecontracts', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setEmployeecontracts(response.data);
         } catch (error) {
@@ -74,8 +74,8 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
             const url = 'http://localhost:5000/api/admin/departments';
             const response = await axios.get(url, {
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
             });
             setDepartments(response.data);
@@ -87,7 +87,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchMonthlySalaries = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/monthlysalaries', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setMonthlySalaries(response.data);
         } catch (error) {
@@ -98,7 +98,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchPayrollCycles = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/payrollcycles', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setPayrollCycles(response.data);
         } catch (error) {
@@ -109,7 +109,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchFamilyMembers = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/familymembers', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setFamilyMembers(response.data);
         } catch (error) {
@@ -120,7 +120,7 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
     const fetchJobProfiles = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/jobprofiles', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setJobProfiles(response.data);
         } catch (error) {
@@ -135,9 +135,9 @@ const EmployeeList = ({ employees, fetchEmployees }) => {
                 activeKey={activeKey}
                 onChange={setActiveKey}
                 items={[
-                    { key: '1', label: 'TỔNG QUAN', children: <General onClick={() => setActiveKey("1")} departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
-                    { key: '2', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey("2")} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },
-                    { key: '3', label: 'DANH SÁCH PHỤ THUỘC', children: <DependentList /> },
+                    { key: '1', label: 'TỔNG QUAN', children: <General onClick={() => setActiveKey('1')} departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
+                    { key: '2', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey('2')} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },
+                    { key: '3', label: 'DANH SÁCH PHỤ THUỘC', children: <DependentList employees={employees} familyMembers={familyMembers} fetchFamilyMembers={fetchFamilyMembers} /> },
                 ]}
             />
         </div>

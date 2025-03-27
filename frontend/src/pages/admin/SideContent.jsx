@@ -19,31 +19,6 @@ const SideContent = ({ nowContracts, expiringContracts }) => {
                     </tr>
                 </table>
             </Card>
-
-            <Menu
-                mode='inline'
-                defaultOpenKeys={['sub1']}
-                // onClick={(e) => onSelectMenu(e.key)}
-                className='menu-sidebar'
-                items={[
-                    {
-                        key: '1',
-                        label: 'Hợp đồng hiện tại',
-                    },
-                    {
-                        key: '2',
-                        label: 'Hợp đồng đã qua',
-                    },
-                    {
-                        key: '3',
-                        label: 'Hợp đồng thử việc',
-                    },
-                    {
-                        key: '4',
-                        label: 'Hợp đồng sắp hết hạn',
-                    }
-                ]}
-            />
         </Flex>
     )
 }
