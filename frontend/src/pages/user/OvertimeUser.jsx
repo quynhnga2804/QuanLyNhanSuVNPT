@@ -14,7 +14,7 @@ dayjs.extend(isSameOrBefore);
 const { TextArea } = Input;
 const { Option } = Select;
 
-const OvertimeUser = () => {
+const OvertimeUser = ({employeeinfo}) => {
     const [overtimeUser, setOvertimeUser] = useState([]);
     const [latestPayrollCycle, setLatestPayrollCycle] = useState(null);
     const [managerList, setManagerList] = useState([]);
@@ -33,16 +33,18 @@ const OvertimeUser = () => {
     const uniqueStatus = [...new Set(mappedOvertimeData.map(ov => ov.Status))];
 
     const handleAddNew = () => {
-        if (overtimeUser.length > 0) { 
+        // if (overtimeUser.length > 0) { 
             addForm.setFieldsValue({
-                employeeId: overtimeUser[0].EmployeeID,
-                fullname: overtimeUser[0].Employee?.FullName || '',
+                employeeId: employeeinfo?.EmployeeID,
+                fullname: employeeinfo?.FullName,
+                // employeeId: overtimeUser[0].EmployeeID,
+                // fullname: overtimeUser[0].Employee?.FullName || '',
                 payroll: latestPayrollCycle.PayrollName,
                 payrollID: latestPayrollCycle.ID_PayrollCycle,
                 company: 'VNPT Nghệ An',
                 status: 'Chờ duyệt',
             });
-        }
+        // }
         setIsAddModalOpen(true);
     };
 
@@ -55,14 +57,14 @@ const OvertimeUser = () => {
     // });
 
     const handleAddCancel = () => {
-        Modal.confirm({
-            title: 'Xác nhận hủy?',
-            content: 'Mọi thông tin bạn đã nhập sẽ bị xoá.',
-            onOk: () => {
+        // Modal.confirm({
+        //     title: 'Xác nhận hủy?',
+        //     content: 'Mọi thông tin bạn đã nhập sẽ bị xoá.',
+        //     onOk: () => {
                 setIsAddModalOpen(false);
                 addForm.resetFields();
-            },
-        });
+        //     },
+        // });
     };
 
     const showModal = (record) => {
@@ -99,8 +101,7 @@ const OvertimeUser = () => {
             });
             setOvertimeUser(response.data);
         } catch (error) {
-            console.log("Lỗi khi lấy dữ liệu tăng ca: ", error);
-            message.error("Không lấy được dữ liệu tăng ca!");
+            // message.error("Không lấy được dữ liệu tăng ca!");
         }
     };
 

@@ -86,13 +86,7 @@ const PersonalProfile = sequelize.define('PersonalProfile', {
   },
   InsurancesNumber: {
     type: DataTypes.STRING(10),
-    allowNull: false,
-    references: {
-      model: 'insurances', 
-      key: 'InsurancesNumber',
-    },
-    onDelete: 'CASCADE', 
-    onUpdate: 'CASCADE', 
+    allowNull: true, 
   },
   Nationality: {
     type: DataTypes.STRING(50),

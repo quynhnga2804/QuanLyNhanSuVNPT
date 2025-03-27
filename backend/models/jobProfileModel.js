@@ -15,10 +15,6 @@ const JobProfile = sequelize.define('JobProfile', {
     type: INTEGER,
     allowNull: true,
   },
-  EmployeesType: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-  },
   RemainingLeaveDays: {
     type: INTEGER,
     allowNull: true,
@@ -29,14 +25,6 @@ const JobProfile = sequelize.define('JobProfile', {
   },
   EmergencyContactName: {
     type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  ResignationsDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  ResignationsReason: {
-    type: DataTypes.TEXT,
     allowNull: true,
   },
   BaseSalary: {

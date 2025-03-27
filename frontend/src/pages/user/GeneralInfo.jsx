@@ -17,8 +17,10 @@ const GeneralInfo = () => {
     };
 
     return (
-        <div style={{ width: '100%', overflowX: 'auto' }}>
+        <div className='ant-layout' style={{ width: '100%'}}>
+            <div style={{position: 'fixed', zIndex: 1000}}>
             <Tabs
+                style={{position: 'fixed', width: '100%'}}
                 className='menu-horizontal'
                 activeKey={activeKey}
                 onChange={handleChange}
@@ -27,9 +29,11 @@ const GeneralInfo = () => {
                     { key: '2', label: 'HỢP ĐỒNG' },
                 ]}
             />
-            <div style={{ marginTop: 0 }}>
-                <Outlet /> {/* chỗ này render nội dung tab tương ứng */}
             </div>
+            <div style={{ marginTop: '4rem' }}>
+                <Outlet /> 
+            </div>
+            
         </div>
     );
 };

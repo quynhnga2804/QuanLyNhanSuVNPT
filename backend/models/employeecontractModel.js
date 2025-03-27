@@ -2,9 +2,13 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const EmployeeContract = sequelize.define('EmployeeContract', {
-  ID_Contract: {
+  employcontractID: {
     type: DataTypes.INTEGER,
     primaryKey: true,
+    allowNull: false,
+  },
+  ID_Contract: {
+    type: DataTypes.STRING(10), 
     allowNull: false,
     references: {
       model: 'laborcontracts',
@@ -21,18 +25,14 @@ const EmployeeContract = sequelize.define('EmployeeContract', {
   },
   StartDate: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true, 
   },
   EndDate: {
     type: DataTypes.DATE,
     allowNull: true,
   },
-  Status: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-  },
 }, {
-  tableName: 'employeescontracts',
+  tableName: 'employeescontracts', 
   timestamps: false,
 });
 

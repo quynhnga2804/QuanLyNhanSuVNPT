@@ -20,7 +20,7 @@ const ChangePasswordModal = ({ visible, onClose }) => {
 
     const sendOTP = async () => {
         try {
-            await form.validateFields(["oldPassword", "newPassword", "confirmPassword"]); // Kiểm tra hợp lệ
+            await form.validateFields(["oldPassword", "newPassword", "confirmPassword"]); 
 
             const token = localStorage.getItem("token");
             if (!token) {
@@ -30,13 +30,13 @@ const ChangePasswordModal = ({ visible, onClose }) => {
 
             await axios.post(
                 "http://localhost:5000/api/user/send-otp",
-                { oldPassword: form.getFieldValue("oldPassword") }, // Chỉ gửi mật khẩu cũ để kiểm tra trước
+                { oldPassword: form.getFieldValue("oldPassword") },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
             message.success("OTP đã được gửi! Hãy kiểm tra email của bạn!");
             setOtpSent(true);
-            setFieldsDisabled(true); // Khóa các trường mật khẩu sau khi gửi OTP
+            setFieldsDisabled(true); 
             startCountdown();
         } catch (error) {
             message.error(error.response?.data?.message || "Lỗi khi gửi OTP");

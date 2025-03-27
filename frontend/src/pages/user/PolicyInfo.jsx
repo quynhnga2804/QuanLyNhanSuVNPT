@@ -19,7 +19,8 @@ const PolicyInfo = () => {
     };
 
     return (
-        <div style={{ width: '100%', overflowX: 'auto' }}>
+        <div className='ant-layout' style={{ width: '100%', overflowX: 'auto' }}>
+            <div style={{position: 'fixed', zIndex: 1000, width: '100%'}}>
             <Tabs
                 className='menu-horizontal'
                 activeKey={activeKey}
@@ -30,8 +31,9 @@ const PolicyInfo = () => {
                     { key: '3', label: 'CHÍNH SÁCH NHÂN SỰ' },
                 ]}
             />
-            <div style={{ marginTop: 0 }}>
-                <Outlet /> {/* chỗ này render nội dung tab tương ứng */}
+            </div>
+            <div style={{ marginTop: '30px' }}>
+                <Outlet /> 
             </div>
         </div>
     );

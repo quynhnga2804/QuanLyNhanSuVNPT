@@ -37,11 +37,11 @@ const Overtime = sequelize.define('Overtime', {
   },
   Status: {
     type: DataTypes.STRING(20),
-    allowNull: true,
+    allowNull: false,
   },
   ID_PayrollCycle: {
     type: DataTypes.STRING(10),
-    allowNull: true,
+    allowNull: false,
     references: {
       model: 'payrollcycles',
       key: 'ID_PayrollCycle',

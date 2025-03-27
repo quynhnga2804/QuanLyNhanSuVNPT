@@ -1,14 +1,10 @@
 import { Flex, Image, Menu, Input, Avatar, Tooltip} from 'antd';
-// import Search from 'antd/es/transfer/search';
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     TeamOutlined,
-    ProfileOutlined,
-    ContactsOutlined,
     ClockCircleOutlined,
     FieldTimeOutlined,
-    CalendarOutlined,
     DollarOutlined,
     BookOutlined ,
     LogoutOutlined
@@ -18,7 +14,7 @@ import logo from '../../assets/images/logo.png';
 const { Search } = Input;
 
 const SidebarUser = ({collapsed}) => {
-    const navigate = useNavigate(); // Hook điều hướng
+    const navigate = useNavigate(); 
     const location = useLocation();
 
     const selectedKey = location.pathname.split('/')[2] || 'generalinfo';
@@ -27,9 +23,9 @@ const SidebarUser = ({collapsed}) => {
         if (e.key === 'logout') {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            navigate('/login'); // Chuyển hướng đến trang đăng nhập
+            navigate('/login');
         } else {
-            navigate(`/user/${e.key}`); // Điều hướng đến trang tương ứng
+            navigate(`/user/${e.key}`); 
         }
     };
 

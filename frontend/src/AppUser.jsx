@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Flex, Layout, } from 'antd';
+import { Button, Flex, Layout, Affix, message } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { UserContext } from './api/api.jsx';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
@@ -66,9 +66,10 @@ const AppUser = () => {
             headers: { Authorization: `Bearer ${token}` },
         });
         setMonthlySalaryUser(response.data);
+        console.log('lương: ', response.data);
     } catch (error) {
         console.log("Lỗi khi lấy dữ liệu lương: ", error);
-        message.error("Không lấy được dữ liệu lương!");
+        // message.error("Không lấy được dữ liệu lương!");
     }
   };
 
@@ -82,7 +83,7 @@ const AppUser = () => {
         setContractUsers(contractData);
     } catch (error) {
       console.log("Lỗi khi lấy dữ liệu hợp đồng: ", error);
-      message.error("Không lấy được dữ liệu hợp đồng!");
+      // message.error("Không lấy được dữ liệu hợp đồng!");
   }
   };
 
@@ -107,24 +108,29 @@ const AppUser = () => {
         </Sider>
 
         <Layout>
-          <Header className="header" >
+          {/* <Header className="header" >
             <HeaderUser employeeinfo={employeeinfo} />
-          </Header>
+          </Header> */}
+          <Affix offsetTop={0} style={{ width: '100%', zIndex: 1000 }}>
+    <Header className="header" style={{ background: '#ffffff', boxShadow: '0px 4px 6px rgba(0,0,0,0.1)' }}>
+      <HeaderUser employeeinfo={employeeinfo} />
+    </Header>
+  </Affix>
 
           <Content className="content">
             <Flex gap="large">
               <Routes>
                 <Route path="/" element={<Navigate to="home" replace />} />
                 <Route path="/generalinfo" element={<GeneralInfo />}>
-                  <Route path="profile" element={<EmployeeProfile employeeinfo={employeeinfo}/>} />
+                  <Route path="profile" element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers}/>} />
                   <Route path="contracts" element={<ContractUser contractUsers={contractUsers} />} />
-                  <Route index element={<EmployeeProfile employeeinfo={employeeinfo} />} />
+                  <Route index element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
                 </Route>
                 <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers}/>} />
                 <Route path="notifications" element={<NotificationListUser />} />
                 <Route path="generalinfo" element={<GeneralInfo />} />
                 <Route path='attendances' element={<AttendanceUser/>} />
-                <Route path='overtimes' element={<OvertimeUser/>} />
+                <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo}/>} />
                 <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
                 <Route path="/policyinfo" element={<PolicyInfo />}>
                   <Route path="salary-policy" element={<SalaryPolicy />} />

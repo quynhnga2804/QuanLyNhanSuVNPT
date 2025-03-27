@@ -12,12 +12,12 @@ const { hash } = require("../utils/passwordUtils");
 const MonthlySalary = require('../models/monthlysalaryModel');
 const PayrollCycle = require('../models/payrollCycleModel');
 const JobProfile = require('../models/jobProfileModel');
-const LaborContract = require('../models/laborContractModel');
+const LaborContract = require('../models/laborcontractModel');
 const Overtime = require('../models/overtimeModel');
 const FamilyMember = require('../models/familyMemberModel');
 const Attendance = require('../models/attendanceModel');
 const Notification = require('../models/notificationModel');
-const UserNotification = require('../models/usernotificationModel');
+const UserNotification = require('../models/userNotificationModel');
 
 const modelMap = {
   department: Department,
