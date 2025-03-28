@@ -13,6 +13,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
     const [editingFamilyMember, setEditingFamilyMember] = useState(null);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     const handleEdit = (record) => {
         setEditingFamilyMember(record);
@@ -144,7 +145,10 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
             dataIndex: 'PhoneNumber',
             align: 'left',
         },
-        {
+    ];
+
+    if (role !== 'Accountant') {
+        columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
             fixed: 'right',
@@ -156,8 +160,8 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
                     <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
                 </>
             ),
-        }
-    ];
+        });
+    }
 
     const handleSearch = debounce((value) => {
         setSearchQuery(value.toLowerCase());
@@ -183,12 +187,14 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
                             onChange={(e) => handleSearch(e.target.value)}
                         />
                     </Space>
-
-                    <Button type='primary' onClick={handleAddNew}>
-                        <Space>
-                            Tạo mới <UserAddOutlined />
-                        </Space>
-                    </Button>
+                    
+                    {role !== 'Accountant' && (
+                        <Button type='primary' onClick={handleAddNew}>
+                            <Space>
+                                Tạo mới <UserAddOutlined />
+                            </Space>
+                        </Button>
+                    )}
                 </Flex>
             </Flex>
 

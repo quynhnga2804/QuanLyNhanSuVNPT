@@ -14,6 +14,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
     const [addForm] = Form.useForm();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editForm] = Form.useForm();
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     const filteredPayrollCycles = monthlysalaries.filter(mont => {
         const employee = employees.find(emp => emp.EmployeeID === mont.EmployeeID);
@@ -80,7 +81,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         {
             title: 'BẢO HIỂM',
             dataIndex: 'InsuranceFee',
-            minWidth: 70,
+            minWidth: 72,
             align: 'right',
             filterSearch: true,
             render: (value) => new Intl.NumberFormat('vi-VN').format(value),
@@ -128,7 +129,10 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             align: 'right',
             render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
-        {
+    ].filter(col => col.dataIndex !== 'ID_Salary');
+
+    if (role !== 'Director' && role !== 'Admin') {
+        columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
             fixed: 'right',
@@ -140,8 +144,8 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                     <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '40px' }}><DeleteOutlined /></Button>
                 </>
             ),
-        }
-    ].filter(col => col.dataIndex !== 'ID_Salary');
+        });
+    }
 
     const handleAddCancel = () => {
         setIsAddModalOpen(false);
@@ -280,7 +284,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
         }
     };
-    
+
     const handleEditCancel = () => {
         setIsEditModalOpen(false);
         editForm.resetFields();
@@ -371,11 +375,13 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                         />
                     </Space>
 
-                    <Button type='primary' onClick={handleAddNew}>
-                        <Space>
-                            Tạo mới <UserAddOutlined />
-                        </Space>
-                    </Button>
+                    {role !== 'Admin' && role !== 'Director' && (
+                        <Button type='primary' onClick={handleAddNew}>
+                            <Space>
+                                Tạo mới <UserAddOutlined />
+                            </Space>
+                        </Button>
+                    )}
                 </Flex>
             </Flex>
 
@@ -410,11 +416,11 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                     <Form.Item label='Chu kỳ lương' name='ID_PayrollCycle' rules={[{ required: true, message: 'Vui lòng chọn chu kỳ lương!' }]}>
                         <Select placeholder="Chọn chu kỳ lương" onChange={handlePayrollCycleChange}>
                             {payrollcycles.filter(payroll => payroll.Status.toLowerCase() === 'đang xử lý')
-                            .map(payroll => (
-                                <Select.Option key={payroll.ID_PayrollCycle} value={payroll.ID_PayrollCycle}>
-                                    {payroll.PayrollName} ({payroll.ID_PayrollCycle})
-                                </Select.Option>
-                            ))}
+                                .map(payroll => (
+                                    <Select.Option key={payroll.ID_PayrollCycle} value={payroll.ID_PayrollCycle}>
+                                        {payroll.PayrollName} ({payroll.ID_PayrollCycle})
+                                    </Select.Option>
+                                ))}
                         </Select>
                     </Form.Item>
 

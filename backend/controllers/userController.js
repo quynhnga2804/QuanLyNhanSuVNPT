@@ -36,7 +36,7 @@ const otpStorage = {};
 
 // Hàm tìm EmployeeID theo email và kiểm tra quyền truy cập
 const getEmployeeIDByEmail = async (email, role) => {
-    if (role !== 'Admin' || role !== 'Director' || role !== 'Manager' || role !== 'Accountant' || role !== 'Employee') {
+    if (!['Admin', 'Director', 'Manager', 'Accountant', 'Employee'].includes(role)) {
         throw new Error("Bạn không có quyền truy cập!");
     }
 

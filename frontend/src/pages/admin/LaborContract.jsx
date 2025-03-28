@@ -1,5 +1,5 @@
 import { Button, message, Descriptions, Form, Modal, Select, Input, Dropdown, Flex, Space, Table, Typography } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CaretDownOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import SideContent from './SideContent';
 import Search from 'antd/es/transfer/search';
@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontracts, employees, jobprofiles }) => {
+const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontracts, employees, jobprofiles, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const today = new Date();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -20,6 +20,9 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
     const [endDateDisabled, setEndDateDisabled] = useState(true);
     const [selectedEmployeeContract, setSelectedEmployeeContract] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
+    const role = JSON.parse(localStorage.getItem('user')).role;
+    const workEmail = JSON.parse(localStorage.getItem('user')).email;
+    const [newEmployees, setNewEmployees] = useState([]);
 
     const expiringContracts = employeecontracts.filter(emp => {
         if (!emp.EndDate) return false;
@@ -28,6 +31,7 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
         return daysLeft <= 30 && daysLeft > 0;
     });
     const nowContracts = employeecontracts.filter(emp => !emp.EndDate || new Date(emp.EndDate) >= today);
+
     const mergedContracts = employeecontracts.map(emp => {
         const contract = laborcontracts.find(lc => lc.ID_Contract === emp.ID_Contract);
         return {
@@ -69,11 +73,6 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
     const handleSearch = debounce((value) => {
         setSearchQuery(value.toLowerCase());
     }, 500);
-
-    const filteredEmployeeContracts = mergedContracts.filter(emp =>
-        emp.ContractType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employees.find(e => e.EmployeeID === emp.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
 
     const handleAddNew = () => {
         setIsAddModalOpen(true);
@@ -165,7 +164,7 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
                         headers: { Authorization: `Bearer ${token}` },
                     });
                     message.success(`Xóa hợp đồng của ${record.EmployeeID} thành công!`);
-                    fetchEmployees();
+                    fetchEmployeeContracts();
                 } catch (error) {
                     message.error('Xóa thất bại, vui lòng thử lại.');
                 }
@@ -182,6 +181,23 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
         setIsShowModalOpen(false);
         setSelectedEmployeeContract(null);
     };
+
+    // useEffect(() => {
+    //     if (role === 'Manager') {
+    //         const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
+    //         const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+
+    //         const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
+    //         const filtered = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
+    //         setNewEmployees(filtered);
+    //     }
+    // }, [role, employees, departments, workEmail]);
+
+    const dataSource = role === 'Manager' && newEmployees.length > 0 ? newEmployees : employees;
+    const filteredEmployeeContracts = mergedContracts.filter(emp =>
+        emp.ContractType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dataSource.find(e => e.EmployeeID === emp.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const columns = [
         {
@@ -393,7 +409,7 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
                 <Form form={addForm} layout='vertical'>
                     <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
                         <Select>
-                            {employees.map(emp => (
+                            {dataSource.map(emp => (
                                 <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
                                     ({emp.EmployeeID}) {emp.FullName}
                                 </Select.Option>
@@ -460,7 +476,7 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Họ và Tên">
-                            {employees.find(emp => emp.EmployeeID === selectedEmployeeContract.EmployeeID).FullName}
+                            {dataSource.find(emp => emp.EmployeeID === selectedEmployeeContract.EmployeeID).FullName}
                         </Descriptions.Item>
                         <Descriptions.Item label="Ngày kết thúc">
                             {selectedEmployeeContract.EndDate || 'Không thời hạn'}

@@ -62,7 +62,7 @@ const upload = multer({ storage });
 // Lấy tất cả bản ghi
 const getAll = async (req, res) => {
   try {
-    if (req.user.role !== 'Admin' || req.user.role !== 'Director' || req.user.role !== 'Manager' || req.user.role !== 'Accountant')
+    if (!['Admin', 'Director', 'Manager', 'Accountant'].includes(req.user.role))
       return res.status(403).json({ message: 'Bạn không có quyền truy cập!' });
 
     const Model = modelMap[req.params.model];
@@ -93,6 +93,9 @@ const getById = async (req, res) => {
 // Thêm mới
 const create = async (req, res) => {
   try {
+    if (!['Admin', 'Director', 'Manager', 'Accountant'].includes(req.user.role))
+      throw new Error("Bạn không có quyền truy cập!");
+
     const Model = modelMap[req.params.model];
     if (!Model) return res.status(400).json({ message: `Model '${req.params.model}' không hợp lệ` });
 
@@ -116,8 +119,8 @@ const create = async (req, res) => {
 // Thêm mới tài khoản người dùng
 const createUser = async (req, res) => {
   try {
-    if (req.user.role !== 'Admin')
-      return res.status(403).json({ message: "Bạn không có quyền tạo tài khoản!" });
+    if (!['Admin', 'Director'].includes(req.user.role))
+      throw new Error("Bạn không có quyền truy cập!");
 
     const { WorkEmail, UserName, Password, Role } = req.body;
     if (!WorkEmail || !UserName || !Password || !Role) {
@@ -161,8 +164,8 @@ const createUser = async (req, res) => {
 // Xóa tài khoản người dùng
 const deleteUser = async (req, res) => {
   try {
-    if (req.user.role !== 'Admin')
-      return res.status(403).json({ message: "Bạn không có quyền tạo tài khoản!" });
+    if (!['Admin', 'Director'].includes(req.user.role))
+      throw new Error("Bạn không có quyền truy cập!");
 
     const { email } = req.params;
     const user = await User.findOne({ where: { WorkEmail: email } });

@@ -5,10 +5,9 @@ import General from './General';
 import Benefit_Salary from './Benefit_Salary';
 import DependentList from './DependentList';
 
-const EmployeeList = ({ employees, fetchEmployees, role }) => {
+const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments }) => {
     const [users, setUsers] = useState([]);
     const [overtimes, setOvertimes] = useState([]);
-    const [departments, setDepartments] = useState([]);
     const [employeecontracts, setEmployeecontracts] = useState([]);
     const [familyMembers, setFamilyMembers] = useState([]);
     const [monthlysalaries, setMonthlySalaries] = useState([]);
@@ -17,6 +16,7 @@ const EmployeeList = ({ employees, fetchEmployees, role }) => {
     const [activeKey, setActiveKey] = useState(() => {
         return localStorage.getItem('activeKey') || '1';
     });
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     const token = localStorage.getItem('token');
 
@@ -67,21 +67,6 @@ const EmployeeList = ({ employees, fetchEmployees, role }) => {
             setEmployeecontracts(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách hợp đồng nhân viên:', error);
-        }
-    };
-
-    const fetchDepartments = async () => {
-        try {
-            const url = 'http://localhost:5000/api/admin/departments';
-            const response = await axios.get(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-            });
-            setDepartments(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy danh sách phòng ban:', error);
         }
     };
 
@@ -136,8 +121,11 @@ const EmployeeList = ({ employees, fetchEmployees, role }) => {
                 activeKey={activeKey}
                 onChange={setActiveKey}
                 items={[
+                    role !== 'Accountant' &&
                     { key: '1', label: 'TỔNG QUAN', children: <General onClick={() => setActiveKey('1')} departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
+                    role !== 'Manager' &&
                     { key: '2', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey('2')} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },
+                    role !== 'Manager' &&
                     { key: '3', label: 'DANH SÁCH PHỤ THUỘC', children: <DependentList employees={employees} familyMembers={familyMembers} fetchFamilyMembers={fetchFamilyMembers} /> },
                 ]}
             />

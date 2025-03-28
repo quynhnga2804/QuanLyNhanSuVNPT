@@ -1,21 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Avatar, Badge, Flex, Affix, Dropdown, Menu } from "antd";
-import { BellOutlined, UserOutlined, LogoutOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
-import { useNavigate, useLocation } from "react-router-dom";
-import ChangePasswordModal from "./ChangePasswordModal"; 
+import { BellOutlined, UserOutlined, LogoutOutlined, LockOutlined, HomeOutlined, TeamOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import ChangePasswordModal from "./ChangePasswordModal";
 import { NotificationContext } from "./NotificationContext";
 import axios from "axios";
 
-const HeaderUser = ({employeeinfo}) => {
+const HeaderUser = ({ employeeinfo }) => {
     const navigate = useNavigate();
-    const location = useLocation();
-    // const { username } = location.state || {}; // Đề phòng undefined
-    const [username, setUserName] = useState(localStorage.getItem("username") || "");
+    const username = localStorage.getItem("username") || "";
     const [isModalVisible, setModalVisible] = useState(false);
-    // const [employeeinfo, setemployeeinfo] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [imageUrl, setImageUrl] = useState(null);
-    const { unreadCount} = useContext(NotificationContext);
+    const { unreadCount } = useContext(NotificationContext);
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     const handleMenuClick = ({ key }) => {
         if (key === "profile") {
@@ -57,31 +54,39 @@ const HeaderUser = ({employeeinfo}) => {
             onClick={handleMenuClick}
             items={[
                 {
-                    key: "profile", icon: <UserOutlined />,
+                    key: "profile",
+                    icon: <UserOutlined />,
                     label: "Thông tin nhân viên",
                 },
+                role !== "Employee" && {
+                    key: "admin/home",
+                    icon: <TeamOutlined />,
+                    label: "Quản lý nhân sự",
+                    onClick: () => navigate("../admin/employees"),
+                },
                 {
-                    key: "change-password", icon: <LockOutlined />,
+                    key: "change-password",
+                    icon: <LockOutlined />,
                     label: "Đổi mật khẩu",
                 },
-                { type: "divider" }, // Thay cho <Menu.Divider />
+                { type: "divider" },
                 {
-                    key: "logout", icon: <LogoutOutlined />,
+                    key: "logout",
+                    icon: <LogoutOutlined />,
                     label: "Đăng xuất",
                     danger: true,
                 },
             ]}
         />
-
     );
 
     return (
         // <div className="fixed-header">
-            <Affix offsetTop={0} style={{ width: '100%' }}>
+        <Affix offsetTop={0} style={{ width: '100%' }}>
             <Flex align="center" justify="end">
                 {/* <Typography.Title level={4} type="secondary"> </Typography.Title> */}
 
-                <Flex align="center" gap="3rem" style={{ paddingBottom:'20px' }}>
+                <Flex align="center" gap="3rem" style={{ paddingBottom: '20px' }}>
                     <Flex align="center" gap="5px" onClick={() => navigate('/user/home')} style={{ cursor: 'pointer' }}>
                         <HomeOutlined className="header-icon" style={{ fontSize: '18px' }} />
                         <p style={{ margin: 0, lineHeight: '1' }}>Trang chủ</p>
@@ -96,7 +101,7 @@ const HeaderUser = ({employeeinfo}) => {
 
                     <Dropdown overlay={menu} trigger={["click"]}>
                         <Flex align="center" gap="5px" style={{ cursor: "pointer" }}>
-                            <Avatar src={imageUrl} size={40} style={{ border: '2px solid #ddd', margin:'3px 0' }} />
+                            <Avatar src={imageUrl} size={40} style={{ border: '2px solid #ddd', margin: '3px 0' }} />
                             <p style={{ margin: 0, lineHeight: "1" }}>{username || "TÀI KHOẢN"}</p>
                         </Flex>
                     </Dropdown>
@@ -105,7 +110,7 @@ const HeaderUser = ({employeeinfo}) => {
 
             {/* Hiển thị modal đổi mật khẩu */}
             <ChangePasswordModal visible={isModalVisible} onClose={() => setModalVisible(false)} />
-            </Affix>
+        </Affix>
         // </div>
     );
 };

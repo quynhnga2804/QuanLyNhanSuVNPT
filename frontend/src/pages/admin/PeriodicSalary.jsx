@@ -114,11 +114,6 @@ const PeriodicSalary = () => {
                                 </div>
                             ),
                         },
-                        {
-                            key: '4',
-                            label: 'BÁO CÁO',
-                            children: 'Nội dung cho tab BÁO CÁO',
-                        },
                     ]}
                 />
             </div>

@@ -21,6 +21,7 @@ import PolicyInfo from './pages/user/PolicyInfo.jsx';
 import HRPolicy from './pages/admin/HRPolicy.jsx';
 import BenifitPolicy from './pages/admin/BenifitPolicy.jsx';
 import SalaryPolicy from './pages/admin/SalaryPolicy.jsx';
+import EmployeeList from './pages/admin/EmployeeList.jsx';
 const { Sider, Content, Header } = Layout;
 
 const AppUser = () => {
@@ -42,9 +43,9 @@ const AppUser = () => {
 
   useEffect(() => {
     if (!token) {
-        navigate('/login');
-    } 
-}, []);
+      navigate('/login');
+    }
+  }, []);
 
   const fetchEmployeeInfo = async () => {
     try {
@@ -59,29 +60,27 @@ const AppUser = () => {
 
   const fetchMonthlySalaryUser = async () => {
     try {
-        const response = await axios.get('http://localhost:5000/api/user/monthlysalaries', {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        setMonthlySalaryUser(response.data);
-        console.log('lương: ', response.data);
+      const response = await axios.get('http://localhost:5000/api/user/monthlysalaries', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMonthlySalaryUser(response.data);
+      console.log('lương: ', response.data);
     } catch (error) {
-        console.log("Lỗi khi lấy dữ liệu lương: ", error);
-        // message.error("Không lấy được dữ liệu lương!");
+      console.log("Lỗi khi lấy dữ liệu lương: ", error);
     }
   };
 
   const fetchContractUser = async () => {
     try {
-        const contractResponse = await fetch("http://localhost:5000/api/user/contractinfo", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const contractData = await contractResponse.json();
-        if (!contractResponse.ok) throw new Error(contractData.message);
-        setContractUsers(contractData);
+      const contractResponse = await fetch("http://localhost:5000/api/user/contractinfo", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const contractData = await contractResponse.json();
+      if (!contractResponse.ok) throw new Error(contractData.message);
+      setContractUsers(contractData);
     } catch (error) {
       console.log("Lỗi khi lấy dữ liệu hợp đồng: ", error);
-      // message.error("Không lấy được dữ liệu hợp đồng!");
-  }
+    }
   };
 
   const handleLogout = () => {
@@ -94,7 +93,7 @@ const AppUser = () => {
   return (
     <NotificationProvider>
       <Layout className="userLayout" style={{ minHeight: '100vh' }}>
-      <Sider theme="light" trigger={null} collapsible collapsed={collapsed} width={220} collapsedWidth={60} className="sider" >
+        <Sider theme="light" trigger={null} collapsible collapsed={collapsed} width={220} collapsedWidth={60} className="sider" >
           <Sidebar onLogout={handleLogout} collapsed={collapsed} />
           <Button
             type="text"
@@ -105,36 +104,38 @@ const AppUser = () => {
         </Sider>
 
         <Layout>
-          {/* <Header className="header" >
-            <HeaderUser employeeinfo={employeeinfo} />
-          </Header> */}
           <Affix offsetTop={0} style={{ width: '100%', zIndex: 1000 }}>
-    <Header className="header" style={{ background: '#ffffff', boxShadow: '0px 4px 6px rgba(0,0,0,0.1)' }}>
-      <HeaderUser employeeinfo={employeeinfo} />
-    </Header>
-  </Affix>
+            <Header className="header" style={{ background: '#ffffff', boxShadow: '0px 4px 6px rgba(0,0,0,0.1)' }}>
+              <HeaderUser employeeinfo={employeeinfo} />
+            </Header>
+          </Affix>
 
           <Content className="content">
             <Flex gap="large">
               <Routes>
                 <Route path="/" element={<Navigate to="home" replace />} />
+
                 <Route path="/generalinfo" element={<GeneralInfo />}>
-                  <Route path="profile" element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers}/>} />
+                  <Route path="profile" element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
                   <Route path="contracts" element={<ContractUser contractUsers={contractUsers} />} />
                   <Route index element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
                 </Route>
-                <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers}/>} />
+
+                <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers} />} />
                 <Route path="notifications" element={<NotificationListUser />} />
                 <Route path="generalinfo" element={<GeneralInfo />} />
-                <Route path='attendances' element={<AttendanceUser/>} />
-                <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo}/>} />
+                <Route path='attendances' element={<AttendanceUser />} />
+                <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo} />} />
                 <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
+
                 <Route path="/policyinfo" element={<PolicyInfo />}>
                   <Route path="salary-policy" element={<SalaryPolicy />} />
                   <Route path="benefit-policy" element={<BenifitPolicy />} />
                   <Route path="hr-policy" element={<HRPolicy />} />
                   <Route index element={<SalaryPolicy />} />
                 </Route>
+
+                <Route path="admin/employees" element={<EmployeeList replace />} />
               </Routes>
             </Flex>
           </Content>

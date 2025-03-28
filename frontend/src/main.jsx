@@ -6,6 +6,7 @@ import AppUser from './AppUser.jsx';
 import Login from './components/Login.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider, UserContext } from './api/api.jsx';
+import AdminHome from './pages/admin/AdminHome.jsx';
 
 const ProtectedRoute = ({ element, allowedRoles }) => {
   const { user } = useContext(UserContext);
@@ -15,10 +16,6 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
-
-  // if (user.role === 'Admin' && window.location.pathname === "/admin/*") {
-  //   return <Navigate to="/admin/home" replace />;
-  // }
 
   return element;
 };
@@ -30,9 +27,11 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/login" element={<Login />} />
 
-          <Route path="/admin/*" element={<ProtectedRoute element={<App />} allowedRoles={['Admin']} />} />
+          <Route path="/admin/*" element={<ProtectedRoute element={<App />} allowedRoles={['Admin', 'Director', 'Manager', 'Accountant']} />}>
+            <Route index element={<ProtectedRoute element={<AdminHome />} allowedRoles={['Admin']} />} />
+          </Route>
 
-          <Route path="/user/*" element={<ProtectedRoute element={<AppUser />} allowedRoles={['Admin','Director', 'Manager', 'Accountant','Employee']} />} />
+          <Route path="/user/*" element={<ProtectedRoute element={<AppUser />} allowedRoles={['Director', 'Manager', 'Accountant', 'Employee']} />} />
 
           <Route path="/" element={<Navigate to="/login" replace />} />
 

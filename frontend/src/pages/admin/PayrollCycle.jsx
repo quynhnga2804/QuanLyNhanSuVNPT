@@ -55,15 +55,14 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             align: 'center',
             filterSearch: true,
             sorter: (a, b) => {
-                const order = ['Đang xử lý', 'Chờ xử lý', 'Sắp diễn ra', 'Chưa bắt đầu']; // Thứ tự ưu tiên
+                const order = ['Đang xử lý', 'Chờ xét duyệt', 'Chưa bắt đầu']; // Thứ tự ưu tiên
                 return order.indexOf(a.Status) - order.indexOf(b.Status);
             },
             defaultSortOrder: 'ascend',
             render: (status) => {
                 const statusColors = {
                     'Đang xử lý': 'green',
-                    'Chờ xử lý': 'blue',
-                    'Sắp diễn ra': 'orange',
+                    'Chờ xét duyệt': 'orange',
                     'Chưa bắt đầu': 'red',
                 };
 

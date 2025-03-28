@@ -6,7 +6,6 @@ import logo from '../assets/images/logo.png';
 
 const Login = () => {
   const [form] = Form.useForm();
-  const [role, setRole] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [showOtpField, setShowOtpField] = useState(false);
@@ -29,8 +28,11 @@ const Login = () => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       const role = JSON.parse(localStorage.getItem('user')).role;
-      if (role === 'Admin' || role === 'Director' || role === 'Manager' || role === 'Accountant' || role === 'Employee') {
-        navigate('/user/home');
+      if (role === 'Admin') {
+        navigate('/Admin/home');
+      }
+      else if (role === 'Director' || role === 'Manager' || role === 'Accountant' || role === 'Employee') {
+        navigate('/User/home');
       }
       else {
         navigate('/unauthorized');
