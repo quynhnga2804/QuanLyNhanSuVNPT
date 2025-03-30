@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 
 const General = ({ employees, departments, users, fetchEmployees, fetchUsers, employeecontracts }) => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
@@ -128,10 +127,8 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
 
     useEffect(() => {
         if (role === 'Manager') {
-            console.log(employees);
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
-
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
             const filtered = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
             setNewEmployees(filtered);
@@ -389,7 +386,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             <Table
                 className='table_TQ'
                 rowKey='EmployeeID'
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 columns={columns}
                 dataSource={filteredEmployees.map(emp => ({ ...emp, key: emp.EmployeeID }))}
                 onRow={(record) => ({

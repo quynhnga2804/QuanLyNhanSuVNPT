@@ -15,6 +15,7 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
     const user = localStorage.getItem('user');
     const { Text } = Typography;
     const navigate = useNavigate();
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     useEffect(() => {
         if (token) {
@@ -27,6 +28,11 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
             key: "userInfo",
             label: <Text strong>{username || "Người dùng"}</Text>,
             disabled: true,
+        },
+        role !== "Admin" && {
+            key: "User/home",
+            label: "Thông tin cá nhân",
+            onClick: () => navigate("../User/home"),
         },
         {
             key: "logout",

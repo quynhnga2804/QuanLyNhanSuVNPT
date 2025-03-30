@@ -66,11 +66,6 @@ const OrganizationalStructure = () => {
                 items={[
                     { key: '1', label: 'DANH SÁCH BỘ PHẬN', children: <DivisionList onClick={() => setActiveKey('1')} divisions={divisions} fetchDivisions={fetchDivisions} /> },
                     { key: '2', label: 'DANH SÁCH PHÒNG BAN', children: <DepartmentList onClick={() => setActiveKey('2')} divisions={divisions} fetchDepartments={fetchDepartments} departments={departments} /> },
-                    { key: '3', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
-                    { key: '4', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
-                    { key: '5', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
-                    { key: '6', label: 'CHƯA CÓ NỘI DUNG', children: 'CHƯA CÓ NỘI DUNG' },
-                    { key: '7', label: 'Page 1', children: 'Nội dung Page 1' },
                 ]}
             />
         </div>

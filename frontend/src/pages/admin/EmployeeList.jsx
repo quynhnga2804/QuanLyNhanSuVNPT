@@ -2,17 +2,16 @@ import { Tabs } from 'antd';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import General from './General';
-import Benefit_Salary from './Benefit_Salary';
 import DependentList from './DependentList';
+import JobProfile from './JobProfile';
+import PersonalProfile from './PersonalProfile';
 
-const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments }) => {
+const EmployeeList = ({ employees, fetchEmployees, departments }) => {
     const [users, setUsers] = useState([]);
-    const [overtimes, setOvertimes] = useState([]);
     const [employeecontracts, setEmployeecontracts] = useState([]);
     const [familyMembers, setFamilyMembers] = useState([]);
-    const [monthlysalaries, setMonthlySalaries] = useState([]);
-    const [payrollcycles, setPayrollCycles] = useState([]);
     const [jobprofiles, setJobProfiles] = useState([]);
+    const [personalprofiles, setPersonalProfiles] = useState([]);
     const [activeKey, setActiveKey] = useState(() => {
         return localStorage.getItem('activeKey') || '1';
     });
@@ -26,14 +25,11 @@ const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments
 
     useEffect(() => {
         if (token) {
-            fetchDepartments(token);
             fetchUsers(token);
             fetchEmployeeContracts(token);
-            fetchMonthlySalaries(token);
-            fetchPayrollCycles(token);
             fetchJobProfiles(token);
-            fetchOverTimes(token);
             fetchFamilyMembers(token);
+            fetchPersonalProfiles(token);
         }
     }, []);
 
@@ -48,17 +44,6 @@ const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments
         }
     };
 
-    const fetchOverTimes = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/admin/overtimes', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setOvertimes(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy danh sách tăng ca:', error);
-        }
-    };
-
     const fetchEmployeeContracts = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/employeecontracts', {
@@ -70,28 +55,6 @@ const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments
         }
     };
 
-    const fetchMonthlySalaries = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/admin/monthlysalaries', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setMonthlySalaries(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy bảng lương:', error);
-        }
-    };
-
-    const fetchPayrollCycles = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/admin/payrollcycles', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setPayrollCycles(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy bảng chu kỳ lương:', error);
-        }
-    };
-
     const fetchFamilyMembers = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/familymembers', {
@@ -99,7 +62,7 @@ const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments
             });
             setFamilyMembers(response.data);
         } catch (error) {
-            console.error('Lỗi khi lấy bảng chu kỳ lương:', error);
+            console.error('Lỗi khi lấy bảng người phụ thuộc:', error);
         }
     };
 
@@ -114,6 +77,17 @@ const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments
         }
     };
 
+    const fetchPersonalProfiles = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/personalprofiles', {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            setPersonalProfiles(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy bảng hồ sơ cá nhân:', error);
+        }
+    };
+
     return (
         <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
             <Tabs
@@ -122,11 +96,13 @@ const EmployeeList = ({ employees, fetchEmployees, departments, fetchDepartments
                 onChange={setActiveKey}
                 items={[
                     role !== 'Accountant' &&
-                    { key: '1', label: 'TỔNG QUAN', children: <General onClick={() => setActiveKey('1')} departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
-                    role !== 'Manager' &&
-                    { key: '2', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey('2')} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },
-                    role !== 'Manager' &&
-                    { key: '3', label: 'DANH SÁCH PHỤ THUỘC', children: <DependentList employees={employees} familyMembers={familyMembers} fetchFamilyMembers={fetchFamilyMembers} /> },
+                    { key: '1', label: 'DANH SÁCH NHÂN VIÊN', children: <General onClick={() => setActiveKey('1')} departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
+                    role !== 'Accountant' &&
+                    { key: '2', label: 'HỒ SƠ CÁ NHÂN', children: <PersonalProfile personalprofiles={personalprofiles} fetchPersonalProfiles={fetchPersonalProfiles} departments={departments} employees={employees} /> },
+                    role !== 'Accountant' &&
+                    { key: '3', label: 'HỒ SƠ CÔNG VIỆC', children: <JobProfile jobprofiles={jobprofiles} fetchJobProfiles={fetchJobProfiles} departments={departments} employees={employees} /> },
+                    role !== 'Manager' && role !== 'Accountant' &&
+                    { key: '4', label: 'DANH SÁCH PHỤ THUỘC', children: <DependentList employees={employees} familyMembers={familyMembers} fetchFamilyMembers={fetchFamilyMembers} /> },
                 ]}
             />
         </div>

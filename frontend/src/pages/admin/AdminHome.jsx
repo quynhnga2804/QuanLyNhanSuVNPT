@@ -5,31 +5,30 @@ import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 
-const AdminHome = ({ employees, employeecontracts }) => {
+const AdminHome = ({ dtEmployees, dtEmployeeContracts, dtDepartments }) => {
   const navigate = useNavigate();
+  const role = JSON.parse(localStorage.getItem('user'))?. role;
 
   const data = [
-    { title: 'Nhân sự', value: employees.length, color: '#ffc226', icon: <TeamOutlined />, path: '../employees' },
-    { title: 'Hợp đồng lao động', value: employeecontracts.length, color: '#33ad39', icon: <SolutionOutlined />, path: '../contracts' },
-    { title: 'Lương', value: 5, color: '#03A9F4', icon: <DollarOutlined /> },
-    { title: 'Bộ phận', value: 2, color: '#f63838', icon: <DeploymentUnitOutlined /> },
-    { title: 'Phòng ban', value: 0, color: '#b12dd4', icon: <ClusterOutlined /> },
-    { title: 'Bảo hiểm', value: 2, color: '#f14881', icon: '' },
-    { title: 'Chính sách', value: 5, color: '#E91E63', icon: <FilePptOutlined /> },
-    { title: 'Báo cáo', value: 0, color: '#00E676', icon: <FilePdfOutlined /> },
-  ];
+    role !== 'Accountant' ? { title: 'Nhân sự', value: dtEmployees?.length || 0, color: '#ffc226', icon: <TeamOutlined />, path: '../employees' } : null,
+    role !== 'Accountant' ? { title: 'Hợp đồng lao động', value: dtEmployeeContracts?.length || 0, color: '#33ad39', icon: <SolutionOutlined />, path: '../contracts' } : null,
+    role !== 'Manager' ? { title: 'Lương', value: 5, color: '#03A9F4', icon: <DollarOutlined />, path: '../periodicsalaries' } : null,
+    role !== 'Accountant' && role !== 'Manager' ? { title: 'Bộ phận', value: 2, color: '#f63838', icon: <DeploymentUnitOutlined />, path: '../organizationalstructures' } : null,
+    role !== 'Accountant' ? { title: 'Phòng ban', value: dtDepartments?.length, color: '#b12dd4', icon: <ClusterOutlined /> } : null,
+    role !== 'Manager' && role !== 'Accountant' ? { title: 'Báo cáo', value: 0, color: '#00E676', icon: <FilePdfOutlined /> } : null,
+  ].filter(Boolean);
 
   return (
     <div style={{ padding: 24 }}>
       <Row gutter={[16, 16]}>
         {data.map((item, index) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={index}>
+          <Col xs={24} sm={12} md={8} lg={6} key={index} style={{minWidth: '40vh'}}>
             <Card
               style={{
-                background: item.color,
+                background: item?.color,
                 color: '#fff',
                 borderRadius: 0,
-                height: 120,
+                minHeight: 120,
                 border: '1px solid rgba(255, 255, 255, 0.4)',
                 position: 'relative'
               }}
@@ -37,10 +36,10 @@ const AdminHome = ({ employees, employeecontracts }) => {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <Title level={2} style={{ color: '#fff', marginBottom: 0 }}>{item.value}</Title>
-                  <Text style={{ color: '#fff', fontSize: 16 }}>{item.title}</Text>
+                  <Title level={2} style={{ color: '#fff', marginBottom: 0 }}>{item?.value}</Title>
+                  <Text style={{ color: '#fff', fontSize: 16 }}>{item?.title}</Text>
                 </div>
-                <div style={{ fontSize: 40, opacity: 0.3 }}>{item.icon}</div>
+                <div style={{ fontSize: 40, opacity: 0.3 }}>{item?.icon}</div>
               </div>
 
               <div

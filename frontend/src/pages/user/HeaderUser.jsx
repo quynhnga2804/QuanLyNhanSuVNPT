@@ -62,7 +62,7 @@ const HeaderUser = ({ employeeinfo }) => {
                     key: "admin/home",
                     icon: <TeamOutlined />,
                     label: "Quản lý nhân sự",
-                    onClick: () => navigate("../admin/employees"),
+                    onClick: () => navigate("../admin/home"),
                 },
                 {
                     key: "change-password",

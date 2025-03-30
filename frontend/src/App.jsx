@@ -20,10 +20,12 @@ import General from './pages/admin/General';
 import Benefit_Salary from './pages/admin/Benefit_Salary';
 import DependentList from './pages/admin/DependentList';
 import LaborContract from './pages/admin/LaborContract';
-import ReginationList from './pages/admin/ReginationList';
+import ReginationList from './pages/admin/ResignationList';
 import PayrollCycle from './pages/admin/PayrollCycle';
 import SalaryPolicy from './pages/admin/SalaryPolicy';
 import BenefitPolicy from './pages/admin/BenifitPolicy';
+import JobProfile from './pages/admin/JobProfile';
+import HomeUser from './pages/user/HomeUser';
 
 const { Sider, Header, Content } = Layout;
 
@@ -38,8 +40,11 @@ const App = () => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
   const workEmail = user?.email;
-  const imageUrl = `http://localhost:5000/uploads/${employees.find(emp => emp.WorkEmail === workEmail)?.Image ?? null}`;
+  const imageUrl = `http://localhost:5000/uploads/${employees.find(emp => emp.WorkEmail === workEmail)?.Image || null}`;
   const [unreadCount, setUnreadCount] = useState(0);
+  const [newEmployees, setnewEmployees] = useState([]);
+  const [newContracts, setnewContracts] = useState([]);
+  const [newDepartments, setnewDepartments] = useState([]);
   const role = user?.role;
 
   useEffect(() => {
@@ -60,6 +65,29 @@ const App = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (role === 'Manager') {
+      const dpID = employees.find(emp => emp.WorkEmail?.includes(workEmail))?.DepartmentID;
+      const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+      const filterDepartments = departments.filter(dp => dp.DivisionID === dvID);
+      if (JSON.stringify(filterDepartments) !== JSON.stringify(departments)) {
+        setnewDepartments(filterDepartments);
+      }
+      const filternewEmployees = employees.filter(emp => filterDepartments.map(dp => dp.DepartmentID)?.includes(emp.DepartmentID));
+      if (JSON.stringify(filternewEmployees) !== JSON.stringify(newEmployees)) {
+        setnewEmployees(filternewEmployees);
+      }
+      const filterEmployeeContracts = employeecontracts.filter(emp => filternewEmployees.map(e => e.EmployeeID).includes(emp.EmployeeID));
+      if (JSON.stringify(filterEmployeeContracts) !== JSON.stringify(newContracts)) {
+        setnewContracts(filterEmployeeContracts);
+      }
+    }
+  }, [role, employees, departments, employeecontracts, workEmail]);
+
+  const dtEmployees = role === 'Manager' ? newEmployees : employees;
+  const dtDepartments = role === 'Manager' ? newDepartments : departments;
+  const dtEmployeeContracts = role === 'Manager' ? newContracts : employeecontracts;
+
   const fetchEmployees = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/admin/employees', {
@@ -76,18 +104,18 @@ const App = () => {
 
   const fetchDepartments = async () => {
     try {
-        const url = 'http://localhost:5000/api/admin/departments';
-        const response = await axios.get(url, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-        });
-        setDepartments(response.data);
+      const url = 'http://localhost:5000/api/admin/departments';
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      setDepartments(response.data);
     } catch (error) {
-        console.error('Lỗi khi lấy danh sách phòng ban:', error);
+      console.error('Lỗi khi lấy danh sách phòng ban:', error);
     }
-};
+  };
 
   const fetchDivisions = async () => {
     try {
@@ -187,21 +215,22 @@ const App = () => {
         <Content className='contents'>
           <Flex gap='large'>
             <Routes>
-              <Route path='home' element={<AdminHome employees={employees} employeecontracts={employeecontracts} />} />
+              <Route path='home' element={<AdminHome dtEmployees={dtEmployees} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} />
 
               <Route path='employees' element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />}>
-                <Route path='employeelist' element={<General divisions={divisions} />} />
-                <Route path='benefit&salary' element={<Benefit_Salary />} />
+                <Route path='employeelist' element={<General />} />
                 <Route path='DependentList' element={<DependentList />} />
+                <Route path='JobProfile' element={<JobProfile />} />
               </Route>
 
-              <Route path='contracts' element={<Contract employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />}>
-                <Route path='laborcontract' element={<LaborContract departments={departments} />} />
+              <Route path='contracts' element={<Contract departments={departments} employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />}>
+                <Route path='laborcontract' element={<LaborContract />} />
                 <Route path='reginationList' element={<ReginationList />} />
               </Route>
 
               <Route path='periodicsalaries' element={<PeriodicSalary />}>
                 <Route path='payrollcycle' element={<PayrollCycle />} />
+                <Route path='benefit&salary' element={<Benefit_Salary />} />
                 <Route path='salarypolicy' element={<SalaryPolicy />} />
                 <Route path='benefitpolicy' element={<BenefitPolicy />} />
               </Route>
@@ -217,16 +246,7 @@ const App = () => {
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
               <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} />
-              {/* <Route path='home' element={<AdminHome employees={employees} employeecontracts={employeecontracts} />} />
-              {role === 'Admin' || role === 'Manager' ? <Route path='employees' element={<EmployeeList role={role} employees={employees} fetchEmployees={fetchEmployees} />} /> : <Route path='employees' element={<Navigate to='/home' />} />}
-              {role === 'Admin' || role === 'Director' || role === 'Manager' ? <Route path='contracts' element={<Contract employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} /> : <Route path='contracts' element={<Navigate to='/home' />} />}
-              {role === 'Admin' || role === 'Director' || role === 'Accountant' ? <Route path='periodicsalaries' element={<PeriodicSalary />} /> : <Route path='periodicsalaries' element={<Navigate to='/home' />} />}
-              {role === 'Admin' || role === 'Director' ? <Route path='humanreports' element={<HumanReport />} /> : <Route path='humanreports' element={<Navigate to='/home' />} />}
-              {role === 'Admin' || role === 'Director' ? <Route path='organizationalstructures' element={<OrganizationalStructure />} /> : <Route path='organizationalstructures' element={<Navigate to='/home' />} />}
-              {role === 'Admin' || role === 'Manager' ? <Route path='attendances' element={<Attendance />} /> : <Route path='attendances' element={<Navigate to='/home' />} />}
-              <Route path='workregulations' element={<WorkRegulations />} />
-              <Route path='hrpolicies' element={<HRPolicy />} />
-              <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} /> */}
+              <Route path='User/home' element={<HomeUser replace />} />
             </Routes>
           </Flex>
         </Content>

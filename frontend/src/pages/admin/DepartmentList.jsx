@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
-import dayjs from 'dayjs';
 import axios from 'axios';
 
 const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
@@ -13,7 +12,6 @@ const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
     const [editingDepartment, setEditingDepartment] = useState(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
 

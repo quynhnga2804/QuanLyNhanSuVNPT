@@ -43,7 +43,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             filterSearch: true,
             render: (id) => {
                 const employee = employees.find(emp => emp.EmployeeID === id);
-                return employee ? employee.FullName : 'Không xác định';
+                return employee ? employee.FullName : '';
             },
         },
         {
@@ -53,7 +53,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             align: 'right',
             render: (id) => {
                 const payrollcycle = payrollcycles.find(payr => payr.ID_PayrollCycle === id);
-                return payrollcycle ? payrollcycle.PayrollName : 'Không xác định';
+                return payrollcycle ? payrollcycle.PayrollName : '';
             },
         },
         {
@@ -75,7 +75,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             filterSearch: true,
             render: (id) => {
                 const jobprofile = jobprofiles.find(jobp => jobp.EmployeeID === id);
-                return jobprofile ? new Intl.NumberFormat('vi-VN').format(jobprofile.Allowance) : 'Không xác định';
+                return jobprofile ? new Intl.NumberFormat('vi-VN').format(jobprofile.Allowance) : '0';
             },
         },
         {
@@ -131,7 +131,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         },
     ].filter(col => col.dataIndex !== 'ID_Salary');
 
-    if (role !== 'Director' && role !== 'Admin') {
+    if (role === 'Accountant') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -375,7 +375,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                         />
                     </Space>
 
-                    {role !== 'Admin' && role !== 'Director' && (
+                    {role === 'Manager' && (
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới <UserAddOutlined />
