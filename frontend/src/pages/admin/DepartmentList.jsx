@@ -1,19 +1,22 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import axios from 'axios';
 
-const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
+const DepartmentList = ({ departments, employees, divisions, fetchDepartments }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter] = useState('');
     const [editingDepartment, setEditingDepartment] = useState(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
+    const [newJobDepartments, setNewDepartments] = useState([]);
+    const [tableFilters, setTableFilters] = useState({});
+    const role = JSON.parse(localStorage.getItem('user')).role;
+    const workEmail = JSON.parse(localStorage.getItem('user')).email;
 
     const uniqueDivisionIDs = [...new Set(departments.map(emp => emp.DivisionID))];
 
@@ -128,7 +131,6 @@ const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
             }).filter(item => item !== null),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.DivisionID === value,
         },
         {
             title: 'CHỨC NĂNG',
@@ -149,11 +151,30 @@ const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
         setSearchQuery(value.toLowerCase());
     }, 500);
 
-    const filteredDepartments = departments.filter(dpm =>
-        dpm.DepartmentID.toLowerCase().includes(searchQuery) ||
-        dpm.DepartmentName.toLowerCase().includes(searchQuery) &&
-        (statusFilter ? dpm.status === statusFilter : true)
-    );
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableFilters(filters);
+    };
+
+    useEffect(() => {
+        if (role === 'Manager') {
+            const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
+            const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+            const filtered = departments.filter(dv => dv.DivisionID === dvID);
+            setNewDepartments(filtered);
+        }
+    }, [role, employees, departments, workEmail]);
+
+    const dataSource = role === 'Manager' && newJobDepartments.length > 0 ? newJobDepartments : departments;
+    const filteredDepartments = dataSource.filter(dpm => {
+        const matchesSearchQuery = searchQuery === '' ||
+            dpm.DepartmentID.toLowerCase().includes(searchQuery) ||
+            dpm.DepartmentName.toLowerCase().includes(searchQuery);
+
+        const selectedDivisionID = tableFilters.DivisionID || [];
+        const matchesDivisionIDFilter = selectedDivisionID.length === 0 || selectedDivisionID.includes(dpm.DivisionID);
+
+        return matchesSearchQuery && matchesDivisionIDFilter;
+    });
 
     return (
         <>
@@ -191,6 +212,7 @@ const DepartmentList = ({ departments, divisions, fetchDepartments }) => {
                     y: 52.8 * 9,
                 }}
                 pagination={false}
+                onChange={handleTableChange}
             />
 
             {/* Thêm mới phòng ban */}

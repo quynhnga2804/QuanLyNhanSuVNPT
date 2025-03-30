@@ -241,7 +241,7 @@ const App = () => {
                 <Route path='benefitpolicy' element={<BenefitPolicy />} />
               </Route>
 
-              <Route path='organizationalstructures' element={<OrganizationalStructure />} />
+              <Route path='organizationalstructures' element={<OrganizationalStructure employees={employees} />} />
               <Route path='attendances' element={<Attendance />} />
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />

@@ -4,7 +4,7 @@ import DivisionList from './DivisionList';
 import DepartmentList from './DepartmentList';
 import axios from 'axios';
 
-const OrganizationalStructure = () => {
+const OrganizationalStructure = ({ employees }) => {
     const [divisions, setDivisions] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [activeKey, setActiveKey] = useState(() => {
@@ -12,6 +12,7 @@ const OrganizationalStructure = () => {
     });
 
     const token = localStorage.getItem('token');
+    const role = JSON.parse(localStorage.getItem('user')).role;
     useEffect(() => {
         localStorage.setItem('activeKey', activeKey);
     }, [activeKey]);
@@ -64,8 +65,9 @@ const OrganizationalStructure = () => {
                 activeKey={activeKey}
                 onChange={setActiveKey}
                 items={[
+                    (role === 'Admin' || role === 'Director') &&
                     { key: '1', label: 'DANH SÁCH BỘ PHẬN', children: <DivisionList onClick={() => setActiveKey('1')} divisions={divisions} fetchDivisions={fetchDivisions} /> },
-                    { key: '2', label: 'DANH SÁCH PHÒNG BAN', children: <DepartmentList onClick={() => setActiveKey('2')} divisions={divisions} fetchDepartments={fetchDepartments} departments={departments} /> },
+                    { key: '2', label: 'DANH SÁCH PHÒNG BAN', children: <DepartmentList onClick={() => setActiveKey('2')} employees={employees} divisions={divisions} fetchDepartments={fetchDepartments} departments={departments} /> },
                 ]}
             />
         </div>

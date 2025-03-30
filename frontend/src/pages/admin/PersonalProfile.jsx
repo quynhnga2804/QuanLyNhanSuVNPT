@@ -16,6 +16,9 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
     const role = JSON.parse(localStorage.getItem('user')).role;
     const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newPersonalProfiles, setNewPersonalProfiles] = useState([]);
+    const [tableFilters, setTableFilters] = useState({});
+
+    const uniqueEducations = [...new Set(personalprofiles.map(per => per.Education).filter(Boolean))];
 
     const handleEdit = (record) => {
         setEditingPersonalProfile(record);
@@ -157,8 +160,11 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
         {
             title: 'HỌC VẤN',
             dataIndex: 'Education',
-            minWidth: 80,
+            minWidth: 90,
             align: 'right',
+            filters: uniqueEducations.map(ed => ({ text: ed, value: ed })),
+            filterMode: 'tree',
+            filterSearch: true,
         },
         {
             title: 'BẰNG CẤP',
@@ -224,11 +230,21 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
         setSearchQuery(value.toLowerCase());
     }, 500);
 
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableFilters(filters);
+    };
+
     const dataSource = role === 'Manager' && newPersonalProfiles.length > 0 ? newPersonalProfiles : personalprofiles;
-    const filteredpersonalprofiles = dataSource.filter(dvs =>
-        dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
-        employees.find(e => e.EmployeeID === dvs.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredpersonalprofiles = dataSource.filter(dvs => {
+        const matchesSearchQuery = searchQuery === '' ||
+            dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
+            employees.find(e => e.EmployeeID === dvs.EmployeeID)?.FullName.toLowerCase().includes(searchQuery);
+
+        const selectedEducation = tableFilters.Education || [];
+        const matchesEducationFilter = selectedEducation.length === 0 || selectedEducation.includes(dvs.Education);
+
+        return matchesSearchQuery && matchesEducationFilter;
+    }).map(dvs => ({ ...dvs, key: dvs.EmployeeID }));
 
     return (
         <>
@@ -267,6 +283,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
                     y: 51.5 * 9,
                 }}
                 pagination={false}
+                onChange={handleTableChange}
             />
 
             {/* Thêm mới */}

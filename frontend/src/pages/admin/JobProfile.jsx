@@ -16,6 +16,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
   const role = JSON.parse(localStorage.getItem('user')).role;
   const workEmail = JSON.parse(localStorage.getItem('user')).email;
   const [newJobProfiles, setNewJobProfiles] = useState([]);
+  const [tableFilters, setTableFilters] = useState({});
 
   const uniqueEmploymentStatuses = [...new Set(jobprofiles.map(emp => emp.EmploymentStatus).filter(Boolean))];
 
@@ -134,7 +135,6 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
       filters: uniqueEmploymentStatuses.map(gd => ({ text: gd, value: gd })),
       filterMode: 'tree',
       filterSearch: true,
-      onFilter: (value, record) => record.EmploymentStatus === value,
     },
     {
       title: 'GIỜ LÀM VIỆC TIÊU CHUẨN',
@@ -198,11 +198,21 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
     setSearchQuery(value.toLowerCase());
   }, 500);
 
+  const handleTableChange = (pagination, filters, sorter) => {
+    setTableFilters(filters);
+  };
+
   const dataSource = role === 'Manager' && newJobProfiles.length > 0 ? newJobProfiles : jobprofiles;
-  const filteredJobProfiles = dataSource.filter(dvs =>
-    dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
-    employees.find(e => e.EmployeeID === dvs.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredJobProfiles = dataSource.filter(dvs => {
+    const matchesSearchQuery = searchQuery === '' ||
+      dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
+      employees.find(e => e.EmployeeID === dvs.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const selectedEmploymentStatus = tableFilters.EmploymentStatus || [];
+    const matchesEmploymentStatusFilter = selectedEmploymentStatus.length === 0 || selectedEmploymentStatus.includes(dvs.EmploymentStatus);
+
+    return matchesSearchQuery && matchesEmploymentStatusFilter;
+  });
 
   return (
     <>
@@ -241,6 +251,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
           y: 51.5 * 9,
         }}
         pagination={false}
+        onChange={handleTableChange}
       />
 
       {/* Thêm mới */}

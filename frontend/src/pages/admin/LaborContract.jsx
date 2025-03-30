@@ -16,20 +16,19 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
     const [startDate, setStartDate] = useState(null);
-    // const [selectedContract, setSelectedContract] = useState(null);
     const [endDateDisabled, setEndDateDisabled] = useState(true);
     const [selectedEmployeeContract, setSelectedEmployeeContract] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const role = JSON.parse(localStorage.getItem('user')).role;
     const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newEmployeeContracts, setNewEmployeeContracts] = useState([]);
+    const [tableFilters, setTableFilters] = useState({});
 
     const handleStartDateChange = (e) => {
         setStartDate(e.target.value);
     };
 
     const handleContractInputChange = (value) => {
-        // setSelectedContract(value);
 
         const selectedLabContract = laborcontracts.find(lab => lab.ID_Contract === value);
         if (selectedLabContract) {
@@ -53,10 +52,6 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
             }
         }
     };
-
-    const handleSearch = debounce((value) => {
-        setSearchQuery(value.toLowerCase());
-    }, 500);
 
     const handleAddNew = () => {
         setIsAddModalOpen(true);
@@ -166,6 +161,14 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
         setSelectedEmployeeContract(null);
     };
 
+    const handleSearch = debounce((value) => {
+        setSearchQuery(value.toLowerCase());
+    }, 500);
+
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableFilters(filters);
+    };
+
     useEffect(() => {
         if (role === 'Manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
@@ -196,10 +199,16 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     });
     const nowContracts = dataSource.filter(emp => !emp.EndDate || new Date(emp.EndDate) >= today);
 
-    const filteredEmployeeContracts = mergedContracts.filter(emp =>
-        emp.ContractType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employees.find(e => e.EmployeeID === emp.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredEmployeeContracts = mergedContracts.filter(emp => {
+        const matchesSearchQuery = searchQuery === '' ||
+            emp.ContractType.toLowerCase().includes(searchQuery) ||
+            employees.find(e => e.EmployeeID === emp.EmployeeID)?.FullName.toLowerCase().includes(searchQuery);
+
+        const selectedStatus = tableFilters.Status || [];
+        const matchesStatusFilter = selectedStatus.length === 0 || selectedStatus.includes(emp.Status);
+
+        return matchesSearchQuery && matchesStatusFilter;
+    });
 
     const columns = [
         {
@@ -396,7 +405,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                             y: 51 * 9,
                         }}
                         pagination={false}
-                    // onChange={onChange}
+                        onChange={handleTableChange}
                     />
                 </Flex>
                 <SideContent nowContracts={nowContracts} expiringContracts={expiringContracts} />
