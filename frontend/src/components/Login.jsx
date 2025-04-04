@@ -154,10 +154,6 @@ const Login = () => {
           </>
         )}
 
-        <Form.Item name='remember' valuePropName='checked' label={null}>
-          <Checkbox>Nhớ mật khẩu</Checkbox>
-        </Form.Item>
-
         <Form.Item label={null}>
           <Button type='primary' htmlType='submit' loading={loading}>
             {showOtpField ? 'Xác nhận OTP' : 'Đăng nhập'}

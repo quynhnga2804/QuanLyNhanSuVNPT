@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 
-const AdminHome = ({ dtEmployees, dtEmployeeContracts, dtDepartments }) => {
+const AdminHome = ({ dtEmployees, dtEmployeeContracts, dtDivisions, dtDepartments }) => {
   const navigate = useNavigate();
   const role = JSON.parse(localStorage.getItem('user'))?. role;
 
@@ -13,7 +13,7 @@ const AdminHome = ({ dtEmployees, dtEmployeeContracts, dtDepartments }) => {
     role !== 'Accountant' ? { title: 'Nhân sự', value: dtEmployees?.length || 0, color: '#ffc226', icon: <TeamOutlined />, path: '../employees' } : null,
     role !== 'Accountant' ? { title: 'Hợp đồng lao động', value: dtEmployeeContracts?.length || 0, color: '#33ad39', icon: <SolutionOutlined />, path: '../contracts' } : null,
     role !== 'Manager' ? { title: 'Lương', value: 5, color: '#03A9F4', icon: <DollarOutlined />, path: '../periodicsalaries' } : null,
-    role !== 'Accountant' && role !== 'Manager' ? { title: 'Bộ phận', value: 2, color: '#f63838', icon: <DeploymentUnitOutlined />, path: '../organizationalstructures' } : null,
+    role !== 'Accountant' && role !== 'Manager' ? { title: 'Bộ phận', value: dtDivisions?.length, color: '#f63838', icon: <DeploymentUnitOutlined />, path: '../organizationalstructures' } : null,
     role !== 'Accountant' ? { title: 'Phòng ban', value: dtDepartments?.length, color: '#b12dd4', icon: <ClusterOutlined /> } : null,
     role !== 'Manager' && role !== 'Accountant' ? { title: 'Báo cáo', value: 0, color: '#00E676', icon: <FilePdfOutlined /> } : null,
   ].filter(Boolean);

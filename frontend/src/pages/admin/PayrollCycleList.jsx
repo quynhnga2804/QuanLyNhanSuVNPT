@@ -14,7 +14,6 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
     const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
 
     const handleEdit = (record) => {
         setEditingPayrollCycle(record);
@@ -46,8 +45,15 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
     };
 
     const handleAddNew = () => {
+        const isProcessing = payrollcycles.some(cycle => cycle.Status === "Đang xử lý");
+        if (isProcessing) {
+            message.warning("Đã có chu kỳ lương chưa bắt đầu. Không thể tạo mới!");
+            return;
+        }
+
         setIsAddModalOpen(true);
     };
+
 
     const handleAddCancel = () => {
         setIsAddModalOpen(false);
@@ -95,6 +101,24 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
         });
     };
 
+    const handleOpen = async (record) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:5000/api/admin/payrollcycles/${record.ID_PayrollCycle}`,
+                { Status: "Đang xử lý" },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+            fetchPayrollCycles();
+            message.success('Đã mở chu kỳ lương mới!');
+        } catch (error) {
+            message.error('Sửa thất bại, vui lòng thử lại.');
+        }
+    };
+
     const columns = [
         {
             title: 'MÃ CHU KỲ',
@@ -122,7 +146,7 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
         {
             title: 'NGÀY KẾT THÚC',
             dataIndex: 'EndDate',
-            minWidth: 183,
+            minWidth: 185,
             align: 'center',
             sorter: (a, b) => new Date(a.DateOfBirth) - new Date(b.DateOfBirth),
             minWidth: 108,
@@ -134,6 +158,12 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
             dataIndex: 'Status',
             align: 'center',
             minWidth: 108,
+            render: (status) => {
+                let color = 'black';
+                if (status === 'Đang xử lý') color = 'green';
+
+                return <span style={{ color }}>{status}</span>;
+            }
         },
         {
             title: 'CHỨC NĂNG',
@@ -143,8 +173,9 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
             minWidth: 113,
             render: (_, record) => (
                 <>
-                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+                    {role === 'Accountant' ? <Button type="link" disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleOpen(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Mở</Button> : null }
+                    {role !== 'Accountant' ? <Button type="link" disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button> : null }
+                    {role !== 'Accountant' ? <Button type="link" danger disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button> : null }
                 </>
             ),
         }
@@ -177,7 +208,7 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
                     {(role === 'Admin' || role === 'Director') &&
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
-                                Tạo mới <UserAddOutlined />
+                                Tạo mới
                             </Space>
                         </Button>
                     }
@@ -230,13 +261,13 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
                     <Form.Item label='Ngày kết thúc' name='EndDate' rules={[{ required: true }]}>
                         <Input type='date' />
                     </Form.Item>
-                    <Form.Item label='Trạng thái' name='Status' rules={[{ required: true }]}>
+                    {/* <Form.Item label='Trạng thái' name='Status' rules={[{ required: true }]}>
                         <Select>
                             <Select.Option value='Hoàn thành'>Hoàn thành</Select.Option>
                             <Select.Option value='Đang xử lý'>Đang xử lý</Select.Option>
                             <Select.Option value='Chưa bắt đầu'>Chưa bắt đầu</Select.Option>
                         </Select>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>
         </>

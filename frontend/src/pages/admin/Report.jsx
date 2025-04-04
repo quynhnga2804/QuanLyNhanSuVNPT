@@ -5,8 +5,9 @@ import axios from 'axios';
 import Luong_PhucLoi from './Benefit_Salary';
 import DanhSachPhuThuoc from './DependentList';
 import LaborContract from './LaborContract';
+import EmployeeReport from './EmployeeReport';
 
-const HumanReport = () => {
+const Report = () => {
     const [activeKey, setActiveKey] = useState('1');
     // const [employeecontracts, setemployeecontracts] = useState([]);
     // const [laborcontracts, setlaborcontracts] = useState([]);
@@ -67,26 +68,11 @@ const HumanReport = () => {
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        {
-                            key: '1',
-                            label: 'HỢP ĐỒNG LAO ĐỘNG',
-                            children: 'chưa có gì',
-                        },
-                        {
-                            key: '2',
-                            label: 'QUYẾT ĐỊNH NHẬN TUYỂN',
-                            children: 'chưa có gì',
-                        },
-                        {
-                            key: '3',
-                            label: 'DANH SÁCH NGHỈ VIỆC',
-                            children: 'chưa có gì',
-                        },
-                        {
-                            key: '4',
-                            label: 'PHÂN LOẠI HỢP ĐỒNG',
-                            children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ',
-                        },
+                        { key: '1', label: 'BÁO CÁO NHÂN SỰ', children: <EmployeeReport /> },
+                        { key: '2', label: 'BÁO CÁO LƯƠNG THƯỞNG', children: 'chưa có gì' },
+                        { key: '3', label: 'BÁO CÁO HIỆU SUẤT LÀM VIỆC', children: 'chưa có gì' },
+                        { key: '4', label: 'BÁO CÁO BẢO HIỂM, THUẾ', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
+                        { key: '5', label: 'BÁO CÁO THEO PHÒNG BAN, CHI NHÁNH', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
                     ]}
                 />
             </div>
@@ -94,4 +80,4 @@ const HumanReport = () => {
     )
 }
 
-export default HumanReport;
+export default Report;

@@ -1,9 +1,9 @@
-import { Button, message, Descriptions, Form, Modal, Select, Input, Dropdown, Flex, Space, Table, Typography } from 'antd';
+import { Button, message, Form, Modal, Flex, Space, Table, Typography } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { CaretDownOutlined, PlusCircleOutlined, UserAddOutlined } from '@ant-design/icons';
-import SideContent from './SideContent';
+import { FileExcelOutlined } from '@ant-design/icons';
 import Search from 'antd/es/transfer/search';
 import { debounce } from 'lodash';
+import exportToExcel from '../../utils/exportToExcel';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
@@ -151,6 +151,28 @@ const ResignationList = ({ resignations, employees, departments, fetchEmployeeCo
         },
     ];
 
+    const handleExportResignations = () => {
+        const columns = [
+            { header: 'STT', key: 'stt', width: 10 },
+            { header: 'MÃ NHÂN VIÊN', key: 'EmployeeID', width: 20 },
+            { header: 'TÊN NHÂN VIÊN', key: 'FullName', width: 25 },
+            { header: 'LÝ DO NGHỈ VIỆC', key: 'Reason', width: 30 },
+            { header: 'NGÀY NGHỈ VIỆC', key: 'ResignationsDate', width: 15, isDate: true }
+        ];
+
+        const data = filteredResignations.map((res) => {
+            const employee = employees.find(emp => emp.EmployeeID === res.EmployeeID);
+            return {
+                EmployeeID: res.EmployeeID,
+                FullName: employee ? employee.FullName : '',
+                Reason: res.Reason,
+                ResignationsDate: res.ResignationsDate
+            };
+        });
+
+        exportToExcel(data, columns, 'DanhSachNghiViec');
+    };
+
     return (
         <>
             <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#fff' }}>
@@ -166,6 +188,10 @@ const ResignationList = ({ resignations, employees, departments, fetchEmployeeCo
                             onChange={(e) => handleSearch(e.target.value)}
                         />
                     </Space>
+
+                    <Button type="primary" onClick={handleExportResignations} icon={<FileExcelOutlined />}>
+                        File excel
+                    </Button>
                 </Flex>
             </Flex>
 
@@ -185,73 +211,6 @@ const ResignationList = ({ resignations, employees, departments, fetchEmployeeCo
                 }}
                 pagination={false}
             />
-
-            {/* Chỉnh sửa */}
-            {/* <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Hợp Đồng</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered>
-                <Form form={editForm} layout='vertical'>
-                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
-                        <Select>
-                            {employees.map(emp => (
-                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
-                                    ({emp.EmployeeID}) {emp.FullName}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Ngày bắt đầu" name="StartDate" rules={[{ required: true }]}>
-                        <Input type="date" onChange={handleStartDateChange} />
-                    </Form.Item>
-                    <Form.Item label="Loại hợp đồng" name="ID_Contract" rules={[{ required: true }]}>
-                        <Select onChange={handleContractInputChange} disabled={!startDate}>
-                            {laborcontracts.map(lab => (
-                                <Select.Option key={lab.ID_Contract} value={lab.ID_Contract}>
-                                    ({lab.ID_Contract}) {lab.ContractType}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Ngày kết thúc" name="EndDate" rules={[{ required: !endDateDisabled }]}>
-                        <Input type="date" disabled={endDateDisabled} />
-                    </Form.Item>
-                </Form>
-            </Modal> */}
-
-            {/* Chi tiết */}
-            {/* <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Chi Tiết Hợp Đồng</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={650} centered>
-                {selectedEmployeeContract && (
-                    <Descriptions column={2} size="small">
-                        <Descriptions.Item label="Mã Nhân Viên">
-                            {selectedEmployeeContract.EmployeeID}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Ngày bắt đầu">
-                            {selectedEmployeeContract.StartDate}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Họ và Tên">
-                            {employees.find(emp => emp.EmployeeID === selectedEmployeeContract.EmployeeID).FullName}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Ngày kết thúc">
-                            {selectedEmployeeContract.EndDate || 'Không thời hạn'}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Mã hợp đồng">
-                            {selectedEmployeeContract.ID_Contract}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Loại hợp đồng">
-                            {jobprofiles.find(job => job.EmployeeID === selectedEmployeeContract.EmployeeID).EmploymentStatus}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Tên hợp đồng">
-                            {laborcontracts.find(lab => lab.ID_Contract === selectedEmployeeContract.ID_Contract).ContractType}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Trạng thái">
-                            {!selectedEmployeeContract.EndDate || new Date(selectedEmployeeContract.EndDate) >= today
-                                ? <span style={{ color: 'green' }}>Hoạt động</span>
-                                : <span style={{ color: 'red' }}>Hết hạn</span>}
-                        </Descriptions.Item>
-                    </Descriptions>
-                )}
-            </Modal> */}
         </>
     )
 }

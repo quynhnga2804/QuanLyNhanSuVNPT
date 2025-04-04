@@ -114,7 +114,7 @@ const PeriodicSalary = () => {
                     onChange={setActiveKey}
                     items={[
                         { key: '1', label: 'TỔNG QUAN', children: (<div className="tab-content-scrollable"><PayrollCycle onClick={() => setActiveKey('1')} monthlysalaries={monthlysalaries} payrollcycles={payrollcycles} /></div>) },
-                        (role === 'Admin' || role === 'Director') &&
+                        (role === 'Admin' || role === 'Director' || role === 'Accountant') &&
                         { key: '2', label: 'CHU KỲ LƯƠNG', children: (<div className="tab-content-scrollable"><PayrollCycleList onClick={() => setActiveKey('2')} fetchPayrollCycles={fetchPayrollCycles} payrollcycles={payrollcycles} /></div>) },
                         role === 'Accountant' &&
                         { key: '3', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey('3')} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },

@@ -31,7 +31,7 @@ const EmployeeList = ({ employees, fetchEmployees, departments }) => {
             fetchFamilyMembers(token);
             fetchPersonalProfiles(token);
         }
-    }, []);
+    }, [token]);
 
     const fetchUsers = async () => {
         try {
@@ -96,7 +96,7 @@ const EmployeeList = ({ employees, fetchEmployees, departments }) => {
                 onChange={setActiveKey}
                 items={[
                     role !== 'Accountant' &&
-                    { key: '1', label: 'DANH SÁCH NHÂN VIÊN', children: <General onClick={() => setActiveKey('1')} departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
+                    { key: '1', label: 'DANH SÁCH NHÂN VIÊN', children: <General departments={departments} employees={employees} users={users} employeecontracts={employeecontracts} fetchEmployees={fetchEmployees} fetchUsers={fetchUsers} /> },
                     role !== 'Accountant' &&
                     { key: '2', label: 'HỒ SƠ CÁ NHÂN', children: <PersonalProfile personalprofiles={personalprofiles} fetchPersonalProfiles={fetchPersonalProfiles} departments={departments} employees={employees} /> },
                     role !== 'Accountant' &&

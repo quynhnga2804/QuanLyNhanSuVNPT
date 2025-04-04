@@ -77,7 +77,7 @@ const Sidebar = ({ collapsed, onLogout }) => {
                     {role !== 'Accountant' ? getItem('employees', <TeamOutlined onClick={() => setActiveKey('1')} />, 'Danh sách nhân sự') : null}
                     {role !== 'Accountant' ? getItem('contracts', <CarryOutOutlined onClick={() => setActiveKey('1')} />, 'Hợp đồng lao động') : null}
                     {getItem('periodicsalaries', <DollarOutlined onClick={() => setActiveKey('1')} />, 'Bảng lương định kỳ')}
-                    {getItem('humanreports', <ReconciliationOutlined onClick={() => setActiveKey('1')} />, 'Báo cáo nhân sự')}
+                    {getItem('humanreports', <ReconciliationOutlined onClick={() => setActiveKey('1')} />, 'Báo cáo')}
                 </Menu.ItemGroup>
 
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="org" title={!collapsed ? 'Thiết kế tổ chức' : null}>

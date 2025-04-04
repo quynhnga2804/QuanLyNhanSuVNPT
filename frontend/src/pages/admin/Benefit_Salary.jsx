@@ -15,14 +15,26 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editForm] = Form.useForm();
     const role = JSON.parse(localStorage.getItem('user')).role;
+    const [selectedPayrollCycleId, setSelectedPayrollCycleId] = useState(null);
 
-    const filteredPayrollCycles = monthlysalaries.filter(mont => {
+    const filteredPayrolls = payrollcycles.filter(pay => pay.Status === 'Đang xử lý').map(pay => ({ id: pay.ID_PayrollCycle, name: pay.PayrollName }));
+
+    const filteredMonthlySalaries = monthlysalaries.filter(mont => {
         const employee = employees.find(emp => emp.EmployeeID === mont.EmployeeID);
         const fullName = employee ? employee.FullName.toLowerCase() : '';
 
         return (
-            fullName.includes(searchQuery)
+            mont.ID_PayrollCycle === selectedPayrollCycleId
+            && fullName.includes(searchQuery)
         ) && (statusFilter ? mont.status === statusFilter : true);
+    });
+
+    const filteredEmployees = jobprofiles.filter(job => {
+        if (!selectedPayrollCycleId) return false;
+    
+        return !monthlysalaries.some(mont => 
+            mont.EmployeeID === job.EmployeeID && mont.ID_PayrollCycle === selectedPayrollCycleId
+        );
     });
 
     const handleSearch = debounce((value) => {
@@ -147,12 +159,78 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         });
     }
 
+    const columnEMPs = [
+        {
+            title: 'MÃ NHÂN VIÊN',
+            dataIndex: 'EmployeeID',
+            align: 'center',
+        },
+        {
+            title: 'TÊN NHÂN VIÊN',
+            dataIndex: 'EmployeeID',
+            fixed: 'left',
+            minWidth: 116,
+            filterSearch: true,
+            render: (id) => {
+                const employee = employees.find(emp => emp.EmployeeID === id);
+                return employee ? employee.FullName : '';
+            },
+        },
+        {
+            title: 'LƯƠNG CƠ BẢN',
+            dataIndex: 'EmployeeID',
+            minWidth: 118,
+            align: 'right',
+            filterSearch: true,
+            render: (id) => {
+                const jobprofile = jobprofiles.find(jobp => jobp.EmployeeID === id);
+                return jobprofile ? new Intl.NumberFormat('vi-VN').format(jobprofile.BaseSalary) : '0';
+            },
+        },
+        {
+            title: 'PHỤ CẤP',
+            dataIndex: 'EmployeeID',
+            minWidth: 70,
+            align: 'right',
+            filterSearch: true,
+            render: (id) => {
+                const jobprofile = jobprofiles.find(jobp => jobp.EmployeeID === id);
+                return jobprofile ? new Intl.NumberFormat('vi-VN').format(jobprofile.Allowance) : '0';
+            },
+        },
+    ];
+
+    if (role === 'Accountant') {
+        columnEMPs.push({
+            title: 'CHỨC NĂNG',
+            dataIndex: 'actions',
+            fixed: 'right',
+            align: 'center',
+            minWidth: 106,
+            render: (_, record) => (
+                <>
+                    <Button type="link" onClick={() => handleAddNew(record)} style={{ border: 'none', height: '20px', width: '40px' }}>Tính lương</Button>
+                </>
+            ),
+        });
+    }
+
     const handleAddCancel = () => {
         setIsAddModalOpen(false);
         addForm.resetFields();
     };
 
-    const handleAddNew = () => {
+    const handleAddNew = (record) => {
+        const totalOT = overtimes
+            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === record.employeeID)
+            .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
+
+        addForm.setFieldsValue({
+            EmployeeID: record.EmployeeID,
+            ID_PayrollCycle: selectedPayrollCycleId,
+            TotalOT: totalOT,
+            TotalOTSalary: totalOT * 200000,
+        });
         setIsAddModalOpen(true);
     };
 
@@ -328,16 +406,16 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         });
     };
 
-    const handlePayrollCycleChange = (value) => {
+    const handlePayrollCycleChange = (selectedPayrollCycleId) => {
         const employeeID = addForm.getFieldValue('EmployeeID');
 
-        if (!employeeID) {
-            message.warning("Vui lòng chọn nhân viên trước!");
-            return;
-        }
+        // if (!employeeID) {
+        //     message.warning("Vui lòng chọn nhân viên trước!");
+        //     return;
+        // }
 
         const totalOT = overtimes
-            .filter(ot => ot.ID_PayrollCycle === value && ot.EmployeeID === employeeID)
+            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === employeeID)
             .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
 
         // Cập nhật lương OT vào form
@@ -363,7 +441,17 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         <>
             <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#fff' }}>
                 <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', paddingTop: '2px', fontWeight: '100', fontSize: '1rem' }}>
-                    Số lượng: {filteredPayrollCycles.length}
+                    <Select
+                        placeholder="Chọn chu kỳ lương"
+                        style={{ width: 170 }}
+                        onChange={(value) => setSelectedPayrollCycleId(value)}
+                    >
+                        {filteredPayrolls.map(pay => (
+                            <Select.Option key={pay.id} value={pay.id}>
+                                {pay.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
                 </Typography.Title>
 
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
@@ -375,10 +463,10 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                         />
                     </Space>
 
-                    {role === 'Manager' && (
+                    {role === 'Accountant' && (
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
-                                Tạo mới <UserAddOutlined />
+                                Hoàn thành
                             </Space>
                         </Button>
                     )}
@@ -389,18 +477,37 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                 className='table_TQ'
                 rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 columns={columns}
-                dataSource={filteredPayrollCycles.map(emp => ({ ...emp, key: emp.ID_Salary }))}
+                dataSource={filteredMonthlySalaries.map(emp => ({ ...emp, key: emp.ID_Salary }))}
                 bordered
                 size='midium'
                 scroll={{
                     x: 'max-content',
-                    y: 51.5 * 9,
+                    y: 23.4 * 9,
+                }}
+                pagination={false}
+                onChange={onChange}
+            />
+            <br/>
+            <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', paddingLeft: '10px', paddingTop: '2px', fontWeight: '100', fontSize: '1rem' }}>
+                Danh sách chưa tính lương ({filteredEmployees.length}/{jobprofiles.length})
+            </Typography.Title>
+
+            <Table
+                className='table_TQ'
+                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+                columns={columnEMPs}
+                dataSource={filteredEmployees.map(emp => ({ ...emp, key: emp.EmployeeID }))}
+                bordered
+                size='midium'
+                scroll={{
+                    x: 'max-content',
+                    y: 18.5 * 9,
                 }}
                 pagination={false}
                 onChange={onChange}
             />
 
-            {/* Thêm mới */}
+            {/* Tạo mới */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Bảng Lương</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered >
                 <Form form={addForm} layout='vertical'>
                     <Form.Item label='Nhân viên' name='EmployeeID' rules={[{ required: true, message: 'Vui lòng chọn nhân viên!' }]}>
@@ -414,7 +521,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                     </Form.Item>
 
                     <Form.Item label='Chu kỳ lương' name='ID_PayrollCycle' rules={[{ required: true, message: 'Vui lòng chọn chu kỳ lương!' }]}>
-                        <Select placeholder="Chọn chu kỳ lương" onChange={handlePayrollCycleChange}>
+                        <Select placeholder="Chọn chu kỳ lương">
                             {payrollcycles.filter(payroll => payroll.Status.toLowerCase() === 'đang xử lý')
                                 .map(payroll => (
                                     <Select.Option key={payroll.ID_PayrollCycle} value={payroll.ID_PayrollCycle}>

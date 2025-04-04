@@ -11,7 +11,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import AdminHeader from './pages/admin/AdminHeader';
 import OrganizationalStructure from './pages/admin/OrganizationalStructure';
 import AdminHome from './pages/admin/AdminHome';
-import HumanReport from './pages/admin/HumanReport';
+import HumanReport from './pages/admin/Report';
 import WorkRegulations from './pages/admin/WorkRegulations';
 import HRPolicy from './pages/admin/HRPolicy';
 import Attendance from './pages/admin/Attendance';
@@ -45,6 +45,7 @@ const App = () => {
   const [newEmployees, setnewEmployees] = useState([]);
   const [newContracts, setnewContracts] = useState([]);
   const [newDepartments, setnewDepartments] = useState([]);
+  const [newDivisions, setnewDivisions] = useState([]);
   const role = user?.role;
 
   useEffect(() => {
@@ -69,6 +70,10 @@ const App = () => {
     if (role === 'Manager') {
       const dpID = employees.find(emp => emp.WorkEmail?.includes(workEmail))?.DepartmentID;
       const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+      const filterDivisions = divisions.filter(dv => dv.DivisionID === dvID);
+      if (JSON.stringify(filterDivisions) !== JSON.stringify(divisions)) {
+        setnewDivisions(filterDivisions);
+      }
       const filterDepartments = departments.filter(dp => dp.DivisionID === dvID);
       if (JSON.stringify(filterDepartments) !== JSON.stringify(departments)) {
         setnewDepartments(filterDepartments);
@@ -85,6 +90,7 @@ const App = () => {
   }, [role, employees, departments, employeecontracts, workEmail]);
 
   const dtEmployees = role === 'Manager' ? newEmployees : employees;
+  const dtDivisions = role === 'Manager' ? newDivisions : divisions;
   const dtDepartments = role === 'Manager' ? newDepartments : departments;
   const dtEmployeeContracts = role === 'Manager' ? newContracts : employeecontracts;
 
@@ -215,7 +221,7 @@ const App = () => {
         <Content className='contents'>
           <Flex gap='large'>
             <Routes>
-              <Route path='home' element={<AdminHome dtEmployees={dtEmployees} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} />
+              <Route path='home' element={<AdminHome dtEmployees={dtEmployees} dtDivisions={dtDivisions} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} />
 
               <Route path='employees' element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />}>
                 <Route path='employeelist' element={<General />} />
