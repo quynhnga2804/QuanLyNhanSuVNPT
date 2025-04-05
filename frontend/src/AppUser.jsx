@@ -64,7 +64,6 @@ const AppUser = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMonthlySalaryUser(response.data);
-      console.log('lương: ', response.data);
     } catch (error) {
       console.log("Lỗi khi lấy dữ liệu lương: ", error);
     }
@@ -124,7 +123,7 @@ const AppUser = () => {
                 <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers} />} />
                 <Route path="notifications" element={<NotificationListUser />} />
                 <Route path="generalinfo" element={<GeneralInfo />} />
-                <Route path='attendances' element={<AttendanceUser />} />
+                <Route path='attendances' element={<AttendanceUser employeeinfo={employeeinfo}/>} />
                 <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo} />} />
                 <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
 

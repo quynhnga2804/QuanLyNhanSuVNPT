@@ -24,6 +24,8 @@ import ReginationList from './pages/admin/ReginationList';
 import PayrollCycle from './pages/admin/PayrollCycle';
 import SalaryPolicy from './pages/admin/SalaryPolicy';
 import BenefitPolicy from './pages/admin/BenifitPolicy';
+import HRStatisticsReports from './pages/admin/HRStatisticsReports';
+import HRAnalysisChart from './pages/admin/HRAnalysisChart';
 
 const { Sider, Header, Content } = Layout;
 
@@ -206,10 +208,11 @@ const App = () => {
                 <Route path='benefitpolicy' element={<BenefitPolicy />} />
               </Route>
 
-              <Route path='humanreports' element={<HumanReport />}>
-                <Route path='payrollcycle' element={<PayrollCycle />} />
-                <Route path='salarypolicy' element={<SalaryPolicy />} />
-                <Route path='benefitpolicy' element={<BenefitPolicy />} />
+              <Route path='humanreports' element={<HumanReport departments={departments} employees={employees}/>}>
+                <Route path='hrstatisticreport' element={<HRStatisticsReports divisions={divisions}/>} />
+                <Route path='hranalysischart' element={<HRAnalysisChart />} />
+                {/* <Route path='benefitpolicy' element={<BenefitPolicy />} /> */}
+                {/* <Route index element={<HRStatisticsReports divisions={divisions}/>} /> */}
               </Route>
 
               <Route path='organizationalstructures' element={<OrganizationalStructure />} />

@@ -1,97 +1,99 @@
-import { Button, Dropdown, Flex, Input, Select, Space, Tabs, Typography } from 'antd';
+import { Tabs,  } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { CaretDownOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import Luong_PhucLoi from './Benefit_Salary';
-import DanhSachPhuThuoc from './DependentList';
-import LaborContract from './LaborContract';
+import HRStatisticsReports from './HRStatisticsReports';
+import HRAnalysisChart from './HRAnalysisChart';
 
-const HumanReport = () => {
-    const [activeKey, setActiveKey] = useState('1');
-    // const [employeecontracts, setemployeecontracts] = useState([]);
-    // const [laborcontracts, setlaborcontracts] = useState([]);
-    // const [employees, setemployees] = useState([]);
-
+const HumanReport = ({employees, departments}) => {
+    const [employeecontracts, setEmployeecontracts] = useState([]);
+    const [jobprofiles, setJobProfiles] = useState([]);
+    const [personalprofiles, setPersonalProfiles] = useState([]);
+    const [resignations, setResignations] = useState([]);
+    const [activeKey, setActiveKey] = useState(() => {
+        return localStorage.getItem('activeKey') || '1';
+    });
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        localStorage.setItem("activeKey", activeKey);
+        localStorage.setItem('activeKey', activeKey);
     }, [activeKey]);
 
     useEffect(() => {
         if (token) {
-            // fetchEmployeeContracts(token);
-            // fetchLaborContracts(token);
-            // fetchEmployees(token);
+            fetchEmployeeContracts(token);
+            fetchJobProfiles(token);
+            fetchPersonalProfiles(token);
+            fetchResignations(token);
         }
     }, []);
 
-    // const fetchEmployeeContracts = async () => {
-    //     try {
-    //         const response = await axios.get('http://localhost:5000/api/admin/employeecontracts', {
-    //             headers: { "Authorization": `Bearer ${token}` }
-    //         });
-    //         setemployeecontracts(response.data);
-    //     } catch (error) {
-    //         console.error('Lỗi khi lấy danh sách hồ sơ nhân sự:', error);
+    // const handleChange = (key) => {
+    //     if (key === '1') {
+    //         navigate('/admin/humanreports/hrstatisticreport');
+    //     } else if (key === '2') {
+    //         navigate('/admin/humanreports/hranalysischart');
     //     }
     // };
 
-    // const fetchEmployees = async () => {
-    //     try {
-    //         const response = await axios.get('http://localhost:5000/api/admin/employees', {
-    //             headers: { "Authorization": `Bearer ${token}` }
-    //         });
-    //         setemployees(response.data);
-    //     } catch (error) {
-    //         console.error('Lỗi khi lấy danh sách nhân viên:', error);
-    //     }
-    // };
+    const fetchEmployeeContracts = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/employeecontracts', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setEmployeecontracts(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách hợp đồng nhân viên:', error);
+        }
+    };
 
-    // const fetchLaborContracts = async () => {
-    //     try {
-    //         const response = await axios.get('http://localhost:5000/api/admin/laborcontracts', {
-    //             headers: { "Authorization": `Bearer ${token}` }
-    //         });
-    //         setlaborcontracts(response.data);
-    //     } catch (error) {
-    //         console.error('Lỗi khi lấy danh sách hồ sơ:', error);
-    //     }
-    // };
+    const fetchJobProfiles = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/jobprofiles', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setJobProfiles(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy bảng hồ sơ công việc:', error);
+        }
+    };
+    const fetchPersonalProfiles = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/personalprofiles', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setPersonalProfiles(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy bảng hồ sơ công việc:', error);
+        }
+    };
+    const fetchResignations = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/resignations', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setResignations(response.data);
+            console.log("ds nghỉ việc: ", response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách nghỉ việc:', error);
+        }
+    };
 
     return (
-        <>
-            <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
-                <Tabs
-                    className='menu-horizontal'
-                    activeKey={activeKey}
-                    onChange={setActiveKey}
-                    items={[
-                        {
-                            key: '1',
-                            label: 'HỢP ĐỒNG LAO ĐỘNG',
-                            children: 'chưa có gì',
-                        },
-                        {
-                            key: '2',
-                            label: 'QUYẾT ĐỊNH NHẬN TUYỂN',
-                            children: 'chưa có gì',
-                        },
-                        {
-                            key: '3',
-                            label: 'DANH SÁCH NGHỈ VIỆC',
-                            children: 'chưa có gì',
-                        },
-                        {
-                            key: '4',
-                            label: 'PHÂN LOẠI HỢP ĐỒNG',
-                            children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ',
-                        },
-                    ]}
-                />
-            </div>
-        </>
-    )
-}
+        <div style={{ width: '100%', height: '100%', overflow: 'none'}}>
+            <Tabs
+                destroyInactiveTabPane={true}
+                className='menu-horizontal'
+                activeKey={activeKey}
+                onChange={setActiveKey}
+                items={[
+                    // role !== 'Accountant' &&
+                    { key: '1', label: 'THỐNG KÊ VÀ BÁO CÁO NHÂN SỰ', children: <HRStatisticsReports key={activeKey} onClick={() => setActiveKey('1')} employeecontracts={employeecontracts} resignations={resignations} jobprofiles={jobprofiles} personalprofiles={personalprofiles} departments={departments} employees={employees} /> },
+                    { key: '2', label: 'BIỂU ĐỒ PHÂN TÍCH NHÂN SỰ', children: <HRAnalysisChart onClick={() => setActiveKey('2')} resignations={resignations} departments={departments} employees={employees} jobprofiles={jobprofiles} personalprofiles={personalprofiles}/>},
+                ]}
+            />
+        </div>
+        
+    );
+};
 
 export default HumanReport;

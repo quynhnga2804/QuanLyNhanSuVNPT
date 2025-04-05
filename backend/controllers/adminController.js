@@ -18,6 +18,8 @@ const FamilyMember = require('../models/familyMemberModel');
 const Attendance = require('../models/attendanceModel');
 const Notification = require('../models/notificationModel');
 const UserNotification = require('../models/userNotificationModel');
+const PersonalProfile = require('../models/personalProfileModel');
+const Resignation = require('../models/resignationModel');
 
 const modelMap = {
   department: Department,
@@ -48,6 +50,10 @@ const modelMap = {
   notifications: Notification,
   usernotification: UserNotification,
   usernotifications: UserNotification,
+  personalprofile : PersonalProfile,
+  personalprofiles : PersonalProfile,
+  resignation : Resignation,
+  resignations : Resignation,
 };
 
 // Cấu hình lưu ảnh vào thư mục uploads

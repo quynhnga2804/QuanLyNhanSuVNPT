@@ -1,6 +1,5 @@
-import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import Search from 'antd/es/transfer/search';
-import { UserAddOutlined } from '@ant-design/icons';
+import { Table, Flex, Modal, Descriptions, message, Space, Button } from 'antd';
+import { LoginOutlined, LogoutOutlined } from '@ant-design/icons';
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { DatePicker } from 'antd';
@@ -11,13 +10,23 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-const AttendanceUser = () => {
+const AttendanceUser = ({employeeinfo}) => {
     const [attendanceUser, setAttendanceUser] = useState([]);
     const [dateRange, setDateRange] = useState([]);
+    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
+    const [selectedAttendance, setSelectedAttendance] = useState(null);
     const token = localStorage.getItem('token');
+    const today = dayjs().format('YYYY-MM-DD');
 
-    const uniquePayroll = Array.from( new Map(attendanceUser.map(att => [att.ID_PayrollCycle, { text: att.PayrollCycle?.PayrollName, value: att.ID_PayrollCycle }])).values());
+    const showModal = (record) => {
+        setSelectedAttendance(record);
+        setIsShowModalOpen(true);
+    };
 
+    const closeModal = () => {
+        setIsShowModalOpen(false);
+        setSelectedAttendance(null);
+    };
 
     useEffect(() => {
         if (token)
@@ -31,10 +40,114 @@ const AttendanceUser = () => {
             });
             setAttendanceUser(response.data);
         } catch (error) {
-            console.log("Lỗi khi lấy dữ liệu chấm công: ", error);
             message.error("Không lấy được dữ liệu chấm công!");
         }
     };
+
+    const checkExistingCheckIn = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/user/attendances`, 
+            { headers: { Authorization: `Bearer ${token}` } });
+            if (response.data.filter(record => dayjs(record.AttendancesDate).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")).length > 0) {
+                message.warning("Bạn đã check in hôm nay rồi!");
+                return false;
+            }
+            return true;
+
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const handleCheckin = async () => {
+        if (!navigator.geolocation) {
+            message.error("Trình duyệt không hỗ trợ GPS");
+            return;
+        }
+    
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords; // Fix lỗi tên biến
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+                if (!response.ok) throw new Error("Không thể lấy địa chỉ!");
+    
+                const data = await response.json();
+                const checkInLocation = data.display_name;
+
+                const canCheckIn = await checkExistingCheckIn();
+                if (!canCheckIn) return;
+                const checkinTime = dayjs().format('HH:mm:ss');
+                const res = await axios.post(`http://localhost:5000/api/user/checkin`, 
+                    {
+                        EmployeeID: employeeinfo?.EmployeeID, 
+                        checkInLocation: checkInLocation,
+                        AttendancesDate: today, 
+                        CheckInTime: checkinTime,
+                    }, 
+                    { headers: { Authorization: `Bearer ${token}` } } 
+                );
+                message.success(res.data.message);
+                await fetchAttendenceUser(); 
+            } catch (error) {
+                message.error("Lỗi khi lấy vị trí hoặc lỗi check-in!");
+            }
+    
+        }, (error) => {
+            message.error("Không thể lấy vị trí GPS!");
+        });
+    };
+
+    const handleCheckout = async () => {
+        if (!navigator.geolocation) {
+            message.error("Trình duyệt không hỗ trợ GPS");
+            return;
+        }
+    
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords; // Fix lỗi tên biến
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+                
+                if (!response.ok) throw new Error("Không thể lấy địa chỉ!");
+    
+                const data = await response.json();
+                const checkOutLocation = data.display_name;
+
+                const existingCheckout = attendanceUser.find(att => dayjs(att.AttendancesDate).format("YYYY-MM-DD") === today);
+
+                if (!existingCheckout || !existingCheckout?.CheckInTime) {
+                    message.warning("Bạn chưa check in nên không thể check out!");
+                }
+                if (existingCheckout?.CheckOutTime) {
+                    message.warning('Bạn đã check out rồi!');
+                }
+
+                const checkInTime = dayjs(`${today} ${existingCheckout?.CheckInTime}`);
+                const checkOutTime = dayjs(`${today} ${dayjs().format('HH:mm:ss')}`);
+                const totalSecondsWorked = checkOutTime.diff(checkInTime, 'second'); 
+                const totalHoursWorked = totalSecondsWorked / 3600;  
+                const res = await axios.put(`http://localhost:5000/api/user/checkout`, 
+                    {
+                        EmployeeID: employeeinfo?.EmployeeID, 
+                        today: today,
+                        checkOutLocation: checkOutLocation, 
+                        TotalHoursWorked: totalHoursWorked,
+                        CheckOutTime: dayjs().format('HH:mm:ss')
+                    }, 
+                    { headers: { Authorization: `Bearer ${token}` } } 
+                );
+                message.success(res.data.message);
+                await fetchAttendenceUser();
+    
+            } catch (error) {
+                message.error("Lỗi khi lấy vị trí hoặc lỗi check-out!");
+            }
+    
+        }, (error) => {
+            message.error("Không thể lấy vị trí GPS!");
+        });
+    };
+    
 
     const filteredAttendanceUser = attendanceUser.filter(att => {
         if (dateRange && dateRange.length === 2) {
@@ -55,18 +168,18 @@ const AttendanceUser = () => {
             ellipsis: true,
             render: (employee) => employee?.FullName || '',
         },
-        {
-            title: 'KỲ LƯƠNG',
-            dataIndex: 'PayrollCycle',
-            width: 150,
-            align: 'center',
-            ellipsis: true,
-            render: (payroll) => payroll?.PayrollName || '',
-            filters: uniquePayroll,
-            filterMode: 'tree',
-            filterSearch: true,
-            onFilter: (value, record) => record.ID_PayrollCycle === value,
-        },
+        // {
+        //     title: 'KỲ LƯƠNG',
+        //     dataIndex: 'PayrollCycle',
+        //     width: 150,
+        //     align: 'center',
+        //     ellipsis: true,
+        //     render: (payroll) => payroll?.PayrollName || '',
+        //     filters: uniquePayroll,
+        //     filterMode: 'tree',
+        //     filterSearch: true,
+        //     onFilter: (value, record) => record.ID_PayrollCycle === value,
+        // },
         {
             title: 'NGÀY CHẤM CÔNG',
             dataIndex: 'AttendancesDate',
@@ -118,13 +231,23 @@ const AttendanceUser = () => {
                         allowClear
                         
                     />
+                    <Space>
+                        <Button style={{background: 'rgb(111, 155, 224)', color: 'white'}}
+                            onClick={handleCheckin}> <LoginOutlined /> Checkin </Button>
+                    </Space>
+                    <Space>
+                        <Button style={{background: 'rgb(111, 155, 224)', color: 'white'}}
+                            onClick={handleCheckout}> <LogoutOutlined /> Checkout </Button>
+                    </Space>
                 </Flex>
+                
             </Flex>
 
             <Table
                 className='table_TQ'
                 columns={columns}
                 dataSource={filteredAttendanceUser}
+                onRow={(record) => ({ onDoubleClick: () => showModal(record), })}
                 bordered
                 size='medium'
                 scroll={{
@@ -133,6 +256,44 @@ const AttendanceUser = () => {
                 }}
                 pagination={false}
             />
+
+            {/* Xem chi tiết tăng ca */}
+            <Modal className='descriptions' title={<div style={{ textAlign: 'center', width: '100%', margin:'1rem 0 2rem 0' }}>Chi Tiết Chấm Công</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={700} centered>
+                {selectedAttendance && (
+                    
+                    <Descriptions column={2} size="middle" labelStyle={{width:'150px'}}>
+                        <Descriptions.Item label="Mã Chấm Công" labelCol={'120px'}>
+                            {selectedAttendance.ID_Attendance}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Checkin Time">
+                            {selectedAttendance.CheckInTime}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Mã Nhân Viên">
+                            {selectedAttendance.EmployeeID}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Checkin Location">
+                            {selectedAttendance.CheckInLocation}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Tên Nhân Viên">
+                            {selectedAttendance.Employee?.FullName || ''}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Checkout Time">
+                            {selectedAttendance.CheckOutTime}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ngày Chấm Công">
+                            {selectedAttendance.AttendancesDate ? dayjs(selectedAttendance.AttendancesDate).format("YYYY-MM-DD") : ""}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Checkout Location">
+                            {selectedAttendance.CheckOutLocation}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Tổng giờ làm">
+                            {selectedAttendance.TotalHoursWorked}
+                        </Descriptions.Item>
+                        
+                    </Descriptions>
+                        
+                )}
+            </Modal>
         </Flex>
     );
 };

@@ -46,9 +46,6 @@ UserNotification.belongsTo(Employee, { foreignKey: 'EmployeeID' });
 Employee.hasMany(Attendance, { foreignKey: 'EmployeeID'});
 Attendance.belongsTo(Employee, { foreignKey: 'EmployeeID'});
 
-PayrollCycle.hasMany(Attendance, {foreignKey: 'ID_PayrollCycle'});
-Attendance.belongsTo(PayrollCycle, { foreignKey: 'ID_PayrollCycle'});
-
 Employee.hasMany(OverTime, { foreignKey: 'EmployeeID'});
 OverTime.belongsTo(Employee, { foreignKey: 'EmployeeID'});
 

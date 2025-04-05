@@ -84,12 +84,6 @@ const SidebarUser = ({collapsed}) => {
                         title: 'Lương tháng',
                     },
                     {
-                        key: 'policyinfo',
-                        icon: <BookOutlined />,
-                        label: !collapsed ? 'Báo cáo' : null,
-                        title: 'Báo cáo',
-                    },
-                    {
                         key: 'logout',
                         label: !collapsed ? 'Đăng xuất' : null,
                         icon: <LogoutOutlined />,

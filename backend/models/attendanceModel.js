@@ -1,3 +1,4 @@
+
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -9,7 +10,7 @@ const Attendance = sequelize.define('Attendance', {
   },
   EmployeeID: {
     type: DataTypes.STRING(10),
-    allowNull: true,
+    allowNull: false,
     references: {
       model: 'employees',
       key: 'EmployeeID',
@@ -20,24 +21,24 @@ const Attendance = sequelize.define('Attendance', {
     allowNull: false,
   },
   CheckInTime: {
-    type: DataTypes.DATE,
-    allowNull: false,
+    type: DataTypes.TIME,
+    allowNull: true,
+  },
+  CheckInLocation: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   CheckOutTime: {
-    type: DataTypes.DATE,
-    allowNull: false,
+    type: DataTypes.TIME,
+    allowNull: true,
+  },
+  CheckOutLocation: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   TotalHoursWorked: {
     type: DataTypes.DECIMAL(5, 2),
-    allowNull: false,
-  },
-  ID_PayrollCycle: {
-    type: DataTypes.STRING(10),
-    allowNull: false,
-    references: {
-      model: 'payrollcycles',
-      key: 'ID_PayrollCycle',
-    },
+    allowNull: true,
   },
 }, {
   tableName: 'attendances',

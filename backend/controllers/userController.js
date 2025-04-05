@@ -16,7 +16,6 @@ const PayrollCycle = require("../models/payrollCycleModel");
 const { OverTime } = require("../models/indexModel");
 const MonthlySalary = require("../models/monthlysalaryModel");
 const Resignation = require("../models/resignationModel");
-
 require("dotenv").config();
 
 const EMAIL_USER = process.env.EMAIL_USER;
@@ -133,7 +132,6 @@ exports.getPersonalProfile = async (req, res) => {
             return res.status(404).json({ message: "Không tìm thấy thông tin cá nhân!" });
         }
         res.json(personalProfile);
-        console.log("personalProfile: ", personalProfile);
     } catch (error) {
         res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({ 
             message: error.message 
@@ -322,22 +320,56 @@ exports.getAttendancesUser = async (req, res) => {
                 {
                     model: Employee, attributes: ['FullName'] 
                 },
-                {
-                    model: PayrollCycle, attributes: ['PayrollName']
-                }
             ]
         });
         if (!attendancesUser){
-            console.log("Không tìm thấy thông tin người thân!");
             return res.status(404).json({ message: "Không tìm thấy chấm công nhân viên!"});
         } 
         res.json(attendancesUser);
-        console.log("Dữ liệu chấm công: ", attendancesUser);
     } catch (error) {
         res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({message: error.message});
     }
 };
 
+// Kiểm tra checkin và update tg check in
+exports.postCheckin = async(req, res) => {
+    try {
+        const { email, role } = req.user;
+        const { checkInLocation, AttendancesDate, CheckInTime } = req.body;
+        const employeeID = await getEmployeeIDByEmail(email, role);
+
+        const newCheckIn = await Attendance.create({
+            EmployeeID: employeeID, AttendancesDate: AttendancesDate, CheckInTime: CheckInTime, CheckInLocation: checkInLocation
+        });
+        res.status(201).json({ message: "Check-in thành công!", data: newCheckIn });
+    } catch (error) {
+        console.error("Lỗi khi Check-in:", error);
+        res.status(500).json({ message: "Lỗi server khi Check-in!" });
+    }
+};
+
+//Checkout
+exports.putCheckout = async (req, res) => {
+    try {
+        const { email, role } = req.user;
+        const { today, checkOutLocation, TotalHoursWorked, CheckOutTime } = req.body;
+        const employeeID = await getEmployeeIDByEmail(email, role);
+
+        const existingCheckout = await Attendance.findOne({
+            where: { EmployeeID: employeeID, AttendancesDate: today }
+        });
+
+        await existingCheckout.update({
+            CheckOutTime: CheckOutTime,
+            CheckOutLocation: checkOutLocation,
+            TotalHoursWorked: TotalHoursWorked.toFixed(2)  // Giữ 2 chữ số thập phân
+        });
+
+        res.status(201).json({ message: 'Check-out thành công!', TotalHoursWorked: TotalHoursWorked.toFixed(2) });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server khi check-out!' });
+    }
+};
 
 // Lấy thông tin overtime 
 exports.getOverTimeUser = async (req, res) => {

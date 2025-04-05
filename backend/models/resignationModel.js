@@ -20,7 +20,7 @@ const Resignation = sequelize.define('Resignation', {
     allowNull: false,
   },
   ResignationsDate: {
-    type: DataTypes.TEXT,
+    type: DataTypes.DATE,
     allowNull: false,
   },
 }, {

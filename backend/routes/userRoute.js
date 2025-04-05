@@ -31,4 +31,6 @@ router.get('/latest-payrollcycle', authenticateToken, userController.getLatestPa
 router.get('/get-managers', authenticateToken, userController.getUserManager);
 // request tăng ca
 router.post('/req-overtime', authenticateToken, userController.addOvertimeEmployeeRe);
+router.post('/checkin', authenticateToken, userController.postCheckin);
+router.put('/checkout', authenticateToken, userController.putCheckout);
 module.exports = router;
