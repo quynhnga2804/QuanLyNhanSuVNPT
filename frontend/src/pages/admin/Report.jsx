@@ -1,17 +1,17 @@
 import { Tabs,  } from 'antd';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import HRStatisticsReports from './HRStatisticsReports';
-import HRAnalysisChart from './HRAnalysisChart';
+import Luong_PhucLoi from './Benefit_Salary';
+import DanhSachPhuThuoc from './DependentList';
+import LaborContract from './LaborContract';
+import EmployeeReport from './EmployeeReport';
 
-const HumanReport = ({employees, departments}) => {
-    const [employeecontracts, setEmployeecontracts] = useState([]);
-    const [jobprofiles, setJobProfiles] = useState([]);
-    const [personalprofiles, setPersonalProfiles] = useState([]);
-    const [resignations, setResignations] = useState([]);
-    const [activeKey, setActiveKey] = useState(() => {
-        return localStorage.getItem('activeKey') || '1';
-    });
+const Report = () => {
+    const [activeKey, setActiveKey] = useState('1');
+    // const [employeecontracts, setemployeecontracts] = useState([]);
+    // const [laborcontracts, setlaborcontracts] = useState([]);
+    // const [employees, setemployees] = useState([]);
+
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -26,6 +26,14 @@ const HumanReport = ({employees, departments}) => {
             fetchResignations(token);
         }
     }, []);
+
+    // const handleChange = (key) => {
+    //     if (key === '1') {
+    //         navigate('/admin/humanreports/hrstatisticreport');
+    //     } else if (key === '2') {
+    //         navigate('/admin/humanreports/hranalysischart');
+    //     }
+    // };
 
     const fetchEmployeeContracts = async () => {
         try {
@@ -71,21 +79,23 @@ const HumanReport = ({employees, departments}) => {
     };
 
     return (
-        <div style={{ width: '100%', height: '100%', overflow: 'none'}}>
-            <Tabs
-                destroyInactiveTabPane={true}
-                className='menu-horizontal'
-                activeKey={activeKey}
-                onChange={setActiveKey}
-                items={[
-                    // role !== 'Accountant' &&
-                    { key: '1', label: 'THỐNG KÊ VÀ BÁO CÁO NHÂN SỰ', children: <HRStatisticsReports key={activeKey} onClick={() => setActiveKey('1')} employeecontracts={employeecontracts} resignations={resignations} jobprofiles={jobprofiles} personalprofiles={personalprofiles} departments={departments} employees={employees} /> },
-                    { key: '2', label: 'BIỂU ĐỒ PHÂN TÍCH NHÂN SỰ', children: <HRAnalysisChart onClick={() => setActiveKey('2')} resignations={resignations} departments={departments} employees={employees} jobprofiles={jobprofiles} personalprofiles={personalprofiles}/>},
-                ]}
-            />
-        </div>
-        
-    );
-};
+        <>
+            <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+                <Tabs
+                    className='menu-horizontal'
+                    activeKey={activeKey}
+                    onChange={setActiveKey}
+                    items={[
+                        { key: '1', label: 'BÁO CÁO NHÂN SỰ', children: <EmployeeReport /> },
+                        { key: '2', label: 'BÁO CÁO LƯƠNG THƯỞNG', children: 'chưa có gì' },
+                        { key: '3', label: 'BÁO CÁO HIỆU SUẤT LÀM VIỆC', children: 'chưa có gì' },
+                        { key: '4', label: 'BÁO CÁO BẢO HIỂM, THUẾ', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
+                        { key: '5', label: 'BÁO CÁO THEO PHÒNG BAN, CHI NHÁNH', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
+                    ]}
+                />
+            </div>
+        </>
+    )
+}
 
-export default HumanReport;
+export default Report;

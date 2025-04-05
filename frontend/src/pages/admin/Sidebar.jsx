@@ -1,5 +1,5 @@
 import { Flex, Menu, Input, Avatar, Tooltip } from 'antd';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     TeamOutlined,
     ReconciliationOutlined,
@@ -19,8 +19,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const { Search } = Input;
 
 const Sidebar = ({ collapsed, onLogout }) => {
+    const [activeKey, setActiveKey] = useState(1);
     const navigate = useNavigate();
     const location = useLocation();
+    const role = JSON.parse(localStorage.getItem('user')).role;
+
+    useEffect(() => {
+        localStorage.setItem("activeKey", activeKey);
+    }, [activeKey]);
 
     const selectedKey = location.pathname.replace('/admin/', '') || 'employees';
 
@@ -62,26 +68,27 @@ const Sidebar = ({ collapsed, onLogout }) => {
                 mode='inline'
                 selectedKeys={[selectedKey]}
                 defaultOpenKeys={['sub1']}
-                onClick={ handleMenuClick }
+                activeKey={activeKey}
+                onChange={setActiveKey}
+                onClick={handleMenuClick}
                 className='menu-bar'
             >
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="base" title={!collapsed ? 'Base.vn' : null}>
-                    {getItem('employees', <TeamOutlined />, 'Danh sách nhân sự')}
-                    {getItem('contracts', <CarryOutOutlined />, 'Hợp đồng lao động')}
-                    {getItem('periodicsalaries', <DollarOutlined />, 'Bảng lương định kỳ')}
-                    {getItem('humanreports', <ReconciliationOutlined />, 'Báo cáo nhân sự')}
+                    {role !== 'Accountant' ? getItem('employees', <TeamOutlined onClick={() => setActiveKey('1')} />, 'Danh sách nhân sự') : null}
+                    {role !== 'Accountant' ? getItem('contracts', <CarryOutOutlined onClick={() => setActiveKey('1')} />, 'Hợp đồng lao động') : null}
+                    {getItem('periodicsalaries', <DollarOutlined onClick={() => setActiveKey('1')} />, 'Bảng lương định kỳ')}
+                    {getItem('humanreports', <ReconciliationOutlined onClick={() => setActiveKey('1')} />, 'Báo cáo')}
                 </Menu.ItemGroup>
 
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="org" title={!collapsed ? 'Thiết kế tổ chức' : null}>
-                    {getItem('organizationalstructures', <ClusterOutlined />, 'Cơ cấu tổ chức')}
-                    {getItem('attendances', <SolutionOutlined />, 'Chấm công')}
-                    {getItem('8', <ScheduleOutlined />, 'Nghiệp vụ được giao')}
-                    {getItem('9', <FileTextOutlined />, 'Văn bản nhân sự')}
+                    {role !== 'Accountant' ? getItem('organizationalstructures', <ClusterOutlined onClick={() => setActiveKey('1')} />, 'Cơ cấu tổ chức') : null}
+                    {getItem('attendances', <SolutionOutlined onClick={() => setActiveKey('1')} />, 'Chấm công')}
+                    {getItem('8', <ScheduleOutlined onClick={() => setActiveKey('1')} />, 'Nghiệp vụ được giao')}
                 </Menu.ItemGroup>
 
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="policy" title={!collapsed ? 'Quy định & Chính sách' : null}>
-                    {getItem('workregulations', <ReadOutlined />, 'Quy định làm việc')}
-                    {getItem('hrpolicies', <WalletOutlined />, 'Chính sách nhân sự')}
+                    {getItem('workregulations', <ReadOutlined onClick={() => setActiveKey('1')} />, 'Quy định làm việc')}
+                    {getItem('hrpolicies', <WalletOutlined onClick={() => setActiveKey('1')} />, 'Chính sách nhân sự')}
                 </Menu.ItemGroup>
 
                 <Menu.Item key="logout" icon={

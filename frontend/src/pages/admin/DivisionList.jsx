@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 
 const DivisionList = ({ divisions, fetchDivisions }) => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter] = useState('');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -165,7 +164,6 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
 
             <Table
                 className='table_TQ'
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 columns={columns}
                 dataSource={filteredDivisions.map(dvs => ({ ...dvs, key: dvs.DivisionID }))}
                 bordered

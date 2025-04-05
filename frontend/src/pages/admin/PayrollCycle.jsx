@@ -44,7 +44,8 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             minWidth: 64,
             align: 'right',
             render: (id) => {
-                const totalSalary = monthlysalaries.filter(mon => mon.ID_PayrollCycle === id).reduce((sum, mon) => sum + mon.NetSalary, 0);
+                const totalSalary = monthlysalaries.filter(mon => mon.ID_PayrollCycle === id)
+                    .reduce((sum, mon) => sum + parseFloat(mon.NetSalary.toString().replace(/[^0-9.-]+/g, '')), 0);
                 return new Intl.NumberFormat('vi-VN').format(totalSalary);
             },
         },
@@ -104,7 +105,11 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             });
 
             // Chuyển đổi thành mảng để vẽ biểu đồ
-            const labels = Object.keys(salaryByMonth).sort();
+            const labels = Object.keys(salaryByMonth)
+                .map((monthYear) => dayjs(monthYear, 'MM-YYYY')) // chuyển đổi chuỗi thành đối tượng dayjs
+                .sort((a, b) => a - b) // sắp xếp theo ngày tháng
+                .map((date) => date.format('MM-YYYY')); // chuyển lại thành chuỗi "MM-YYYY"
+
             const dataPoints = labels.map((monthYear) => salaryByMonth[monthYear]);
 
             setChartData((prev) => {
@@ -123,7 +128,7 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
                             borderColor: "#1168dd",
                             backgroundColor: "#1168dd",
                             borderWidth: 2,
-                            pointRadius: 5,
+                            pointRadius: 3,
                             pointBackgroundColor: "#1168dd",
                             tension: 0.4,
                         },

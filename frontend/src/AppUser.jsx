@@ -22,6 +22,7 @@ import HRPolicy from './pages/admin/HRPolicy.jsx';
 import BenifitPolicy from './pages/admin/BenifitPolicy.jsx';
 import SalaryPolicy from './pages/admin/SalaryPolicy.jsx';
 import EmployeeList from './pages/admin/EmployeeList.jsx';
+import AdminHome from './pages/admin/AdminHome.jsx';
 const { Sider, Content, Header } = Layout;
 
 const AppUser = () => {
@@ -134,7 +135,7 @@ const AppUser = () => {
                   <Route index element={<SalaryPolicy />} />
                 </Route>
 
-                <Route path="admin/employees" element={<EmployeeList replace />} />
+                <Route path="admin/home" element={<AdminHome replace />} />
               </Routes>
             </Flex>
           </Content>

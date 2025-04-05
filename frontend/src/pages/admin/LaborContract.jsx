@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontracts, employees, jobprofiles, departments }) => {
+const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, laborcontracts, jobprofiles, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const today = new Date();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -16,36 +16,19 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
     const [startDate, setStartDate] = useState(null);
-    const [selectedContract, setSelectedContract] = useState(null);
     const [endDateDisabled, setEndDateDisabled] = useState(true);
     const [selectedEmployeeContract, setSelectedEmployeeContract] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const role = JSON.parse(localStorage.getItem('user')).role;
     const workEmail = JSON.parse(localStorage.getItem('user')).email;
-    const [newEmployees, setNewEmployees] = useState([]);
-
-    const expiringContracts = employeecontracts.filter(emp => {
-        if (!emp.EndDate) return false;
-        const endDate = new Date(emp.EndDate);
-        const daysLeft = (endDate - today) / (1000 * 60 * 60 * 24);
-        return daysLeft <= 30 && daysLeft > 0;
-    });
-    const nowContracts = employeecontracts.filter(emp => !emp.EndDate || new Date(emp.EndDate) >= today);
-
-    const mergedContracts = employeecontracts.map(emp => {
-        const contract = laborcontracts.find(lc => lc.ID_Contract === emp.ID_Contract);
-        return {
-            ...emp,
-            ContractType: contract ? contract?.ContractType : '',
-        };
-    });
+    const [newEmployeeContracts, setNewEmployeeContracts] = useState([]);
+    const [tableFilters, setTableFilters] = useState({});
 
     const handleStartDateChange = (e) => {
         setStartDate(e.target.value);
     };
 
     const handleContractInputChange = (value) => {
-        setSelectedContract(value);
 
         const selectedLabContract = laborcontracts.find(lab => lab.ID_Contract === value);
         if (selectedLabContract) {
@@ -69,10 +52,6 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
             }
         }
     };
-
-    const handleSearch = debounce((value) => {
-        setSearchQuery(value.toLowerCase());
-    }, 500);
 
     const handleAddNew = () => {
         setIsAddModalOpen(true);
@@ -182,22 +161,54 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
         setSelectedEmployeeContract(null);
     };
 
-    // useEffect(() => {
-    //     if (role === 'Manager') {
-    //         const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
-    //         const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+    const handleSearch = debounce((value) => {
+        setSearchQuery(value.toLowerCase());
+    }, 500);
 
-    //         const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
-    //         const filtered = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
-    //         setNewEmployees(filtered);
-    //     }
-    // }, [role, employees, departments, workEmail]);
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableFilters(filters);
+    };
 
-    const dataSource = role === 'Manager' && newEmployees.length > 0 ? newEmployees : employees;
-    const filteredEmployeeContracts = mergedContracts.filter(emp =>
-        emp.ContractType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dataSource.find(e => e.EmployeeID === emp.EmployeeID)?.FullName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    useEffect(() => {
+        if (role === 'Manager') {
+            const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
+            const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+            const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
+            const newEmployees = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
+            const relatedEmployeeIDs = newEmployees.map(dv => dv.EmployeeID);
+            const filtered = employeecontracts.filter(emp => relatedEmployeeIDs.includes(emp.EmployeeID));
+            setNewEmployeeContracts(filtered);
+        }
+    }, [role, employees, departments, workEmail]);
+
+    const dataSource = role === 'Manager' && newEmployeeContracts.length > 0 ? newEmployeeContracts : employeecontracts;
+
+    const mergedContracts = dataSource.map(emp => {
+        const contract = laborcontracts.find(lc => lc.ID_Contract === emp.ID_Contract);
+        return {
+            ...emp,
+            ContractType: contract ? contract?.ContractType : '',
+        };
+    });
+
+    const expiringContracts = dataSource.filter(emp => {
+        if (!emp.EndDate) return false;
+        const endDate = new Date(emp.EndDate);
+        const daysLeft = (endDate - today) / (1000 * 60 * 60 * 24);
+        return daysLeft <= 30 && daysLeft > 0;
+    });
+    const nowContracts = dataSource.filter(emp => !emp.EndDate || new Date(emp.EndDate) >= today);
+
+    const filteredEmployeeContracts = mergedContracts.filter(emp => {
+        const matchesSearchQuery = searchQuery === '' ||
+            emp.ContractType.toLowerCase().includes(searchQuery) ||
+            employees.find(e => e.EmployeeID === emp.EmployeeID)?.FullName.toLowerCase().includes(searchQuery);
+
+        const selectedStatus = tableFilters.Status || [];
+        const matchesStatusFilter = selectedStatus.length === 0 || selectedStatus.includes(emp.Status);
+
+        return matchesSearchQuery && matchesStatusFilter;
+    });
 
     const columns = [
         {
@@ -357,10 +368,6 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
         }
     ];
 
-    const onChange = (pagination, filters, sorter, extra) => {
-        console.log('params', pagination, filters, sorter, extra);
-    };
-
     return (
         <>
             <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#fff' }}>
@@ -398,7 +405,7 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
                             y: 51 * 9,
                         }}
                         pagination={false}
-                        onChange={onChange}
+                        onChange={handleTableChange}
                     />
                 </Flex>
                 <SideContent nowContracts={nowContracts} expiringContracts={expiringContracts} />
@@ -409,13 +416,16 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
                 <Form form={addForm} layout='vertical'>
                     <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
                         <Select>
-                            {dataSource.map(emp => (
-                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
-                                    ({emp.EmployeeID}) {emp.FullName}
-                                </Select.Option>
-                            ))}
+                            {employees
+                                .filter(emp => !nowContracts.some(contract => contract.EmployeeID === emp.EmployeeID))
+                                .map(emp => (
+                                    <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                                        ({emp.EmployeeID}) {emp.FullName}
+                                    </Select.Option>
+                                ))}
                         </Select>
                     </Form.Item>
+
                     <Form.Item label="Ngày bắt đầu" name="StartDate" rules={[{ required: true }]}>
                         <Input type="date" onChange={handleStartDateChange} />
                     </Form.Item>
@@ -476,7 +486,7 @@ const LaborContract = ({ fetchEmployeeContracts, employeecontracts, laborcontrac
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Họ và Tên">
-                            {dataSource.find(emp => emp.EmployeeID === selectedEmployeeContract.EmployeeID).FullName}
+                            {employees.find(emp => emp.EmployeeID === selectedEmployeeContract.EmployeeID).FullName}
                         </Descriptions.Item>
                         <Descriptions.Item label="Ngày kết thúc">
                             {selectedEmployeeContract.EndDate || 'Không thời hạn'}

@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 
 const General = ({ employees, departments, users, fetchEmployees, fetchUsers, employeecontracts }) => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
@@ -20,6 +19,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const role = JSON.parse(localStorage.getItem('user')).role;
     const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newEmployees, setNewEmployees] = useState([]);
+    const [tableFilters, setTableFilters] = useState({});
 
     const uniqueGenders = [...new Set(employees.map(emp => emp.Gender).filter(Boolean))];
     const uniquePositions = [...new Set(employees.map(emp => emp.Position).filter(Boolean))];
@@ -84,10 +84,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
         }
     };
 
-    const handleSearch = debounce((value) => {
-        setSearchQuery(value.toLowerCase());
-    }, 500);
-
     const handleAddNew = () => {
         setIsAddModalOpen(true);
     };
@@ -126,12 +122,18 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
         }
     };
 
+    const handleSearch = debounce((value) => {
+        setSearchQuery(value.toLowerCase());
+    }, 500);
+
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableFilters(filters);
+    };
+
     useEffect(() => {
         if (role === 'Manager') {
-            console.log(employees);
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
-
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
             const filtered = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
             setNewEmployees(filtered);
@@ -139,12 +141,23 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     }, [role, employees, departments, workEmail]);
 
     const dataSource = role === 'Manager' ? newEmployees : employees;
-    const filteredEmployees = dataSource.filter(emp =>
-        emp.FullName.toLowerCase().includes(searchQuery) ||
-        emp.EmployeeID.toLowerCase().includes(searchQuery) ||
-        emp.Address.toLowerCase().includes(searchQuery) ||
-        emp.PhoneNumber.includes(searchQuery)
-    );
+    const filteredEmployees = dataSource.filter(emp => {
+        const matchesSearchQuery = searchQuery === '' ||
+            emp.FullName.toLowerCase().includes(searchQuery) ||
+            emp.EmployeeID.toLowerCase().includes(searchQuery) ||
+            emp.Address.toLowerCase().includes(searchQuery) ||
+            emp.PhoneNumber.includes(searchQuery);
+
+        const selectedGender = tableFilters.Gender || [];
+        const selectedPosition = tableFilters.Position || [];
+        const selectedDepartmentID = tableFilters.DepartmentID || [];
+
+        const matchesGenderFilter = selectedGender.length === 0 || selectedGender.includes(emp.Gender);
+        const matchesPositionFilter = selectedPosition.length === 0 || selectedPosition.includes(emp.Position);
+        const matchesDepartmentFilter = selectedDepartmentID.length === 0 || selectedDepartmentID.includes(emp.DepartmentID);
+
+        return matchesSearchQuery && matchesGenderFilter && matchesPositionFilter && matchesDepartmentFilter;
+    });
 
     const handleDelete = (record) => {
         Modal.confirm({
@@ -175,7 +188,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                 {
                     WorkEmail: selectedEmployee.WorkEmail,
                     UserName: newUser.UserName,
-                    Password: newUser.Password, // Mã hóa trên backend
+                    Password: newUser.Password,
                     Role: newUser.Role,
                 },
                 {
@@ -287,7 +300,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             filters: uniqueGenders.map(gd => ({ text: gd, value: gd })),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.Gender === value,
         },
         {
             title: 'ĐỊA CHỈ',
@@ -316,7 +328,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             filters: uniquePositions.map(pt => ({ text: pt, value: pt })),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.Position === value,
         },
         {
             title: 'NGÀY BẮT ĐẦU',
@@ -340,7 +351,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             })),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.DepartmentID === value,
         },
     ];
 
@@ -389,7 +399,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             <Table
                 className='table_TQ'
                 rowKey='EmployeeID'
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 columns={columns}
                 dataSource={filteredEmployees.map(emp => ({ ...emp, key: emp.EmployeeID }))}
                 onRow={(record) => ({
@@ -402,6 +411,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                     y: 51.5 * 9,
                 }}
                 pagination={false}
+                onChange={handleTableChange}
             />
 
 

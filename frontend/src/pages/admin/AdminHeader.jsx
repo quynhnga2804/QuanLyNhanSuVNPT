@@ -6,7 +6,6 @@ import {
     SettingOutlined,
     HomeOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
@@ -15,6 +14,7 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
     const user = localStorage.getItem('user');
     const { Text } = Typography;
     const navigate = useNavigate();
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     useEffect(() => {
         if (token) {
@@ -27,6 +27,11 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
             key: "userInfo",
             label: <Text strong>{username || "Người dùng"}</Text>,
             disabled: true,
+        },
+        role !== "Admin" && {
+            key: "User/home",
+            label: "Thông tin cá nhân",
+            onClick: () => navigate("../User/home"),
         },
         {
             key: "logout",
@@ -49,7 +54,7 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
                         <BellOutlined className='header-icon' onClick={() => navigate('/admin/notifications')} />
                     </Badge>
 
-                    <SettingOutlined className='header-icon' />
+                    {/* <SettingOutlined className='header-icon' /> */}
 
                     <Dropdown menu={{ items }} trigger={["click"]} className='avata'>
                         <a onClick={(e) => e.preventDefault()} style={{ margin: '-16px 0' }}>

@@ -2,12 +2,15 @@ import { Tabs } from 'antd';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LaborContract from './LaborContract';
-import ReginationList from './ReginationList';
+import ReginationList from './ResignationList';
 
-const Contract = ({ employeecontracts, fetchEmployeeContracts, employees }) => {
-    const [activeKey, setActiveKey] = useState('1');
+const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, departments }) => {
     const [laborcontracts, setlaborcontracts] = useState([]);
     const [jobprofiles, setjobprofiles] = useState([]);
+    const [resignations, setresignations] = useState([]);
+    const [activeKey, setActiveKey] = useState(() => {
+        return localStorage.getItem('activeKey') || '1';
+    });
 
     const token = localStorage.getItem('token');
     const role = JSON.parse(localStorage.getItem('user')).role;
@@ -20,6 +23,7 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees }) => {
         if (token) {
             fetchLaborContracts(token);
             fetchJobProfiles(token);
+            fetchResignations(token);
         }
     }, []);
 
@@ -45,6 +49,17 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees }) => {
         }
     };
 
+    const fetchResignations = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/resignations', {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            setresignations(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách hồ sơ:', error);
+        }
+    };
+
     return (
         <>
             <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
@@ -54,9 +69,9 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees }) => {
                     onChange={setActiveKey}
                     items={[
                         role !== 'Accountant' &&
-                        { key: '1', label: 'HỢP ĐỒNG LAO ĐỘNG', children: <LaborContract employeecontracts={employeecontracts} laborcontracts={laborcontracts} jobprofiles={jobprofiles} fetchEmployeeContracts={fetchEmployeeContracts} employees={employees} /> },
-                        { key: '2', label: 'DANH SÁCH NGHỈ VIỆC', children: <ReginationList /> },
-                        { key: '3', label: 'PHÂN LOẠI HỢP ĐỒNG', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
+                        { key: '1', label: 'HỢP ĐỒNG LAO ĐỘNG', children: <LaborContract onClick={() => setActiveKey('1')} departments={departments} employees={employees} employeecontracts={employeecontracts} laborcontracts={laborcontracts} jobprofiles={jobprofiles} fetchEmployeeContracts={fetchEmployeeContracts} /> },
+                        role !== 'Accountant' &&
+                        { key: '2', label: 'DANH SÁCH NGHỈ VIỆC', children: <ReginationList onClick={() => setActiveKey('2')} departments={departments} resignations={resignations} employees={employees} /> },
                     ]}
                 />
             </div>
