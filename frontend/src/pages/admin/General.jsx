@@ -188,7 +188,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                 {
                     WorkEmail: selectedEmployee.WorkEmail,
                     UserName: newUser.UserName,
-                    Password: newUser.Password, // Mã hóa trên backend
+                    Password: newUser.Password,
                     Role: newUser.Role,
                 },
                 {

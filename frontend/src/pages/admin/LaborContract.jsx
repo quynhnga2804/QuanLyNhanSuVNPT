@@ -416,13 +416,16 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                 <Form form={addForm} layout='vertical'>
                     <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
                         <Select>
-                            {employees.map(emp => (
-                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
-                                    ({emp.EmployeeID}) {emp.FullName}
-                                </Select.Option>
-                            ))}
+                            {employees
+                                .filter(emp => !nowContracts.some(contract => contract.EmployeeID === emp.EmployeeID))
+                                .map(emp => (
+                                    <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                                        ({emp.EmployeeID}) {emp.FullName}
+                                    </Select.Option>
+                                ))}
                         </Select>
                     </Form.Item>
+
                     <Form.Item label="Ngày bắt đầu" name="StartDate" rules={[{ required: true }]}>
                         <Input type="date" onChange={handleStartDateChange} />
                     </Form.Item>

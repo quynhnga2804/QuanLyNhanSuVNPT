@@ -6,7 +6,6 @@ import {
     SettingOutlined,
     HomeOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
@@ -55,7 +54,7 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
                         <BellOutlined className='header-icon' onClick={() => navigate('/admin/notifications')} />
                     </Badge>
 
-                    <SettingOutlined className='header-icon' />
+                    {/* <SettingOutlined className='header-icon' /> */}
 
                     <Dropdown menu={{ items }} trigger={["click"]} className='avata'>
                         <a onClick={(e) => e.preventDefault()} style={{ margin: '-16px 0' }}>

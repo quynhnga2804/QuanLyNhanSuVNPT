@@ -18,6 +18,7 @@ const Notifications = ({ fetchUnreadCount }) => {
     const [filterType, setFilterType] = useState('all');
     const EmployeeID = employees.find(emp => emp.WorkEmail === workEmail)?.EmployeeID;
     const [selectedNotification, setSelectedNotification] = useState(null);
+    const role = currentUser?.role;
 
     const filteredStatuses = notifications.filter(item => {
         const isDeleted = usernotifications.some(userNo =>
@@ -207,9 +208,11 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const menu = (
         <Menu>
-            <Menu.Item key='add-new' onClick={handleAddNew}>
-                Gửi thông báo mới
-            </Menu.Item>
+            {(role === 'Admin' || role === 'Director') && (
+                <Menu.Item key='add-new' onClick={handleAddNew}>
+                    Gửi thông báo mới
+                </Menu.Item>
+            )}
             <Menu.Item key='mark-all-read' onClick={handleMarkAllRead}>
                 Đánh dấu tất cả là đã đọc
             </Menu.Item>
@@ -222,10 +225,10 @@ const Notifications = ({ fetchUnreadCount }) => {
 
         if (noti.sentID === EmployeeID) {
             tagColor = 'blue';
-            tagText = 'Gửi đi';
+            tagText = 'Đã gửi';
         } else if (noti.receivedID === EmployeeID || (noti.receivedID !== EmployeeID && noti.receivedID === 'All')) {
             tagColor = 'green';
-            tagText = 'Nhận được';
+            tagText = 'Đã nhận';
         }
 
         return (
@@ -250,7 +253,7 @@ const Notifications = ({ fetchUnreadCount }) => {
                             style={{ width: 170 }}
                         >
                             <Option value='all'>Tất cả</Option>
-                            <Option value='sent'>Thông báo gửi đi</Option>
+                            {(role === 'Admin' || role === 'Director') && <Option value='sent'>Thông báo gửi đi</Option>}
                             <Option value='received'>Thông báo nhận</Option>
                             <Option value='expired'>Thông báo hết hạn</Option>
                         </Select>
@@ -281,7 +284,7 @@ const Notifications = ({ fetchUnreadCount }) => {
                                         {item.Title} - {dayjs(item.ExpiredAt).format('DD/MM/YYYY')}
                                     </span>
                                 </Badge>
-                                {renderNotificationTitle(item)}
+                                {(role === 'Admin' || role === 'Director') && renderNotificationTitle(item)}
                             </Flex>
 
                             <Flex gap={12}>

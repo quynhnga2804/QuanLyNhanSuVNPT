@@ -6,7 +6,7 @@ import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, fetchPayrollCycles }) => {
+const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -45,9 +45,9 @@ const PayrollCycleList = ({ employees, jobprofiles, departments, payrollcycles, 
     };
 
     const handleAddNew = () => {
-        const isProcessing = payrollcycles.some(cycle => cycle.Status === "Đang xử lý");
+        const isProcessing = payrollcycles.some(cycle => cycle.Status === "Đang xử lý" || cycle.Status === "Chưa bắt đầu");
         if (isProcessing) {
-            message.warning("Đã có chu kỳ lương chưa bắt đầu. Không thể tạo mới!");
+            message.warning("Đang tồn tại chu kỳ lương chưa hoàn thành. Không thể tạo mới!");
             return;
         }
 

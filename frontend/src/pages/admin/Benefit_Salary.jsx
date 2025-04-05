@@ -31,8 +31,8 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
 
     const filteredEmployees = jobprofiles.filter(job => {
         if (!selectedPayrollCycleId) return false;
-    
-        return !monthlysalaries.some(mont => 
+
+        return !monthlysalaries.some(mont =>
             mont.EmployeeID === job.EmployeeID && mont.ID_PayrollCycle === selectedPayrollCycleId
         );
     });
@@ -138,7 +138,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             title: 'NGÀY TÍNH LƯƠNG',
             dataIndex: 'PaymentDate',
             minWidth: 140,
-            align: 'right',
+            align: 'center',
             render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
     ].filter(col => col.dataIndex !== 'ID_Salary');
@@ -209,7 +209,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             minWidth: 106,
             render: (_, record) => (
                 <>
-                    <Button type="link" onClick={() => handleAddNew(record)} style={{ border: 'none', height: '20px', width: '40px' }}>Tính lương</Button>
+                    <Button type="link" onClick={() => handleAdd(record)} style={{ border: 'none', height: '20px', width: '40px' }}>Tính lương</Button>
                 </>
             ),
         });
@@ -220,9 +220,9 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         addForm.resetFields();
     };
 
-    const handleAddNew = (record) => {
+    const handleAdd = (record) => {
         const totalOT = overtimes
-            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === record.employeeID)
+            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === record.EmployeeID && ot.Status === 'Approved')
             .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
 
         addForm.setFieldsValue({
@@ -285,6 +285,66 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             handleAddCancel();
         } catch (error) {
             message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
+        }
+    };
+
+    const handleAddAll = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await Promise.all(filteredEmployees.map(async (emp) => {
+                const employeeID = emp.EmployeeID;
+
+                // Tìm thông tin job
+                const selectedEmployee = jobprofiles.find(job => job.EmployeeID === employeeID);
+                const baseSalary = selectedEmployee ? +selectedEmployee.BaseSalary : 0;
+                const allowance = selectedEmployee ? +selectedEmployee.Allowance : 0;
+
+                // Tính OT đã duyệt
+                const totalOT = overtimes
+                    .filter(ot =>
+                        ot.EmployeeID === employeeID &&
+                        ot.ID_PayrollCycle === selectedPayrollCycleId &&
+                        ot.Status === 'Approved'
+                    )
+                    .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
+
+                const totalOTSalary = totalOT * 200000;
+                const insuranceFee = baseSalary * 0.105;
+
+                const personalReduction = 11000000;
+                const familyMemberCounts = familyMembers.filter(fam => fam.EmployeeID === employeeID).length || 0;
+                const dependentReduction = 4400000 * familyMemberCounts;
+
+                const prize = 0;
+                const forfeit = 0;
+
+                const grossIncome = baseSalary + allowance + totalOTSalary + prize;
+                const taxableIncome = grossIncome - personalReduction - dependentReduction - forfeit;
+                const taxPayable = taxableIncome > 0 ? calculateTax(taxableIncome) : 0;
+                const netSalary = grossIncome - taxPayable - insuranceFee - forfeit;
+
+                const data = {
+                    EmployeeID: employeeID,
+                    ID_PayrollCycle: selectedPayrollCycleId,
+                    InsuranceFee: insuranceFee,
+                    TaxPayable: taxPayable,
+                    Forfeit: forfeit,
+                    PrizeMoney: prize,
+                    TotalOTSalary: totalOTSalary,
+                    NetSalary: netSalary,
+                    PaymentDate: dayjs().format('YYYY-MM-DD'),
+                };
+
+                return axios.post('http://localhost:5000/api/admin/monthlysalaries', data, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }));
+
+            fetchMonthlySalaries();
+            message.success('Tính lương hàng loạt thành công!');
+        } catch (error) {
+            console.error(error);
+            message.error('Đã xảy ra lỗi khi tính lương hàng loạt!');
         }
     };
 
@@ -409,13 +469,13 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
     const handlePayrollCycleChange = (selectedPayrollCycleId) => {
         const employeeID = addForm.getFieldValue('EmployeeID');
 
-        // if (!employeeID) {
-        //     message.warning("Vui lòng chọn nhân viên trước!");
-        //     return;
-        // }
+        if (!employeeID) {
+            message.warning("Vui lòng chọn nhân viên trước!");
+            return;
+        }
 
         const totalOT = overtimes
-            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === employeeID)
+            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === EmployeeID)
             .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
 
         // Cập nhật lương OT vào form
@@ -431,6 +491,28 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         addForm.setFieldsValue({
             TotalOTSalary: totalOT * 200000,
         });
+    };
+
+    const handleComplete = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:5000/api/admin/payrollcycles/${selectedPayrollCycleId}`,
+                { Status: "Hoàn thành" },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+            message.success('Cập nhật lương thành công!');
+            handleEditCancel();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } catch (error) {
+            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
+        }
     };
 
     const onChange = (pagination, filters, sorter, extra) => {
@@ -464,10 +546,8 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                     </Space>
 
                     {role === 'Accountant' && (
-                        <Button type='primary' onClick={handleAddNew}>
-                            <Space>
-                                Hoàn thành
-                            </Space>
+                        <Button type='primary' onClick={handleComplete} disabled={filteredEmployees.length > 0 || filteredMonthlySalaries.length === 0}>
+                            <Space>Hoàn thành</Space>
                         </Button>
                     )}
                 </Flex>
@@ -482,15 +562,23 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                 size='midium'
                 scroll={{
                     x: 'max-content',
-                    y: 23.4 * 9,
+                    y: 24.3 * 9,
                 }}
                 pagination={false}
                 onChange={onChange}
             />
-            <br/>
-            <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', paddingLeft: '10px', paddingTop: '2px', fontWeight: '100', fontSize: '1rem' }}>
-                Danh sách chưa tính lương ({filteredEmployees.length}/{jobprofiles.length})
-            </Typography.Title>
+
+            <Flex justify='space-between' style={{ padding: '15px 20px 5px 20px' }}>
+                <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', fontWeight: '100', fontSize: '1rem' }}>
+                    Danh sách chưa tính lương ({filteredEmployees.length}/{jobprofiles.length})
+                </Typography.Title>
+
+                {role === 'Accountant' && (
+                    <Button type='primary' onClick={handleAddAll} disabled={filteredEmployees.length === 0}>
+                        <Space>Tính lương tất cả</Space>
+                    </Button>
+                )}
+            </Flex>
 
             <Table
                 className='table_TQ'
