@@ -10,18 +10,18 @@ const EmployeeContract = sequelize.define('EmployeeContract', {
   ID_Contract: {
     type: DataTypes.STRING(10), 
     allowNull: false,
-    // references: {
-    //   model: 'laborcontracts',
-    //   key: 'ID_Contract'
-    // }
+    references: {
+      model: 'laborcontracts',
+      key: 'ID_Contract'
+    }
   },
   EmployeeID: {
     type: DataTypes.STRING(10),
     allowNull: false,
-    // references: {
-    //   model: 'employees',
-    //   key: 'EmployeeID'
-    // }
+    references: {
+      model: 'employees',
+      key: 'EmployeeID'
+    }
   },
   StartDate: {
     type: DataTypes.DATE,
