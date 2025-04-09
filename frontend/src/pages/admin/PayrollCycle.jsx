@@ -106,9 +106,9 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
 
             // Chuyển đổi thành mảng để vẽ biểu đồ
             const labels = Object.keys(salaryByMonth)
-                .map((monthYear) => dayjs(monthYear, 'MM-YYYY')) // chuyển đổi chuỗi thành đối tượng dayjs
+                .map((monthYear) => dayjs(monthYear, 'MM-YYYY'))
                 .sort((a, b) => a - b) // sắp xếp theo ngày tháng
-                .map((date) => date.format('MM-YYYY')); // chuyển lại thành chuỗi "MM-YYYY"
+                .map((date) => date.format('MM-YYYY'));
 
             const dataPoints = labels.map((monthYear) => salaryByMonth[monthYear]);
 
@@ -149,22 +149,60 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
                 intersect: false,
                 displayColors: false,
             }
+        },
+        scales: {
+            x: {
+                grid: {
+                    display: false  // Tắt lưới trục X
+                },
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 45
+                },
+                afterTick: function (scale) {
+                    // Đảm bảo đơn vị nằm cuối trục X
+                    const lastTick = scale.ticks[scale.ticks.length - 1];
+                    scale.ticks.push(lastTick);
+                }
+            },
+            y: {
+                ticks: {
+                    callback: function (value) {
+                        return value.toLocaleString('vi-VN') + '₫';
+                    }
+                },
+                afterTick: function (scale) {
+                const yAxis = scale;
+                const ctx = scale.chart.ctx;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(yAxis.right, yAxis.top);
+                ctx.lineTo(yAxis.right - 10, yAxis.top + 10); // Mũi tên
+                ctx.lineTo(yAxis.right + 10, yAxis.top + 10);
+                ctx.closePath();
+                ctx.fillStyle = 'blue'; // Màu mũi tên
+                ctx.fill();
+                ctx.restore();
+            },
+            }
         }
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '99%' }}>
+        <div style={{ padding: '20px' }}>
             <Row gutter={16}>
-                <Col span={16}>
+                <Col span={14}>
                     <Card>
                         <div style={{ height: '200px' }}>
+                            <AntTitle level={5}>Tổng lương theo tháng</AntTitle>
                             <Line data={chartData} options={chartOptions} />
                         </div>
                     </Card>
                 </Col>
-                <Col span={8}>
+
+                <Col span={10}>
                     <Card>
-                        <AntTitle level={4}>Payment Status</AntTitle>
+                        <AntTitle level={5}>Payment Status</AntTitle>
                         <Text strong style={{ fontSize: 20 }}>2,400 Employees</Text>
                         <Progress percent={68} success={{ percent: 68 }} strokeColor='#52c41a' />
                         <Progress percent={17} success={{ percent: 17 }} strokeColor='#faad14' />

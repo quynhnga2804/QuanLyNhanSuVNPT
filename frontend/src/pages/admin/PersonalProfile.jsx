@@ -1,7 +1,7 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
 import React, { useState, useEffect } from 'react';
 import Search from 'antd/es/transfer/search';
-import { UserAddOutlined } from '@ant-design/icons';
+import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 import axios from 'axios';
@@ -164,7 +164,6 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
             align: 'right',
             filters: uniqueEducations.map(ed => ({ text: ed, value: ed })),
             filterMode: 'tree',
-            filterSearch: true,
         },
         {
             title: 'BẰNG CẤP',
@@ -219,8 +218,8 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
             minWidth: 113,
             render: (_, record) => (
                 <>
-                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}><EditOutlined /></Button>
+                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}><DeleteOutlined /></Button>
                 </>
             ),
         });
@@ -238,6 +237,12 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
     const filteredpersonalprofiles = dataSource.filter(dvs => {
         const matchesSearchQuery = searchQuery === '' ||
             dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
+            dvs.Nationality.toLowerCase().includes(searchQuery) ||
+            dvs.PlaceOfBirth.toLowerCase().includes(searchQuery) ||
+            dvs.InsurancesNumber.toLowerCase().includes(searchQuery) ||
+            dvs.ID_Card.toLowerCase().includes(searchQuery) ||
+            dvs.Degree.toLowerCase().includes(searchQuery) ||
+            dvs.Major.toLowerCase().includes(searchQuery) ||
             employees.find(e => e.EmployeeID === dvs.EmployeeID)?.FullName.toLowerCase().includes(searchQuery);
 
         const selectedEducation = tableFilters.Education || [];

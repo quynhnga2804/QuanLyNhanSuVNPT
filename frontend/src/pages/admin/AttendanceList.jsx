@@ -1,236 +1,145 @@
-import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState } from 'react';
+import { Table, Flex, Space, Typography } from 'antd';
+import React, { useState, useEffect } from 'react';
 import Search from 'antd/es/transfer/search';
-import { UserAddOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
+import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
-import axios from 'axios';
 
-const AttendanceList = ({ attendances }) => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+const AttendanceList = ({ attendances, employees, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter] = useState('');
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [editingAttendance, setEditingAttendance] = useState(null);
-    const [editForm] = Form.useForm();
-    const [addForm] = Form.useForm();
+    const [newAttendances, setNewAttendances] = useState([]);
+    const workEmail = JSON.parse(localStorage.getItem('user')).email;
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
-    const handleEdit = (record) => {
-        setEditingAttendance(record);
-        editForm.setFieldsValue(record);
-        setIsEditModalOpen(true);
-    };
-
-    const handleEditCancel = () => {
-        setIsEditModalOpen(false);
-        editForm.resetFields();
-    };
-
-    const handleAddNew = () => {
-        setIsAddModalOpen(true);
-    };
-
-    const handleAddCancel = () => {
-        setIsAddModalOpen(false);
-        addForm.resetFields();
-    };
-
-    const handleDelete = (record) => {
-        Modal.confirm({
-            title: 'Xác nhận xóa',
-            content: `Bạn có chắc chắn muốn xóa chấm công ngày ${record.AttendancesDate} không?`,
-            okText: 'Xóa',
-            okType: 'danger',
-            cancelText: 'Hủy',
-            onOk: async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/attendances/${record.ID_Attendance}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    message.success(`Xóa nhân sự ${record.AttendancesDate} thành công!`);
-                    fetchAttendances();
-                } catch (error) {
-                    message.error('Xóa thất bại, vui lòng thử lại.');
-                }
-            },
-        });
-    };
-
-    const handleAddSave = async () => {
-        try {
-            const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/attendances', values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            fetchAttendances();
-            message.success('Thêm mới nhân sự thành công!');
-            handleAddCancel();
-        } catch (error) {
-            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
-        }
-    };
-
-    const handleEditSave = async () => {
-        try {
-            const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/attendances/${editingAttendance.ID_Attendance}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            fetchAttendances();
-            message.success('Chỉnh sửa thành công!');
-            handleEditCancel();
-        } catch (error) {
-            message.error('Sửa thất bại, vui lòng thử lại.');
-        }
-    };
+    const [fromDate, setFromDate] = useState(null);
+    const [toDate, setToDate] = useState(null);
 
     const columns = [
         {
             title: 'MÃ',
             dataIndex: 'ID_Attendance',
             fixed: 'left',
+            minWidth: 50,
             align: 'center',
         },
         {
             title: 'MÃ NHÂN VIÊN',
             dataIndex: 'EmployeeID',
             align: 'center',
-            minWidth: 72,
-            filterSearch: true,
+            minWidth: 109,
         },
         {
             title: 'NGÀY CHẤM CÔNG',
             dataIndex: 'AttendancesDate',
-            minWidth: 79,
+            minWidth: 139,
             align: 'center',
+            render: (date) => dayjs(date).format('DD-MM-YYYY'),
         },
         {
             title: 'GIỜ VÀO',
             dataIndex: 'CheckInTime',
-            minWidth: 64,
+            minWidth: 100,
             align: 'center',
-            filterSearch: true,
+        },
+        {
+            title: 'ĐỊA ĐIỂM VÀO',
+            dataIndex: 'CheckInLocation',
+            minWidth: 100,
+            align: 'left',
         },
         {
             title: 'GIỜ RA',
             dataIndex: 'CheckOutTime',
-            minWidth: 64,
+            minWidth: 100,
             align: 'center',
+        },
+        {
+            title: 'ĐỊA ĐIỂM RA',
+            dataIndex: 'CheckOutLocation',
+            minWidth: 100,
+            align: 'left',
         },
         {
             title: 'TỔNG GIỜ LÀM',
             dataIndex: 'TotalHoursWorked',
-            minWidth: 98,
+            minWidth: 118,
             align: 'center',
-            filterSearch: true,
-        },
-        {
-            title: 'MÃ CHU KỲ',
-            dataIndex: 'ID_PayrollCycle',
-            minWidth: 64,
-            align: 'center',
-        },
-        {
-            title: 'CHỨC NĂNG',
-            dataIndex: 'actions',
             fixed: 'right',
-            align: 'center',
-            minWidth: 93,
-            render: (_, record) => (
-                <>
-                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
-                </>
-            ),
-        }
+        },
     ];
 
     const handleSearch = debounce((value) => {
         setSearchQuery(value.toLowerCase());
     }, 500);
 
-    const filteredAttendances = attendances.filter(ate =>
-        ate.AttendancesDate.toLowerCase().includes(searchQuery) &&
-        (statusFilter ? ate.status === statusFilter : true)
-    );
+    useEffect(() => {
+        if (role === 'Manager') {
+            const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
+            const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
+            const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
+            const filteredEmployees = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
+            const filtered = attendances.filter(ate => filteredEmployees.some(emp => emp.EmployeeID === ate.EmployeeID));
+            setNewAttendances(filtered);
+        }
+    }, [role, employees, departments, workEmail]);
+
+    const dataSource = role === 'Manager' ? newAttendances : attendances;
+
+    const filteredAttendances = dataSource.filter(ate => {
+        const matchessearchQuery = searchQuery === '' ||
+            ate.CheckInLocation.toLowerCase().includes(searchQuery) ||
+            ate.CheckOutLocation.toLowerCase().includes(searchQuery);
+
+        const otDate = dayjs(ate.AttendancesDate);
+        const matchesDateRange = (!fromDate || otDate.isSameOrAfter(fromDate, 'day')) && (!toDate || otDate.isSameOrBefore(toDate, 'day'));
+
+        return matchessearchQuery && matchesDateRange;
+    });
 
     return (
         <>
             <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#fff' }}>
                 <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', paddingTop: '2px', fontWeight: '100', fontSize: '1rem' }}>
-                    Số lượng: {filteredAttendances.length}
                 </Typography.Title>
 
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
+                    <Space style={{ border: '1px solid #d9d9d9', borderRadius: '5px', padding: '0 5px' }}>
+                        <DatePicker
+                            style={{ border: 'none' }}
+                            placeholder='Từ ngày'
+                            format='DD-MM-YYYY'
+                            onChange={(date) => setFromDate(date)}
+                        />
+                        <DatePicker
+                            style={{ border: 'none' }}
+                            placeholder='Đến ngày'
+                            format='DD-MM-YYYY'
+                            onChange={(date) => setToDate(date)}
+                        />
+                    </Space>
+
                     <Space>
                         <Search
-                            placeholder='Search...'
+                            placeholder='Tìm kiếm địa điểm...'
                             allowClear
                             onChange={(e) => handleSearch(e.target.value)}
                         />
                     </Space>
-
-                    <Button type='primary' onClick={handleAddNew}>
-                        <Space>
-                            Tạo mới <UserAddOutlined />
-                        </Space>
-                    </Button>
                 </Flex>
             </Flex>
 
             <Table
                 className='table_TQ'
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 columns={columns}
                 dataSource={filteredAttendances.map(ate => ({ ...ate, key: ate.ID_Attendance }))}
                 bordered
                 size='small'
                 scroll={{
                     x: 'max-content',
-                    y: 51 * 9,
+                    y: 51.5 * 9,
                 }}
                 pagination={false}
             />
-
-            {/* Chỉnh sửa */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh sửa thông tin bộ phận</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
-                <Form form={editForm} layout='vertical'>
-                    <Form.Item label='Mã bộ phận' name='DivisionID'>
-                        <Input disabled />
-                    </Form.Item>
-                    <Form.Item label='Tên bộ phận' name='DivisionsName' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Thời gian thành lập' name='EstablishmentDate' rules={[{ required: true }]}>
-                        <Input type='date' />
-                    </Form.Item>
-                </Form>
-            </Modal>
-
-            {/* Thêm mới */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm mới chấm công</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
-                <Form form={addForm} layout='vertical'>
-                    <Form.Item label='Mã nhân viên' name='EmployeeID' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Tên bộ phận' name='DivisionsName' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Thời gian thành lập' name='EstablishmentDate' rules={[{ required: true }]}>
-                        <Input type='date' />
-                    </Form.Item>
-                </Form>
-            </Modal>
         </>
     );
 };

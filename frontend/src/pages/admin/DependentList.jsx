@@ -1,8 +1,8 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
 import React, { useState } from 'react';
 import Search from 'antd/es/transfer/search';
-import { UserAddOutlined } from '@ant-design/icons';
-import { debounce } from 'lodash';
+import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { debounce, min } from 'lodash';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
@@ -121,19 +121,21 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
         {
             title: 'MỐI QUAN HỆ',
             dataIndex: 'Relationship',
-            align: 'left',
+            align: 'center',
+            minWidth: 70,
         },
         {
             title: 'NGÀY SINH',
             dataIndex: 'DateOfBirth',
             minWidth: 80,
-            align: 'left',
+            align: 'center',
             render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {
             title: 'GIỚI TÍNH',
             dataIndex: 'Gender',
-            align: 'left',
+            align: 'center',
+            minWidth: 60,
         },
         {
             title: 'ĐỊA CHỈ',
@@ -143,7 +145,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
         {
             title: 'SĐT',
             dataIndex: 'PhoneNumber',
-            align: 'left',
+            align: 'center',
         },
     ];
 
@@ -156,8 +158,8 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
             minWidth: 113,
             render: (_, record) => (
                 <>
-                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+                    <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}><EditOutlined /></Button>
+                    <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}><DeleteOutlined /></Button>
                 </>
             ),
         });

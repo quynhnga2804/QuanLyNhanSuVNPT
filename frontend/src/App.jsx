@@ -14,7 +14,7 @@ import AdminHome from './pages/admin/AdminHome';
 import HumanReport from './pages/admin/Report';
 import WorkRegulations from './pages/admin/WorkRegulations';
 import HRPolicy from './pages/admin/HRPolicy';
-import Attendance from './pages/admin/Attendance';
+import Attendance_Overtime from './pages/admin/Attendance_Overtime';
 import Notification from './pages/admin/Notification';
 import General from './pages/admin/General';
 import Benefit_Salary from './pages/admin/Benefit_Salary';
@@ -204,17 +204,13 @@ const App = () => {
 
   return (
     <Layout className='adminLayout'>
+
       <Sider theme='light' trigger={null} collapsible collapsed={collapsed} width={220} collapsedWidth={60} className='sider'>
-        <Sidebar onLogout={handleLogout} collapsed={collapsed} />
+        <Sidebar onLogout={handleLogout} collapsed={collapsed} imageUrl={imageUrl} />
 
-        <Button
-          type='text'
-          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={() => setCollapsed(!collapsed)}
-          className='trigger-btn'
-        />
+        <Button type='text' icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed(!collapsed)} className='trigger-btn' />
       </Sider>
-
+      
       <Layout>
         <Header className='header'>
           <AdminHeader onLogout={handleLogout} unreadCount={unreadCount} imageUrl={imageUrl} />
@@ -243,15 +239,15 @@ const App = () => {
                 <Route path='benefitpolicy' element={<BenefitPolicy />} />
               </Route>
 
-              <Route path='humanreports' element={<HumanReport departments={departments} employees={employees}/>}>
-                <Route path='hrstatisticreport' element={<HRStatisticsReports divisions={divisions}/>} />
+              <Route path='humanreports' element={<HumanReport departments={departments} employees={employees} />}>
+                <Route path='hrstatisticreport' element={<HRStatisticsReports divisions={divisions} />} />
                 <Route path='hranalysischart' element={<HRAnalysisChart />} />
                 {/* <Route path='benefitpolicy' element={<BenefitPolicy />} /> */}
                 {/* <Route index element={<HRStatisticsReports divisions={divisions}/>} /> */}
               </Route>
 
               <Route path='organizationalstructures' element={<OrganizationalStructure employees={employees} />} />
-              <Route path='attendances' element={<Attendance />} />
+              <Route path='attendance&overtime' element={<Attendance_Overtime employees={employees} departments={departments} />} />
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
               <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} />

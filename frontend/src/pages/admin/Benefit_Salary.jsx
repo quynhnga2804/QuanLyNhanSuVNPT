@@ -2,7 +2,7 @@ import { Table, Select, Input, Form, Flex, Typography, Space, Button, Modal, mes
 import React, { useState } from 'react';
 import Search from 'antd/es/transfer/search';
 import { debounce } from 'lodash';
-import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
@@ -223,13 +223,40 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
     const handleAdd = (record) => {
         const totalOT = overtimes
             .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === record.EmployeeID && ot.Status === 'Approved')
-            .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
+            .reduce((sum, ot) => sum + (+ot.OverTimesHours || 0), 0);
+
+        const totalOTSalary = overtimes
+            .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === record.EmployeeID && ot.Status === 'Approved')
+            .reduce((sum, ot) => {
+                const profile = jobprofiles.find(jp => jp.EmployeeID === ot.EmployeeID);
+                if (!profile) return sum;
+
+                const { BaseSalary, StandardWorkingHours } = profile;
+                const hourlyRate = BaseSalary / (StandardWorkingHours * 4);
+
+                let multiplier = 1;
+                switch (ot.OTType) {
+                    case 'Ngày thường':
+                        multiplier = 1.5;
+                        break;
+                    case 'Cuối tuần':
+                        multiplier = 2.0;
+                        break;
+                    case 'Ngày lễ':
+                        multiplier = 3.0;
+                        break;
+                    default:
+                        multiplier = 1;
+                }
+
+                return sum + (+ot.OverTimesHours || 0) * multiplier * hourlyRate;
+            }, 0);
 
         addForm.setFieldsValue({
             EmployeeID: record.EmployeeID,
             ID_PayrollCycle: selectedPayrollCycleId,
             TotalOT: totalOT,
-            TotalOTSalary: totalOT * 200000,
+            TotalOTSalary: totalOTSalary,
         });
         setIsAddModalOpen(true);
     };
@@ -239,8 +266,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             const values = await addForm.validateFields();
             const token = localStorage.getItem('token');
 
-            const totalOT = addForm.getFieldValue('TotalOT') || 0;
-            const totalOTSalary = totalOT * 200000;
+            const totalOTSalary = addForm.getFieldValue('TotalOTSalary') || 0;
 
             const selectedEmployee = jobprofiles.find(job => job.EmployeeID === values.EmployeeID);
             const baseSalary = selectedEmployee ? +selectedEmployee.BaseSalary : 0;
@@ -299,16 +325,32 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                 const baseSalary = selectedEmployee ? +selectedEmployee.BaseSalary : 0;
                 const allowance = selectedEmployee ? +selectedEmployee.Allowance : 0;
 
-                // Tính OT đã duyệt
-                const totalOT = overtimes
-                    .filter(ot =>
-                        ot.EmployeeID === employeeID &&
-                        ot.ID_PayrollCycle === selectedPayrollCycleId &&
-                        ot.Status === 'Approved'
-                    )
-                    .reduce((sum, ot) => sum + (ot.OverTimesHours || 0), 0);
+                const totalOTSalary = overtimes
+                    .filter(ot => ot.ID_PayrollCycle === selectedPayrollCycleId && ot.EmployeeID === employeeID && ot.Status === 'Approved')
+                    .reduce((sum, ot) => {
+                        const profile = jobprofiles.find(jp => jp.EmployeeID === ot.EmployeeID);
+                        if (!profile) return sum;
 
-                const totalOTSalary = totalOT * 200000;
+                        const { BaseSalary, StandardWorkingHours } = profile;
+                        const hourlyRate = BaseSalary / (StandardWorkingHours * 4);
+
+                        let multiplier = 1;
+                        switch (ot.OTType) {
+                            case 'Ngày thường':
+                                multiplier = 1.5;
+                                break;
+                            case 'Cuối tuần':
+                                multiplier = 2.0;
+                                break;
+                            case 'Ngày lễ':
+                                multiplier = 3.0;
+                                break;
+                            default:
+                                multiplier = 1;
+                        }
+
+                        return sum + (ot.OverTimesHours || 0) * multiplier * hourlyRate;
+                    }, 0);
                 const insuranceFee = baseSalary * 0.105;
 
                 const personalReduction = 11000000;
@@ -485,14 +527,6 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         });
     };
 
-    // Cập nhật TotalOTSalary khi nhập TotalOT
-    const handleTotalOTChange = (e) => {
-        const totalOT = parseInt(e.target.value, 10) || 0;
-        addForm.setFieldsValue({
-            TotalOTSalary: totalOT * 200000,
-        });
-    };
-
     const handleComplete = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -628,7 +662,7 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
                     </Form.Item>
 
                     <Form.Item label='Tổng giờ OT' name='TotalOT'>
-                        <Input type='number' onChange={handleTotalOTChange} disabled />
+                        <Input type='number' disabled />
                     </Form.Item>
 
                     <Form.Item label='Lương OT' name='TotalOTSalary'>
@@ -670,10 +704,6 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
 
                     <Form.Item label='Thưởng' name='PrizeMoney' rules={[{ required: false, pattern: /^[0-9]+$/, message: 'Vui lòng nhập số hợp lệ!' }]}>
                         <Input type='number' placeholder='Nhập tiền thưởng' />
-                    </Form.Item>
-
-                    <Form.Item label='Tổng giờ OT' name='TotalOT'>
-                        <Input type='number' onChange={handleTotalOTChange} disabled />
                     </Form.Item>
 
                     <Form.Item label='Lương OT' name='TotalOTSalary'>
