@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Layout, Card, Typography, Avatar, Table, Badge, Flex, message } from "antd";
-import { ClockCircleOutlined, FileTextOutlined, DollarOutlined, BarChartOutlined, InsuranceOutlined } from "@ant-design/icons";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar } from "recharts";
+import { Layout, Card, Typography, Avatar, Table, Flex } from "antd";
+import { ClockCircleOutlined, FileTextOutlined, DollarOutlined, BarChartOutlined } from "@ant-design/icons";
+import { Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar } from "recharts";
 import '../../App.css';
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";

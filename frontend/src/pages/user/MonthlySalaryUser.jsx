@@ -51,6 +51,13 @@ const MonthlySalaryUser = ({monthlySalaryUser}) => {
             render: (value) => currencyFormatter.format(value || 0),
         },
         {
+            title: 'BẢO HIỂM',
+            dataIndex: 'InsuranceFee',
+            width: 100,
+            align: 'center',
+            render: (value) => currencyFormatter.format(value || 0),
+        },
+        {
             title: 'THUẾ',
             dataIndex: 'TaxPayable',
             width: 100,

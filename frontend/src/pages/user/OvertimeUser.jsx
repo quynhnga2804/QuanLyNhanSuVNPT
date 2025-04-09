@@ -2,7 +2,7 @@ import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, mes
 import Search from 'antd/es/transfer/search';
 import { FieldTimeOutlined } from '@ant-design/icons';
 import axios from "axios";
-import { debounce } from 'lodash';
+import { debounce, filter } from 'lodash';
 import dayjs from 'dayjs';
 import React, { useState, useEffect } from "react";
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -25,26 +25,26 @@ const OvertimeUser = ({employeeinfo}) => {
     const [selectedOT, setSelectedOT] = useState(null);
     const [dateRange, setDateRange] = useState([]);
     const [addForm] = Form.useForm();
+
+    // const [selectedPayroll, setSelectedPayroll] = useState([]);
+    // const [selectedManager, setSelectedManager] = useState([]);
+    const [selectedOTType, setSelectedOTType] = useState([]);
+    const [selectedStatus, setSelectedStatus] = useState([]);
     const token = localStorage.getItem('token');
 
-    
     const uniquePayroll = Array.from( new Map(mappedOvertimeData.map(ov => [ov.ID_PayrollCycle, { text: ov.PayrollCycle?.PayrollName, value: ov.ID_PayrollCycle }])).values());
     const uniqueOTType = [...new Set(mappedOvertimeData.map(ov => ov.OTType))];
     const uniqueStatus = [...new Set(mappedOvertimeData.map(ov => ov.Status))];
 
     const handleAddNew = () => {
-        // if (overtimeUser.length > 0) { 
-            addForm.setFieldsValue({
-                employeeId: employeeinfo?.EmployeeID,
-                fullname: employeeinfo?.FullName,
-                // employeeId: overtimeUser[0].EmployeeID,
-                // fullname: overtimeUser[0].Employee?.FullName || '',
-                payroll: latestPayrollCycle.PayrollName,
-                payrollID: latestPayrollCycle.ID_PayrollCycle,
-                company: 'VNPT Nghệ An',
-                status: 'Chờ duyệt',
-            });
-        // }
+        addForm.setFieldsValue({
+            employeeId: employeeinfo?.EmployeeID,
+            fullname: employeeinfo?.FullName,
+            payroll: latestPayrollCycle.PayrollName,
+            payrollID: latestPayrollCycle.ID_PayrollCycle,
+            company: 'VNPT Nghệ An',
+            status: 'Chờ duyệt',
+        });
         setIsAddModalOpen(true);
     };
 
@@ -101,7 +101,7 @@ const OvertimeUser = ({employeeinfo}) => {
             });
             setOvertimeUser(response.data);
         } catch (error) {
-            // message.error("Không lấy được dữ liệu tăng ca!");
+            console.error("Không lấy được dữ liệu tăng ca!", error);
         }
     };
 
@@ -110,7 +110,6 @@ const OvertimeUser = ({employeeinfo}) => {
             const response = await axios.get(`http://localhost:5000/api/user/latest-payrollcycle`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log('kỳ lương gần nhất: ', response.data);
             setLatestPayrollCycle(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy kỳ lương gần nhất:', error);
@@ -122,7 +121,6 @@ const OvertimeUser = ({employeeinfo}) => {
             const response = await axios.get(`http://localhost:5000/api/user/get-managers`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log('List managers: ', response.data);
             setManagerList(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách manager:', error);
@@ -160,8 +158,6 @@ const OvertimeUser = ({employeeinfo}) => {
                 CreatedAt: new Date(),
                 
             };
-    
-            console.log('test: ', newOT);
             await axios.post('http://localhost:5000/api/user/req-overtime', newOT, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -171,11 +167,25 @@ const OvertimeUser = ({employeeinfo}) => {
     
             fetchOvertimeUser();
             message.success('Tạo đề xuất tăng ca thành công!');
+            handleAddCancel();
         } catch (error) {
-            console.error(error);
             message.error('Đã xảy ra lỗi thêm tăng ca, vui lòng kiểm tra lại!');
         }
     };
+
+    const mapStatus = (status) => {
+        switch (status) {
+            case 'Approved':
+                return 'Đã duyệt';
+            case 'Rejected':
+                return 'Đã hủy';
+            case 'Pending':
+                return 'Chờ duyệt';
+            default:
+                return status; // fallback nếu không khớp
+        }
+    };
+    
 
     const columns = [
         {
@@ -193,10 +203,11 @@ const OvertimeUser = ({employeeinfo}) => {
             width: 150,
             align: 'center',
             ellipsis: true,
-            filters: uniquePayroll,
-            filterMode: 'tree',
-            filterSearch: true,
-            onFilter: (value, record) => record.ID_PayrollCycle === value,
+            // filters: uniquePayroll,
+            // filterMode: 'tree',
+            // filterSearch: true,
+            // onFilter: (value, record) => record.ID_PayrollCycle === value,
+            // onFilter: (value, record) => selectedPayroll.length === value || selectedPayroll.includes(record.ID_PayrollCycle),
             render: (payroll) => payroll?.PayrollName || '',
         },
         {
@@ -205,12 +216,13 @@ const OvertimeUser = ({employeeinfo}) => {
             width: 180,
             align: 'center',
             ellipsis: true,
-            filters: managerList.map(manager => ({
-                text: manager.FullName,
-                value: manager.FullName.toLowerCase(),
-            })),
-            onFilter: (value, record) => record.ManagerName?.toLowerCase().includes(value),
-            filterSearch: true,
+            // filters: managerList.map(manager => ({
+            //     text: manager.FullName,
+            //     value: manager.FullName.toLowerCase(),
+            // })),
+            // onFilter: (value, record) => record.ManagerName?.toLowerCase().includes(value),
+            // onFilter: (value, record) => selectedManager.length === value || selectedManager.includes(record?.ManagerName),
+            // filterSearch: true,
             render: (managerName) => managerName || 'Chưa có',
         },
         {
@@ -222,7 +234,7 @@ const OvertimeUser = ({employeeinfo}) => {
             filters: uniqueOTType.map(ott => ({ text: ott, value: ott })),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.OTType === value,
+            onFilter: (value, record) => selectedOTType.length === value || selectedOTType.includes(record.OTType),
         },
         {
             title: 'NGÀY TĂNG CA',
@@ -245,20 +257,16 @@ const OvertimeUser = ({employeeinfo}) => {
             width: 120,
             align: 'center',
             ellipsis: true,
-            filters: uniqueStatus.map(stt => ({ text: stt, value: stt })),
+            filters: uniqueStatus.map(stt => ({ text: mapStatus(stt), value: stt })),
             filterMode: 'tree',
             filterSearch: true,
-            onFilter: (value, record) => record.Status === value,
+            onFilter: (value, record) => selectedStatus.length === value || selectedStatus.includes(record.Status),
+            render: (status) => mapStatus(status),
         },
     ];
 
     const handleSearch = debounce((value) => setSearchQuery(value.toLowerCase()), 500);
 
-    // const filteredOvertimes = mappedOvertimeData.filter(ov =>
-    //     ov.Status?.toLowerCase().includes(searchQuery) ||
-    //     ov.OTType?.toLowerCase().includes(searchQuery) ||
-    //     ov.ManagerName?.toLowerCase().includes(searchQuery)
-    // );
     const filteredOvertimes = mappedOvertimeData.filter(ov => {
         const matchesSearch =
             ov.Status?.toLowerCase().includes(searchQuery) ||
@@ -269,14 +277,25 @@ const OvertimeUser = ({employeeinfo}) => {
             ? dayjs(ov.DateTime).isSameOrAfter(dateRange[0].startOf('day')) &&
               dayjs(ov.DateTime).isSameOrBefore(dateRange[1].endOf('day'))
             : true;
-    
-        return matchesSearch && matchesDateRange;
+        const matchesFilters = (
+            // (!selectedPayroll.length || selectedPayroll.includes(ov.ID_PayrollCycle)) && 
+            // (!selectedManager.length || selectedManager.includes(ov.ManagerName)) && 
+            (!selectedOTType.length || selectedOTType.includes(ov.OTType)) && 
+            (!selectedStatus.length || selectedStatus.includes(ov.Status))
+        );
+        return matchesSearch && matchesDateRange && matchesFilters;
     });
     
+    const handleTableChange = (pagination, filters, sorter) => {
+        // setSelectedPayroll(filters.ID_PayrollCycle || []);
+        // setSelectedManager(filters.ManagerName || []);
+        setSelectedOTType(filters.OTType || []);
+        setSelectedStatus(filters.Status || []);
+    };
 
     return (
         <Flex vertical style={{ width: '100%' }}>
-            <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: 'lightslategray' }}>
+            <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#f0f0f1' }}>
                 <Typography.Text type='secondary' style={{ color: '#2b2b2b', fontSize: '1rem' }}>
                     Số lượng: {filteredOvertimes.length}
                 </Typography.Text>
@@ -313,6 +332,7 @@ const OvertimeUser = ({employeeinfo}) => {
                 className='table_TQ'
                 columns={columns}
                 dataSource={filteredOvertimes.map(ov => ({ ...ov, key: ov.ID_OT }))}
+                onChange={handleTableChange}
                 onRow={(record) => ({ onDoubleClick: () => showModal(record), })}
                 bordered
                 size='medium'

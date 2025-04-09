@@ -117,9 +117,11 @@ const AttendanceUser = ({employeeinfo}) => {
 
                 if (!existingCheckout || !existingCheckout?.CheckInTime) {
                     message.warning("Bạn chưa check in nên không thể check out!");
+                    return;
                 }
                 if (existingCheckout?.CheckOutTime) {
                     message.warning('Bạn đã check out rồi!');
+                    return;
                 }
 
                 const checkInTime = dayjs(`${today} ${existingCheckout?.CheckInTime}`);
@@ -222,7 +224,7 @@ const AttendanceUser = ({employeeinfo}) => {
     ];
     return (
         <Flex vertical style={{ width: '100%' }}>
-            <Flex justify='end' style={{ padding: '10px 20px 0 20px', backgroundColor: 'lightslategray'}}>
+            <Flex justify='end' style={{ padding: '10px 20px 0 20px', backgroundColor: '#f0f0f1'}}>
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px',  }}>
                     <DatePicker.RangePicker
                         format="DD/MM/YYYY"

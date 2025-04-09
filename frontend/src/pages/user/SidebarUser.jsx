@@ -2,12 +2,12 @@ import { Flex, Image, Menu, Input, Avatar, Tooltip} from 'antd';
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    TeamOutlined,
     ClockCircleOutlined,
     FieldTimeOutlined,
     DollarOutlined,
     BookOutlined ,
-    LogoutOutlined
+    LogoutOutlined,
+    UserOutlined
 } from '@ant-design/icons';
 import logo from '../../assets/images/logo.png';
 
@@ -39,11 +39,11 @@ const SidebarUser = ({collapsed}) => {
                 </div>
             </Flex>
 
-            {!collapsed ? (
+            {/* {!collapsed ? (
                 <Flex align='center' justify='center' style={{ padding: '10px 15px 0 15px', marginBottom:'1rem', }}>
                     <Search placeholder='Search...' allowClear />
                 </Flex>
-            ) : null}
+            ) : null} */}
 
 
             <Menu
@@ -56,7 +56,7 @@ const SidebarUser = ({collapsed}) => {
                     {
                         label: !collapsed ? 'Thông tin chung' : null,
                         key: 'generalinfo',
-                        icon: <TeamOutlined />,
+                        icon: <UserOutlined />,
                         title: 'Thông tin chung',
                     },
                     {

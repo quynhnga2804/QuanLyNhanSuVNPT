@@ -6,7 +6,16 @@ const PolicyInfo = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const activeKey = location.pathname.includes('salary-policy') ? '1' : location.pathname.includes('benefit-policy') ? '2' : '3';
+    const activeKey = location.pathname.includes('salary-policy')
+    ? '1'
+    : location.pathname.includes('benefit-policy')
+    ? '2'
+    : location.pathname.includes('hr-policy')
+    ? '3'
+    : location.pathname.includes('work-policy')
+    ? '4'
+    : '1'; // fallback mặc định nếu không khớp
+  
 
     const handleChange = (key) => {
         if (key === '1') {
@@ -15,6 +24,8 @@ const PolicyInfo = () => {
             navigate('/user/policyinfo/benefit-policy');
         } else if (key === '3') {
             navigate('/user/policyinfo/hr-policy');
+        } else if (key === '4') {
+            navigate('/user/policyinfo/work-policy');
         }
     };
 
@@ -29,6 +40,7 @@ const PolicyInfo = () => {
                     { key: '1', label: 'CHÍNH SÁCH LƯƠNG' },
                     { key: '2', label: 'CHÍNH SÁCH PHÚC LỢI' },
                     { key: '3', label: 'CHÍNH SÁCH NHÂN SỰ' },
+                    { key: '4', label: 'CHÍNH SÁCH LÀM VIỆC' },
                 ]}
             />
             </div>

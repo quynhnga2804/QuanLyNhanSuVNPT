@@ -21,8 +21,8 @@ import PolicyInfo from './pages/user/PolicyInfo.jsx';
 import HRPolicy from './pages/admin/HRPolicy.jsx';
 import BenifitPolicy from './pages/admin/BenifitPolicy.jsx';
 import SalaryPolicy from './pages/admin/SalaryPolicy.jsx';
-import EmployeeList from './pages/admin/EmployeeList.jsx';
 import AdminHome from './pages/admin/AdminHome.jsx';
+import WorkRegulations from './pages/admin/WorkRegulations.jsx';
 const { Sider, Content, Header } = Layout;
 
 const AppUser = () => {
@@ -132,6 +132,7 @@ const AppUser = () => {
                   <Route path="salary-policy" element={<SalaryPolicy />} />
                   <Route path="benefit-policy" element={<BenifitPolicy />} />
                   <Route path="hr-policy" element={<HRPolicy />} />
+                  <Route path="work-policy" element={<WorkRegulations />} />
                   <Route index element={<SalaryPolicy />} />
                 </Route>
 

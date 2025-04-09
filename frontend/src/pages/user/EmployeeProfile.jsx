@@ -35,7 +35,6 @@ const EmployeeProfile = ({ employeeinfo, contractUsers }) => {
                 // if (!jobResponse.ok) throw new Error(jobData.message);
                 setJobProfile(jobData.jobProfile);
                 setResignation(jobData.resignation);
-                console.log('jobProfile: ', jobData.jobProfile);
 
                 //Gọi API lấy manager
                 const managerResponse = await fetch("http://localhost:5000/api/user/get-managers", {
@@ -52,14 +51,12 @@ const EmployeeProfile = ({ employeeinfo, contractUsers }) => {
                 });
                 const personalData = await personalResponse.json();
                 setPersonalProfile(personalData);
-                console.log('personalProfile: ', personalData);
                 // Gọi API lấy thông tin thành viên gia đình
                 const familyResponse = await fetch("http://localhost:5000/api/user/familymembers", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const familyData = await familyResponse.json();
                 setFamilyMembers(familyData);
-                console.log('familyData: ', familyData);
 
             } catch (error) {
                 message.error(error.message);
@@ -117,7 +114,7 @@ const EmployeeProfile = ({ employeeinfo, contractUsers }) => {
                             <Flex className="sub-info-employeeinfo">
                                 <Flex vertical className="sub-info" gap={20} style={{ flex: 1 }}>
                                     <Text><strong>Số Điện Thoại:</strong> {employeeinfo?.PhoneNumber}</Text>
-                                    <Text><strong>Ngày Sinh:</strong> {employeeinfo?.DateOfBirth}</Text>
+                                    <Text><strong>Ngày Sinh:</strong> {new Date(employeeinfo?.DateOfBirth).toLocaleDateString('vi-VN')}</Text>
                                     <Text><strong>Giới Tính:</strong> {employeeinfo?.Gender}</Text>
                                     <Text><strong>Địa Chỉ:</strong> {employeeinfo?.Address}</Text>
                                     <Text><strong>Email Cá Nhân:</strong> {employeeinfo?.PersonalEmail}</Text>
@@ -126,7 +123,7 @@ const EmployeeProfile = ({ employeeinfo, contractUsers }) => {
                                     <Text><strong>Email Công Việc:</strong> {employeeinfo?.WorkEmail}</Text>
                                     <Text><strong>Chức Danh:</strong> {employeeinfo?.JobTitle}</Text>
                                     <Text><strong>Chức Vụ:</strong> {employeeinfo?.Position}</Text>
-                                    <Text><strong>Ngày Bắt Đầu:</strong> {employeeinfo?.StartDate}</Text>
+                                    <Text><strong>Ngày Bắt Đầu:</strong> {new Date(employeeinfo?.StartDate).toLocaleDateString("vi-VN")}</Text>
                                     <Text><strong>Phòng Ban:</strong> {employeeinfo.Department ? employeeinfo.Department.DepartmentName : "Chưa có phòng ban"}</Text>
                                 </Flex>
                             </Flex>

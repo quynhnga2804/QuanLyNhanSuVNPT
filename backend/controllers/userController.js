@@ -82,7 +82,7 @@ exports.getContractUser = async (req, res) => {
         const employeeID = await getEmployeeIDByEmail(email, role);
         const contractUser = await EmployeeContract.findAll({
             where: { EmployeeID: employeeID },
-            order: [['EndDate', 'DESC']],
+            order: [['StartDate', 'DESC']],
             include: {
                 model: LaborContract,
                 attributes: ['ContractType']
@@ -433,11 +433,11 @@ exports.addOvertimeEmployeeRe = async (req, res) => {
 exports.getLatestPayrollCycle = async (req, res) => {
     try {
         const latestPayroll = await PayrollCycle.findOne({
-            where: { Status: 'Đang xử lý'},
+            where: { Status: 'Chưa bắt đầu'},
         });
         
         if (!latestPayroll) {
-            return res.status(404).json({ message: "Không tìm thấy lỳ lương hiện tại! "});
+            return res.status(404).json({ message: "Không tìm thấy kỳ lương hiện tại! "});
         }
         return res.status(200).json(latestPayroll);
     }  catch (error) {
@@ -472,6 +472,7 @@ exports.getMonthlySalaryUser = async (req, res) => {
 
         const monthlySalaryUser = await MonthlySalary.findAll({
             where: { EmployeeID: employeeID },
+            order: [['PaymentDate', 'ASC']],
             include: [
                 { model: Employee, attributes: ['FullName'] },
                 { model: PayrollCycle, attributes: ['PayrollName'] }

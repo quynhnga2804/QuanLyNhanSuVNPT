@@ -11,7 +11,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import AdminHeader from './pages/admin/AdminHeader';
 import OrganizationalStructure from './pages/admin/OrganizationalStructure';
 import AdminHome from './pages/admin/AdminHome';
-import HumanReport from './pages/admin/Report';
+import HumanReport from './pages/admin/HumanReport';
 import WorkRegulations from './pages/admin/WorkRegulations';
 import HRPolicy from './pages/admin/HRPolicy';
 import Attendance from './pages/admin/Attendance';

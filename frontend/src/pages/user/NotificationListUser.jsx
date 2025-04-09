@@ -21,11 +21,9 @@ function NotificationListUser() {
 
   const fetchNotifications = async () => {
     try {
-      console.log("📡 Gọi API lấy danh sách thông báo...");
       const response = await axios.get('http://localhost:5000/api/user/notifications', {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
-      console.log("✅ Dữ liệu nhận được:", response.data);
       
       // Lưu notifications và unreadCount
       if (!response.data.notifications) throw new Error("Dữ liệu không hợp lệ");
@@ -88,7 +86,7 @@ function NotificationListUser() {
   return (
     <Layout className="home-container">
       <Content style={{ padding: '20px' }}>
-        <Flex vertical align="center" style={{ padding: '20px', background: '#f0f2f5' }}>
+        <Flex vertical align="center" style={{ padding: '20px' }}>
           <Flex vertical style={{ width: '100%', background: '#ffffff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
             <Flex style={{ justifyContent: 'space-between'}}>
             <Title level={3} style={{ marginBottom: '0px' }}>Danh sách thông báo</Title>
@@ -149,7 +147,7 @@ function NotificationListUser() {
               <hr/>
               <Flex style={{justifyContent: 'space-between'}}>
                 <Paragraph style={{marginTop:'10px', float: 'left'}}>({selectedNotification.Type})</Paragraph>
-                <Paragraph style={{marginTop:'10px', float: 'right'}}>Ngày gửi: {selectedNotification.CreatedAt} </Paragraph>
+                <Paragraph style={{marginTop:'10px', float: 'right'}}>Ngày gửi: {new Date(selectedNotification.CreatedAt).toLocaleDateString("vi-VN")} </Paragraph>
               </Flex>
               <Paragraph>{selectedNotification.Message} </Paragraph>
             </Modal>
