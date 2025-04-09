@@ -1,11 +1,6 @@
 import { Avatar, Badge, Dropdown, Flex, Typography, Space } from 'antd';
 import React, { useState, useEffect } from 'react';
-import {
-    BellOutlined,
-    UserOutlined,
-    SettingOutlined,
-    HomeOutlined
-} from '@ant-design/icons';
+import { BellOutlined, UserOutlined, SettingOutlined, HomeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {

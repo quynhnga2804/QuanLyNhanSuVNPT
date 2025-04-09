@@ -1,9 +1,6 @@
 import { Tabs,  } from 'antd';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Luong_PhucLoi from './Benefit_Salary';
-import DanhSachPhuThuoc from './DependentList';
-import LaborContract from './LaborContract';
 import EmployeeReport from './EmployeeReport';
 
 const Report = () => {

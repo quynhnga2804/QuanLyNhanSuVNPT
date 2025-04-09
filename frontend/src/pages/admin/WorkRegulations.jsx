@@ -18,7 +18,7 @@ const WorkRegulations = () => {
         <Title level={4}>🔹 2. Quy định chấm công</Title>
         <Paragraph>
           <ul>
-            <li>Nhân viên cần <Text strong>quẹt thẻ/chấm công điện tử</Text> đúng giờ.</li>
+            <li>Nhân viên cần <Text strong>chấm công</Text> đúng giờ trên hệ thống chấm công.</li>
             <li>Đi trễ trên 15 phút sẽ bị ghi nhận và có thể bị trừ lương.</li>
             <li>Vắng mặt không có lý do hợp lệ sẽ bị xử lý theo quy định.</li>
           </ul>
@@ -41,7 +41,7 @@ const WorkRegulations = () => {
               <ul>
                 <li><Text strong>Ngày thường:</Text> 150% lương cơ bản.</li>
                 <li><Text strong>Cuối tuần:</Text> 200% lương cơ bản.</li>
-                <li><Text strong>Ngày lễ, Tết:</Text> 300% lương cơ bản.</li>
+                <li><Text strong>Ngày lễ:</Text> 300% lương cơ bản.</li>
               </ul>
             </li>
           </ul>
@@ -50,8 +50,7 @@ const WorkRegulations = () => {
         <Title level={4}>🔹 5. Nghỉ phép và nghỉ lễ</Title>
         <Paragraph>
           <ul>
-            <li><Text strong>Nghỉ phép năm:</Text> Tối thiểu 12 ngày/năm.</li>
-            <li><Text strong>Nghỉ ốm, thai sản:</Text> Theo quy định bảo hiểm xã hội.</li>
+            <li><Text strong>Nghỉ phép năm:</Text> Tối đa 12 ngày/năm.</li>
             <li><Text strong>Nghỉ lễ, Tết:</Text> Theo lịch nghỉ lễ nhà nước.</li>
           </ul>
         </Paragraph>

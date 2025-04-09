@@ -136,21 +136,17 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
         {
             title: 'NGÀY BẮT ĐẦU',
             dataIndex: 'StartDate',
-            align: 'center',
-            minWidth: 135,
-            sorter: (a, b) => new Date(a.DateOfBirth) - new Date(b.DateOfBirth),
             minWidth: 108,
             align: 'center',
+            sorter: (a, b) => new Date(a.DateOfBirth) - new Date(b.DateOfBirth),
             render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {
             title: 'NGÀY KẾT THÚC',
             dataIndex: 'EndDate',
-            minWidth: 185,
             align: 'center',
-            sorter: (a, b) => new Date(a.DateOfBirth) - new Date(b.DateOfBirth),
             minWidth: 108,
-            align: 'center',
+            sorter: (a, b) => new Date(a.DateOfBirth) - new Date(b.DateOfBirth),
             render: (date) => date ? dayjs(date).format('DD-MM-YYYY') : '',
         },
         {

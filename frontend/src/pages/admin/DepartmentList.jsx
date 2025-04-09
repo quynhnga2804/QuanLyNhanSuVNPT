@@ -130,7 +130,6 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
                 return division ? { text: division?.DivisionsName, value: division?.DivisionID } : null;
             }).filter(item => item !== null),
             filterMode: 'tree',
-            filterSearch: true,
         },
         {
             title: 'CHỨC NĂNG',

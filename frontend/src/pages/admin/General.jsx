@@ -296,10 +296,9 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             title: 'GIỚI TÍNH',
             dataIndex: 'Gender',
             minWidth: 95,
-            align: 'left',
+            align: 'center',
             filters: uniqueGenders.map(gd => ({ text: gd, value: gd })),
             filterMode: 'tree',
-            filterSearch: true,
         },
         {
             title: 'ĐỊA CHỈ',
@@ -327,7 +326,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             minWidth: 110,
             filters: uniquePositions.map(pt => ({ text: pt, value: pt })),
             filterMode: 'tree',
-            filterSearch: true,
         },
         {
             title: 'NGÀY BẮT ĐẦU',
@@ -350,7 +348,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                 value: dept.DepartmentID
             })),
             filterMode: 'tree',
-            filterSearch: true,
         },
     ];
 

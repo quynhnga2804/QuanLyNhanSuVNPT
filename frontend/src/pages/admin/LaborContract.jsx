@@ -273,7 +273,6 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                 { text: 'Hết hạn', value: 'Hết hạn' }
             ],
             filterMode: 'tree',
-            filterSearch: true,
             onFilter: (value, record) => {
                 const today = new Date();
                 const endDate = record.EndDate ? new Date(record.EndDate) : null;

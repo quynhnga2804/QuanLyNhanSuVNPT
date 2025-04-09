@@ -1,9 +1,8 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
 import React, { useState, useEffect } from 'react';
 import Search from 'antd/es/transfer/search';
-import { UserAddOutlined } from '@ant-design/icons';
+import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
-import dayjs from 'dayjs';
 import axios from 'axios';
 
 const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) => {
@@ -134,7 +133,6 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
       minWidth: 135,
       filters: uniqueEmploymentStatuses.map(gd => ({ text: gd, value: gd })),
       filterMode: 'tree',
-      filterSearch: true,
     },
     {
       title: 'GIỜ LÀM VIỆC TIÊU CHUẨN',
@@ -187,8 +185,8 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
       minWidth: 113,
       render: (_, record) => (
         <>
-          <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-          <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+          <Button type="link" onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}><EditOutlined /></Button>
+          <Button type="link" danger onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}><DeleteOutlined /></Button>
         </>
       ),
     });
