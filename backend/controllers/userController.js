@@ -194,10 +194,8 @@ exports.sendOTP = async (req, res) => {
 // Đổi mật khẩu
 exports.ChangePassword = async (req, res) => {
     try {
-        console.log(`🔒 Yêu cầu đổi mật khẩu từ ${req.user.email}`);
         const { email } = req.user;
         const { newPassword, otp } = req.body;
-
         if (!otpStorage[email] || otpStorage[email].otp !== otp || Date.now() > otpStorage[email].expiresAt) {
             return res.status(400).json({ message: "OTP không hợp lệ hoặc đã hết hạn" });
         }
@@ -205,10 +203,7 @@ exports.ChangePassword = async (req, res) => {
         delete otpStorage[email]; // Xóa OTP sau khi sử dụng
 
         const hashedPassword = await hash(newPassword);
-        
         await User.update({ Password: hashedPassword }, { where: { WorkEmail: email } });
-
-        console.log("✅ Mật khẩu đã được thay đổi thành công");
         res.json({ message: "Đổi mật khẩu thành công. Vui lòng đăng nhập lại." });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -376,11 +371,6 @@ exports.getOverTimeUser = async (req, res) => {
     try {
         const { email, role } = req.user;
         const employeeID = await getEmployeeIDByEmail(email, role);
-
-        // Lấy JobProfile 1-1 theo EmployeeID
-        // const jobProfile = await JobProfile.findOne({ where: { EmployeeID: employeeID } });
-        
-        // Lấy danh sách overtime
         const overtimeUser = await OverTime.findAll({
             where: { EmployeeID: employeeID },
             include: [
@@ -388,19 +378,9 @@ exports.getOverTimeUser = async (req, res) => {
                 { model: PayrollCycle, attributes: ['PayrollName'] }
             ]
         });
-        // const managerID = overtimeUser.ManagerID;
-        // const employee = await Employee.findOne({ where: { EmployeeID: managerID } });
-        
         if (!overtimeUser || overtimeUser.length === 0) {
             return res.status(404).json({ message: "Không tìm thấy thông tin tăng ca!" });
         }
-
-        // Thêm Manager từ jobProfile vào từng overtime record
-        // const overtimeWithManager = overtimeUser.map(item => ({
-        //     ...item.toJSON(),  // chuyển về object trước khi spread
-        //     ManagerName: employee?.FullName || null
-        // }));
-
         res.json(overtimeUser);
     } catch (error) {
         res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({ message: error.message });

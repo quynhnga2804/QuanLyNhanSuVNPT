@@ -170,18 +170,6 @@ const AttendanceUser = ({employeeinfo}) => {
             ellipsis: true,
             render: (employee) => employee?.FullName || '',
         },
-        // {
-        //     title: 'KỲ LƯƠNG',
-        //     dataIndex: 'PayrollCycle',
-        //     width: 150,
-        //     align: 'center',
-        //     ellipsis: true,
-        //     render: (payroll) => payroll?.PayrollName || '',
-        //     filters: uniquePayroll,
-        //     filterMode: 'tree',
-        //     filterSearch: true,
-        //     onFilter: (value, record) => record.ID_PayrollCycle === value,
-        // },
         {
             title: 'NGÀY CHẤM CÔNG',
             dataIndex: 'AttendancesDate',
@@ -234,11 +222,11 @@ const AttendanceUser = ({employeeinfo}) => {
                         
                     />
                     <Space>
-                        <Button style={{background: 'rgb(111, 155, 224)', color: 'white'}}
+                        <Button type='primary'
                             onClick={handleCheckin}> <LoginOutlined /> Checkin </Button>
                     </Space>
                     <Space>
-                        <Button style={{background: 'rgb(111, 155, 224)', color: 'white'}}
+                        <Button type='primary'
                             onClick={handleCheckout}> <LogoutOutlined /> Checkout </Button>
                     </Space>
                 </Flex>

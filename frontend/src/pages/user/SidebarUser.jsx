@@ -45,7 +45,6 @@ const SidebarUser = ({collapsed}) => {
                 </Flex>
             ) : null} */}
 
-
             <Menu
                 mode="inline"
                 selectedKeys={[selectedKey]}
