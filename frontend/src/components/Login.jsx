@@ -3,6 +3,7 @@ import { Button, Checkbox, Form, Image, Input, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../api/api';
 import logo from '../assets/images/logo.png';
+import dayjs from 'dayjs';
 
 const Login = () => {
   const [form] = Form.useForm();
@@ -13,6 +14,7 @@ const Login = () => {
   const [countdown, setCountdown] = useState(0);
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     let timer;
@@ -74,9 +76,15 @@ const Login = () => {
           setToken(verifyData.token);
           message.success('Đăng nhập thành công!');
           localStorage.removeItem('tempToken');
-
           const user = JSON.parse(localStorage.getItem('user'));
           localStorage.setItem('username', user.name);
+          //kiểm tra đổi mật khẩu
+          const lastChanged = dayjs(user?.lastPasswordChange)
+          const now = dayjs();
+          console.log("lastchange: ", lastChanged);
+          if (now.diff(lastChanged, "month") >= 3) {
+            localStorage.setItem('forceChangePass', 'true');
+          }
           navigate('/');
         } else {
           console.error('Token không hợp lệ');

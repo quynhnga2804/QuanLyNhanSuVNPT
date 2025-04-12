@@ -37,6 +37,12 @@ const OvertimeUser = ({employeeinfo}) => {
     const uniqueStatus = [...new Set(mappedOvertimeData.map(ov => ov.Status))];
 
     const handleAddNew = () => {
+        fetchLatestPayrollCycle(); // gọi lại trước khi kiểm tra
+
+        if (!latestPayrollCycle || !latestPayrollCycle.PayrollName) {
+            message.warning("Chưa mở kỳ lương mới. Vui lòng liên hệ quản lý để mở kỳ lương!");
+            return;
+        }
         addForm.setFieldsValue({
             employeeId: employeeinfo?.EmployeeID,
             fullname: employeeinfo?.FullName,
@@ -76,14 +82,6 @@ const OvertimeUser = ({employeeinfo}) => {
         setIsShowModalOpen(false);
         setSelectedOT(null);
     };
-
-    // const onTimeChange = () => {
-    //     const values = addForm.getFieldsValue();
-    //     if (values.timeIn && values.timeOut) {
-    //         const diff = dayjs(values.timeOut).diff(dayjs(values.timeIn), 'minute') / 60;
-    //         addForm.setFieldsValue({ otHours: diff.toFixed(2) });
-    //     }
-    // };
 
     useEffect(() => {
         if (token) {
@@ -150,8 +148,6 @@ const OvertimeUser = ({employeeinfo}) => {
                 ReasonOT: values.reason,
                 OTType: values.otType,
                 DateTime: values.otDate.format('YYYY-MM-DD'),
-                // TimeIn: values.timeIn.format('HH:mm:ss'),
-                // TimeOut: values.timeOut.format('HH:mm:ss'),
                 OverTimesHours: parseFloat(values.otHours),
                 Status: values.status,
                 ID_PayrollCycle: values.payrollID,
@@ -176,15 +172,16 @@ const OvertimeUser = ({employeeinfo}) => {
     const mapStatus = (status) => {
         switch (status) {
             case 'Approved':
-                return 'Đã duyệt';
+                return { text: 'Đã duyệt', color: 'green' };
             case 'Rejected':
-                return 'Đã hủy';
+                return { text: 'Đã hủy', color: 'red' };
             case 'Pending':
-                return 'Chờ duyệt';
+                return { text: 'Chờ duyệt', color: 'orange' };
             default:
-                return status; // fallback nếu không khớp
+                return { text: status, color: 'black' };
         }
     };
+    
     
 
     const columns = [
@@ -257,11 +254,15 @@ const OvertimeUser = ({employeeinfo}) => {
             width: 120,
             align: 'center',
             ellipsis: true,
-            filters: uniqueStatus.map(stt => ({ text: mapStatus(stt), value: stt })),
+            filters: uniqueStatus.map(stt => ({ text: mapStatus(stt).text, value: stt })),
             filterMode: 'tree',
             filterSearch: true,
             onFilter: (value, record) => selectedStatus.length === value || selectedStatus.includes(record.Status),
-            render: (status) => mapStatus(status),
+            // render: (status) => mapStatus(status),
+            render: (status) => {
+                const { text, color } = mapStatus(status);
+                return <span style={{color: color}}>{text}</span>;
+            }
         },
     ];
 
@@ -400,12 +401,6 @@ const OvertimeUser = ({employeeinfo}) => {
                             <Form.Item label='Ngày OT' name='otDate' rules={[{ required: true }]}>
                                 <DatePicker format="DD-MM-YYYY" style={{ width: '100%' }} />
                             </Form.Item>
-                            {/* <Form.Item label='Thời gian vào' name='timeIn' rules={[{ required: true }]}>
-                                <TimePicker format="HH:mm:ss" style={{ width: '100%' }} onChange={onTimeChange} />
-                            </Form.Item>
-                            <Form.Item label='Thời gian ra' name='timeOut' rules={[{ required: true }]}>
-                                <TimePicker format="HH:mm:ss" style={{ width: '100%' }} onChange={onTimeChange} />
-                            </Form.Item> */}
                             <Form.Item label='Trạng thái' name='status' initialValue={'Chờ duyệt'} rules={[{ required: true }]} >
                                 <Input disabled />
                             </Form.Item>
@@ -434,15 +429,9 @@ const OvertimeUser = ({employeeinfo}) => {
                         <Descriptions.Item label="Tên Nhân Viên">
                             {selectedOT.Employee?.FullName || ''}
                         </Descriptions.Item>
-                        {/* <Descriptions.Item label="Giờ Vào">
-                            {selectedOT.TimeIn} 
-                        </Descriptions.Item> */}
                         <Descriptions.Item label="Quản lý">
                             {selectedOT.ManagerName}
                         </Descriptions.Item>
-                        {/* <Descriptions.Item label="Giờ Ra">
-                            {selectedOT.TimeOut}
-                        </Descriptions.Item> */}
                         <Descriptions.Item label="Lý Do OT">
                             {selectedOT.ReasonOT}
                         </Descriptions.Item>
@@ -453,7 +442,9 @@ const OvertimeUser = ({employeeinfo}) => {
                             {selectedOT.OTType}
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng Thái">
-                            {selectedOT.Status}
+                            <span style={{color: mapStatus(selectedOT.Status)?.color}}>
+                            {mapStatus(selectedOT.Status)?.text}
+                            </span>
                         </Descriptions.Item>
                         <Descriptions.Item label="Kỳ Lương">
                             {selectedOT.PayrollCycle?.PayrollName || ''}

@@ -41,8 +41,8 @@ exports.login = async (req, res) => {
             await user.save();
         }
 
-        const token = jwt.sign({ email: user.WorkEmail, name: user.UserName, role: user.Role }, SECRET_KEY, { expiresIn: "5m" });
-        res.json({ token, user: { email: user.WorkEmail, name: user.UserName, role: user.Role } });
+        const token = jwt.sign({ email: user.WorkEmail, name: user.UserName, role: user.Role, lastPasswordChange: user.LastPasswordChange }, SECRET_KEY, { expiresIn: "5m" });
+        res.json({ token, user: { email: user.WorkEmail, name: user.UserName, role: user.Role, lastPasswordChange: user.LastPasswordChange } });
     } catch (error) {
         console.error("Lỗi đăng nhập:", error);
         res.status(500).json({ message: "Lỗi server" });
@@ -55,11 +55,11 @@ exports.sendOTP = async (req, res) => {
 
     try {
         const decoded = jwt.verify(tokenA, SECRET_KEY); // Kiểm tra token hợp lệ
-        const { email, name, role } = decoded;
+        const { email, name, role, lastPasswordChange } = decoded;
 
         const otp = generateOTP();
         otpStore[email] = otp; // Lưu OTP tạm thời
-        const token = jwt.sign({ email, name, role, otp }, SECRET_KEY, { expiresIn: "1m" });
+        const token = jwt.sign({ email, name, role, lastPasswordChange, otp }, SECRET_KEY, { expiresIn: "1m" });
 
         const mailOptions = {
             from: `"VNPT Nghệ An" <${EMAIL_USER}>`,
@@ -82,7 +82,7 @@ exports.verifyOTP = async (req, res) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-        const { email, name, role } = decoded;
+        const { email, name, role, lastPasswordChange } = decoded;
 
         if (otpStore[email] !== otp) {
             return res.status(400).json({ message: "OTP không hợp lệ hoặc đã hết hạn!" });
@@ -90,7 +90,7 @@ exports.verifyOTP = async (req, res) => {
 
         delete otpStore[email];
 
-        const tokenB = jwt.sign({ email, name, role }, SECRET_KEY, { expiresIn: "10h" });
+        const tokenB = jwt.sign({ email, name, role, lastPasswordChange }, SECRET_KEY, { expiresIn: "10h" });
 
         res.json({ message: "Xác thực thành công!", token: tokenB});
     } catch (error) {

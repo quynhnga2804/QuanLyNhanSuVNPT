@@ -4,27 +4,41 @@ import { BellOutlined, UserOutlined, LogoutOutlined, LockOutlined, HomeOutlined,
 import { useNavigate } from "react-router-dom";
 import ChangePasswordModal from "./ChangePasswordModal";
 import { NotificationContext } from "./NotificationContext";
+import { ModalContext } from "../../api/ModalContext";
 import axios from "axios";
 
 const HeaderUser = ({ employeeinfo }) => {
     const navigate = useNavigate();
     const username = localStorage.getItem("username") || "";
-    const [isModalVisible, setModalVisible] = useState(false);
+    // const [isModalVisible, setModalVisible] = useState(false);
     const [imageUrl, setImageUrl] = useState(null);
-    const { unreadCount } = useContext(NotificationContext);
+    const {unreadCount} = useContext(NotificationContext);
+    const {isChangePassVisible, setChangePassVisible, modalMessage, setModalMessage, isForcedChange, setIsForcedChange} = useContext(ModalContext);
     const role = JSON.parse(localStorage.getItem('user')).role;
+    const forceChange = localStorage.getItem("forceChangePass");
 
     const handleMenuClick = ({ key }) => {
         if (key === "profile") {
             navigate("/user/generalinfo/profile");
         } else if (key === "change-password") {
-            setModalVisible(true); // Hiển thị modal đổi mật khẩu
+            // setModalVisible(true); // Hiển thị modal đổi mật khẩu
+            setChangePassVisible(true);
         } else if (key === "logout") {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             navigate("/login");
         }
     };
+
+    useEffect(() => {
+        // const shouldForceChange = localStorage.getItem('forceChangePass');
+        if (forceChange === 'true') {
+          setModalMessage('Bạn cần đổi mật khẩu để tiếp tục!');
+          setChangePassVisible(true);
+          setIsForcedChange(true);      
+          console.log("force:", isForcedChange);
+        }
+      }, []);
 
     useEffect(() => {
         if (employeeinfo?.Image) {
@@ -81,11 +95,8 @@ const HeaderUser = ({ employeeinfo }) => {
     );
 
     return (
-        // <div className="fixed-header">
         <Affix offsetTop={0} style={{ width: '100%' }}>
             <Flex align="center" justify="end">
-                {/* <Typography.Title level={4} type="secondary"> </Typography.Title> */}
-
                 <Flex align="center" gap="3rem" style={{ paddingBottom: '20px' }}>
                     <Flex align="center" gap="5px" onClick={() => navigate('/user/home')} style={{ cursor: 'pointer' }}>
                         <HomeOutlined className="header-icon" style={{ fontSize: '18px' }} />
@@ -109,9 +120,14 @@ const HeaderUser = ({ employeeinfo }) => {
             </Flex>
 
             {/* Hiển thị modal đổi mật khẩu */}
-            <ChangePasswordModal visible={isModalVisible} onClose={() => setModalVisible(false)} />
+            <ChangePasswordModal 
+                visible={isChangePassVisible} 
+                onClose={() => {if(!isForcedChange){
+                    setChangePassVisible(false)
+                }}}
+                messageText={modalMessage} 
+                isForce={isForcedChange}/>
         </Affix>
-        // </div>
     );
 };
 

@@ -6,6 +6,7 @@ import AppUser from './AppUser.jsx';
 import Login from './components/Login.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider, UserContext } from './api/api.jsx';
+import { ModalProvider } from './api/ModalContext.jsx';
 import AdminHome from './pages/admin/AdminHome.jsx';
 
 const ProtectedRoute = ({ element, allowedRoles }) => {
@@ -23,6 +24,7 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <UserProvider>
+      <ModalProvider>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -38,6 +40,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/unauthorized" element={<h1>Bạn không có quyền truy cập trang này!!!</h1>} />
         </Routes>
       </Router>
+      </ModalProvider>
     </UserProvider>
   </StrictMode>
 );

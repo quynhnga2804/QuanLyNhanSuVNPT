@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Modal, Input, Button, Form, message } from "antd";
+import { ModalContext } from "../../api/ModalContext";
 import axios from "axios";
 
-const ChangePasswordModal = ({ visible, onClose }) => {
+const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
     const [form] = Form.useForm();
     const [otpSent, setOtpSent] = useState(false);
     const [countdown, setCountdown] = useState(60);
     const [fieldsDisabled, setFieldsDisabled] = useState(false);
     const [passwordChanged, setPasswordChanged] = useState(false);
+    const { setIsForcedChange, setModalMessage } = useContext(ModalContext);
 
     useEffect(() => {
         if (!visible) {
@@ -60,7 +62,6 @@ const ChangePasswordModal = ({ visible, onClose }) => {
                 message.error("Bạn chưa đăng nhập!");
                 return;
             }
-
             await axios.post(
                 "http://localhost:5000/api/user/change-password",
                 {
@@ -71,10 +72,12 @@ const ChangePasswordModal = ({ visible, onClose }) => {
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-
             message.success("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
             setPasswordChanged(true);
             localStorage.removeItem("token");
+            setIsForcedChange(false);
+            setModalMessage("");
+            localStorage.removeItem("forceChangePass");
         } catch (error) {
             message.error(error.response?.data?.message || "Lỗi khi đổi mật khẩu");
         }
@@ -84,19 +87,25 @@ const ChangePasswordModal = ({ visible, onClose }) => {
         <Modal
             title="Đổi mật khẩu"
             open={visible}
-            onCancel={!passwordChanged ? onClose : null} // Chặn đóng modal khi đổi mật khẩu thành công
+            onCancel={!isForced && !passwordChanged ? onClose : null} // Chặn đóng modal khi đổi mật khẩu thành công
             footer={null}
-            closable={!passwordChanged} // Không hiển thị nút X khi đổi mật khẩu thành công
+            closable={!isForced || !passwordChanged} // Không hiển thị nút X khi đổi mật khẩu thành công
             style={{ textAlign: "center" }}
         >
+            {messageText && (
+                <div style={{ marginBottom: 16, color: 'red', fontWeight: 500 }}>
+                    {messageText}
+                </div>
+            )}
             {passwordChanged ? (
                 <div>
-                    <p style={{ fontSize: "16px", fontWeight: "bold", color: "green" }}>Đổi mật khẩu thành công!</p>
+                    <p style={{ fontSize: "16px", fontWeight: "bold", color: "green" }}>Đổi mật khẩu thành công! Vui lòng đăng nhập lại!</p>
                     <Button type="primary" onClick={() => (window.location.href = "/login")}  style={{ marginTop: '15px'}}>
                         Đăng nhập lại
                     </Button>
                 </div>
             ) : (
+                
                 <Form form={form} onFinish={handleChangePassword} layout="vertical">
                     <Form.Item
                         label="Mật khẩu cũ"

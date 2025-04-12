@@ -92,56 +92,58 @@ const AppUser = () => {
 
   return (
     <NotificationProvider>
-      <Layout className="userLayout" style={{ minHeight: '100vh' }}>
-        <Sider theme="light" trigger={null} collapsible collapsed={collapsed} width={220} collapsedWidth={60} className="sider" >
-          <Sidebar onLogout={handleLogout} collapsed={collapsed} />
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            className="triger-btn"
-          />
-        </Sider>
+      {/* <ModalProvider> */}
+        <Layout className="userLayout" style={{ minHeight: '100vh' }}>
+          <Sider theme="light" trigger={null} collapsible collapsed={collapsed} width={220} collapsedWidth={60} className="sider" >
+            <Sidebar onLogout={handleLogout} collapsed={collapsed} />
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              className="triger-btn"
+            />
+          </Sider>
 
-        <Layout>
-          <Affix offsetTop={0} style={{ width: '100%', zIndex: 1000 }}>
-            <Header className="header" style={{ background: '#ffffff', boxShadow: '0px 4px 6px rgba(0,0,0,0.1)' }}>
-              <HeaderUser employeeinfo={employeeinfo} />
-            </Header>
-          </Affix>
+          <Layout>
+            <Affix offsetTop={0} style={{ width: '100%', zIndex: 1000 }}>
+              <Header className="header" style={{ background: '#ffffff', boxShadow: '0px 4px 6px rgba(0,0,0,0.1)' }}>
+                <HeaderUser employeeinfo={employeeinfo} />
+              </Header>
+            </Affix>
 
-          <Content className="content">
-            <Flex gap="large">
-              <Routes>
-                <Route path="/" element={<Navigate to="home" replace />} />
+            <Content className="content">
+              <Flex gap="large">
+                <Routes>
+                  <Route path="/" element={<Navigate to="home" replace />} />
 
-                <Route path="/generalinfo" element={<GeneralInfo />}>
-                  <Route path="profile" element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
-                  <Route path="contracts" element={<ContractUser contractUsers={contractUsers} />} />
-                  <Route index element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
-                </Route>
+                  <Route path="/generalinfo" element={<GeneralInfo />}>
+                    <Route path="profile" element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
+                    <Route path="contracts" element={<ContractUser contractUsers={contractUsers} />} />
+                    <Route index element={<EmployeeProfile employeeinfo={employeeinfo} contractUsers={contractUsers} />} />
+                  </Route>
 
-                <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers} />} />
-                <Route path="notifications" element={<NotificationListUser />} />
-                <Route path="generalinfo" element={<GeneralInfo />} />
-                <Route path='attendances' element={<AttendanceUser employeeinfo={employeeinfo}/>} />
-                <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo} />} />
-                <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
+                  <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers} />} />
+                  <Route path="notifications" element={<NotificationListUser />} />
+                  <Route path="generalinfo" element={<GeneralInfo />} />
+                  <Route path='attendances' element={<AttendanceUser employeeinfo={employeeinfo} />} />
+                  <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo} />} />
+                  <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
 
-                <Route path="/policyinfo" element={<PolicyInfo />}>
-                  <Route path="salary-policy" element={<SalaryPolicy />} />
-                  <Route path="benefit-policy" element={<BenifitPolicy />} />
-                  <Route path="hr-policy" element={<HRPolicy />} />
-                  <Route path="work-policy" element={<WorkRegulations />} />
-                  <Route index element={<SalaryPolicy />} />
-                </Route>
+                  <Route path="/policyinfo" element={<PolicyInfo />}>
+                    <Route path="salary-policy" element={<SalaryPolicy />} />
+                    <Route path="benefit-policy" element={<BenifitPolicy />} />
+                    <Route path="hr-policy" element={<HRPolicy />} />
+                    <Route path="work-policy" element={<WorkRegulations />} />
+                    <Route index element={<SalaryPolicy />} />
+                  </Route>
 
-                <Route path="admin/home" element={<AdminHome replace />} />
-              </Routes>
-            </Flex>
-          </Content>
+                  <Route path="admin/home" element={<AdminHome replace />} />
+                </Routes>
+              </Flex>
+            </Content>
+          </Layout>
         </Layout>
-      </Layout>
+      {/* </ModalProvider> */}
     </NotificationProvider>
   );
 };
