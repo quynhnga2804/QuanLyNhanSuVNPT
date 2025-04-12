@@ -6,7 +6,7 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthlysalaries, employees, payrollcycles, jobprofiles }) => {
+const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySalaries, monthlysalaries, employees, payrollcycles, jobprofiles, incomeTaxes }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter] = useState('');
@@ -271,7 +271,10 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
             const selectedEmployee = jobprofiles.find(job => job.EmployeeID === values.EmployeeID);
             const baseSalary = selectedEmployee ? +selectedEmployee.BaseSalary : 0;
             const allowance = selectedEmployee ? +selectedEmployee.Allowance : 0;
-            const insuranceFee = baseSalary * 0.105;
+
+            // BHXH - BHYT - BHTN
+            const employeeInsuranceRate = insurances.reduce((total, ins) => total + parseFloat(ins.Employee), 0);
+            const insuranceFee = baseSalary * employeeInsuranceRate;
 
             const personalReduction = 11000000;
             const familyMemberCounts = familyMembers.filter(fam => fam.EmployeeID === values.EmployeeID).length || 0;
@@ -351,7 +354,10 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
 
                         return sum + (ot.OverTimesHours || 0) * multiplier * hourlyRate;
                     }, 0);
-                const insuranceFee = baseSalary * 0.105;
+
+                // BHXH - BHYT - BHTN
+                const employeeInsuranceRate = insurances.reduce((total, ins) => total + parseFloat(ins.Employee), 0);
+                const insuranceFee = baseSalary * employeeInsuranceRate;
 
                 const personalReduction = 11000000;
                 const familyMemberCounts = familyMembers.filter(fam => fam.EmployeeID === employeeID).length || 0;
@@ -390,26 +396,21 @@ const Benefit_Salary = ({ familyMembers, overtimes, fetchMonthlySalaries, monthl
         }
     };
 
-    // Hàm tính thuế theo biểu thuế lũy tiến
+    // Bảng tính thuế
     const calculateTax = (income) => {
-        const taxBrackets = [
-            { limit: 5000000, rate: 0.05 },   // 5% cho 5 triệu đầu
-            { limit: 5000000, rate: 0.10 },   // 10% cho 5 triệu tiếp theo
-            { limit: 8000000, rate: 0.15 },   // 15% cho 8 triệu tiếp theo
-            { limit: 14000000, rate: 0.20 },  // 20% cho 14 triệu tiếp theo
-            { limit: 20000000, rate: 0.25 },  // 25% cho 20 triệu tiếp theo
-            { limit: 28000000, rate: 0.30 },  // 30% cho 28 triệu tiếp theo
-            { limit: Infinity, rate: 0.35 },  // 35% cho phần còn lại
-        ];
-
+        const taxBrackets = [...incomeTaxes].sort((a, b) => a.MinIncome - b.MinIncome);
         let tax = 0;
-        let remainingIncome = income;
 
-        for (const bracket of taxBrackets) {
-            if (remainingIncome <= 0) break;
-            const taxableAmount = Math.min(remainingIncome, bracket.limit);
-            tax += taxableAmount * bracket.rate;
-            remainingIncome -= taxableAmount;
+        for (let i = 0; i < taxBrackets.length; i++) {
+            const current = taxBrackets[i];
+            const prevMax = i === 0 ? 0 : taxBrackets[i - 1].MaxValue;
+            const range = current.MaxValue - prevMax;
+
+            if (income <= 0) break;
+
+            const taxableAmount = i === taxBrackets.length - 1 ? income : Math.min(income, range);
+            tax += taxableAmount * current.TaxRate;
+            income -= taxableAmount;
         }
 
         return tax;

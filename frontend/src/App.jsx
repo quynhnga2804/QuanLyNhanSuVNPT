@@ -28,6 +28,7 @@ import HRStatisticsReports from './pages/admin/HRStatisticsReports';
 import HRAnalysisChart from './pages/admin/HRAnalysisChart';
 import JobProfile from './pages/admin/JobProfile';
 import HomeUser from './pages/user/HomeUser';
+import Tax_Insurance from './pages/admin/Tax_Insurance';
 
 const { Sider, Header, Content } = Layout;
 
@@ -210,9 +211,9 @@ const App = () => {
 
         <Button type='text' icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed(!collapsed)} className='trigger-btn' />
       </Sider>
-      
+
       <Layout>
-        <Header className='header'>
+        <Header className='header'style={{marginBottom: '1px'}}>
           <AdminHeader onLogout={handleLogout} unreadCount={unreadCount} imageUrl={imageUrl} />
         </Header>
 
@@ -220,38 +221,17 @@ const App = () => {
           <Flex gap='large'>
             <Routes>
               <Route path='home' element={<AdminHome dtEmployees={dtEmployees} dtDivisions={dtDivisions} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} />
-
-              <Route path='employees' element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />}>
-                <Route path='employeelist' element={<General />} />
-                <Route path='DependentList' element={<DependentList />} />
-                <Route path='JobProfile' element={<JobProfile />} />
-              </Route>
-
-              <Route path='contracts' element={<Contract departments={departments} employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />}>
-                <Route path='laborcontract' element={<LaborContract />} />
-                <Route path='reginationList' element={<ReginationList />} />
-              </Route>
-
-              <Route path='periodicsalaries' element={<PeriodicSalary />}>
-                <Route path='payrollcycle' element={<PayrollCycle />} />
-                <Route path='benefit&salary' element={<Benefit_Salary />} />
-                <Route path='salarypolicy' element={<SalaryPolicy />} />
-                <Route path='benefitpolicy' element={<BenefitPolicy />} />
-              </Route>
-
-              <Route path='humanreports' element={<HumanReport departments={departments} employees={employees} />}>
-                <Route path='hrstatisticreport' element={<HRStatisticsReports divisions={divisions} />} />
-                <Route path='hranalysischart' element={<HRAnalysisChart />} />
-                {/* <Route path='benefitpolicy' element={<BenefitPolicy />} /> */}
-                {/* <Route index element={<HRStatisticsReports divisions={divisions}/>} /> */}
-              </Route>
-
+              <Route path='User/home' element={<HomeUser replace />} />
+              <Route path='employees' element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />} />
+              <Route path='contracts' element={<Contract departments={departments} employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} />
+              <Route path='periodicsalaries' element={<PeriodicSalary />} />
+              <Route path='humanreports' element={<HumanReport departments={departments} employees={employees} />} />
               <Route path='organizationalstructures' element={<OrganizationalStructure employees={employees} />} />
               <Route path='attendance&overtime' element={<Attendance_Overtime employees={employees} departments={departments} />} />
+              <Route path='tax&insurance' element={<Tax_Insurance />} />
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
               <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} />
-              <Route path='User/home' element={<HomeUser replace />} />
             </Routes>
           </Flex>
         </Content>

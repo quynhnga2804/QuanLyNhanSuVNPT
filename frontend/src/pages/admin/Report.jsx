@@ -85,8 +85,8 @@ const Report = () => {
                     items={[
                         { key: '1', label: 'BÁO CÁO NHÂN SỰ', children: <EmployeeReport /> },
                         { key: '2', label: 'BÁO CÁO LƯƠNG THƯỞNG', children: 'chưa có gì' },
-                        { key: '3', label: 'BÁO CÁO HIỆU SUẤT LÀM VIỆC', children: 'chưa có gì' },
-                        { key: '4', label: 'BÁO CÁO BẢO HIỂM, THUẾ', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
+                        { key: '3', label: 'BÁO CÁO HIỆU CHẤM CÔNG', children: 'chưa có gì' },
+                        // { key: '4', label: 'BÁO CÁO BẢO HIỂM, THUẾ', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
                         { key: '5', label: 'BÁO CÁO THEO PHÒNG BAN, CHI NHÁNH', children: 'Nội dung cho tab TEAM VÀ QUẢN LÝ' },
                     ]}
                 />

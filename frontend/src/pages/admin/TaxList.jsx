@@ -8,6 +8,7 @@ import axios from 'axios';
 
 const DivisionList = ({ divisions, fetchDivisions }) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter] = useState('');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingDivision, setEditingDivision] = useState(null);
@@ -133,7 +134,8 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
 
     const filteredDivisions = divisions.filter(dvs =>
         dvs.DivisionID.toLowerCase().includes(searchQuery) ||
-        dvs.DivisionsName.toLowerCase().includes(searchQuery)
+        dvs.DivisionsName.toLowerCase().includes(searchQuery) &&
+        (statusFilter ? dvs.status === statusFilter : true)
     );
 
     return (

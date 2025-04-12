@@ -543,7 +543,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                         </Upload>
                     </Form.Item>
-                    <Form.Item label='Số điện thoại' name='PhoneNumber'>
+                    <Form.Item label='Số điện thoại' name='PhoneNumber' rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item label='Ngày sinh' name='DateOfBirth'>
@@ -571,13 +571,13 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label='Chức danh' name='JobTitle'>
+                    <Form.Item label='Chức danh' name='JobTitle' rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item label='Chức vụ' name='Position'>
+                    <Form.Item label='Chức vụ' name='Position' rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item label='Ngày bắt đầu' name='StartDate'>
+                    <Form.Item label='Ngày bắt đầu' name='StartDate' rules={[{ required: true }]}>
                         <Input type='date' />
                     </Form.Item>
                 </Form>
@@ -612,7 +612,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                         </Upload>
                     </Form.Item>
-                    <Form.Item label='Số điện thoại' name='PhoneNumber'>
+                    <Form.Item label='Số điện thoại' name='PhoneNumber' rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item label='Ngày sinh' name='DateOfBirth'>
@@ -640,13 +640,13 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label='Chức danh' name='JobTitle'>
+                    <Form.Item label='Chức danh' name='JobTitle' rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item label='Chức vụ' name='Position'>
+                    <Form.Item label='Chức vụ' name='Position' rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item label='Ngày bắt đầu' name='StartDate'>
+                    <Form.Item label='Ngày bắt đầu' name='StartDate' rules={[{ required: true }]}>
                         <Input type='date' />
                     </Form.Item>
                 </Form>

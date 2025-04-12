@@ -1,6 +1,6 @@
 import { Flex, Menu, Avatar, Tooltip } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { TeamOutlined, ReconciliationOutlined, WalletOutlined, DollarOutlined, CarryOutOutlined, ClusterOutlined, SolutionOutlined, ReadOutlined, ScheduleOutlined, LogoutOutlined } from '@ant-design/icons';
+import { TeamOutlined, ReconciliationOutlined, WalletOutlined, DollarOutlined, CarryOutOutlined, ClusterOutlined, SolutionOutlined, ReadOutlined, DiffOutlined, LogoutOutlined } from '@ant-design/icons';
 import logo from '../../assets/images/logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -61,7 +61,7 @@ const Sidebar = ({ collapsed, onLogout, imageUrl }) => {
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="org" title={!collapsed ? 'Thiết kế tổ chức' : null}>
                     {role !== 'Accountant' ? getItem('organizationalstructures', <ClusterOutlined onClick={() => setActiveKey('1')} />, 'Cơ cấu tổ chức') : null}
                     {getItem('attendance&overtime', <SolutionOutlined onClick={() => setActiveKey('1')} />, 'Công thời')}
-                    {getItem('8', <ScheduleOutlined onClick={() => setActiveKey('1')} />, 'Nghiệp vụ được giao')}
+                    {role === 'Admin' ? getItem('tax&insurance', <DiffOutlined onClick={() => setActiveKey('1')} />, 'Thuế và bảo hiểm') : null}
                 </Menu.ItemGroup>
 
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="policy" title={!collapsed ? 'Quy định & Chính sách' : null}>

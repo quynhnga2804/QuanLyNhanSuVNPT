@@ -13,6 +13,7 @@ const HumanReport = ({employees, departments}) => {
         return localStorage.getItem('activeKey') || '1';
     });
     const token = localStorage.getItem('token');
+    const role = JSON.parse(localStorage.getItem('user')).role;
 
     useEffect(() => {
         localStorage.setItem('activeKey', activeKey);
@@ -64,7 +65,6 @@ const HumanReport = ({employees, departments}) => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setResignations(response.data);
-            console.log("ds nghỉ việc: ", response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách nghỉ việc:', error);
         }
@@ -78,7 +78,7 @@ const HumanReport = ({employees, departments}) => {
                 activeKey={activeKey}
                 onChange={setActiveKey}
                 items={[
-                    // role !== 'Accountant' &&
+                    role === 'Manager' &&
                     { key: '1', label: 'THỐNG KÊ VÀ BÁO CÁO NHÂN SỰ', children: <HRStatisticsReports key={activeKey} onClick={() => setActiveKey('1')} employeecontracts={employeecontracts} resignations={resignations} jobprofiles={jobprofiles} personalprofiles={personalprofiles} departments={departments} employees={employees} /> },
                     { key: '2', label: 'BIỂU ĐỒ PHÂN TÍCH NHÂN SỰ', children: <HRAnalysisChart onClick={() => setActiveKey('2')} resignations={resignations} departments={departments} employees={employees} jobprofiles={jobprofiles} personalprofiles={personalprofiles}/>},
                 ]}

@@ -20,6 +20,8 @@ const Notification = require('../models/notificationModel');
 const UserNotification = require('../models/userNotificationModel');
 const Resignation = require('../models/resignationModel');
 const PersonalProfile = require('../models/personalProfileModel');
+const IncomeTax = require('../models/incometaxModel');
+const Insurance = require('../models/insuranceModel');
 
 const modelMap = {
   attendance: Attendance,
@@ -36,6 +38,10 @@ const modelMap = {
   familymembers: FamilyMember,
   jobprofile: JobProfile,
   jobprofiles: JobProfile,
+  incometax: IncomeTax,
+  incometaxes: IncomeTax,
+  insurance: Insurance,
+  insurances: Insurance,
   laborcontract: LaborContract,
   laborcontracts: LaborContract,
   monthlysalary: MonthlySalary,

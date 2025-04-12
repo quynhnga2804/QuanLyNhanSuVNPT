@@ -9,20 +9,22 @@ import PayrollCycleList from './PayrollCycleList';
 
 const PeriodicSalary = () => {
     const [employees, setEmployees] = useState([]);
+    const [incomeTaxes, setIncomeTaxes] = useState([]);
+    const [insurances, setInsurances] = useState([]);
     const [monthlysalaries, setMonthlySalaries] = useState([]);
     const [payrollcycles, setPayrollCycles] = useState([]);
     const [jobprofiles, setJobProfiles] = useState([]);
     const [familyMembers, setFamilyMembers] = useState([]);
     const [overtimes, setOvertimes] = useState([]);
     const [activeKey, setActiveKey] = useState(() => {
-        return localStorage.getItem("activeKey") || "1";
+        return localStorage.getItem('activeKey') || '1';
     });
     const role = JSON.parse(localStorage.getItem('user')).role;
 
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        localStorage.setItem("activeKey", activeKey);
+        localStorage.setItem('activeKey', activeKey);
     }, [activeKey]);
 
     useEffect(() => {
@@ -33,20 +35,44 @@ const PeriodicSalary = () => {
             fetchJobProfiles(token);
             fetchOverTimes(token);
             fetchFamilyMembers(token);
+            fetchIncomeTaxes(token);
+            fetchInsurances(token);
         }
-    }, []);
+    }, [token]);
 
     const fetchEmployees = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/employees', {
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
             });
             setEmployees(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        }
+    };
+
+    const fetchIncomeTaxes = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/incometaxes', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setIncomeTaxes(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách thuế:', error);
+        }
+    };
+
+    const fetchInsurances = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/admin/insurances', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setInsurances(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách bảo hiểm:', error);
         }
     };
 
@@ -75,7 +101,7 @@ const PeriodicSalary = () => {
     const fetchMonthlySalaries = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/monthlysalaries', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setMonthlySalaries(response.data);
         } catch (error) {
@@ -86,7 +112,7 @@ const PeriodicSalary = () => {
     const fetchPayrollCycles = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/payrollcycles', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setPayrollCycles(response.data);
         } catch (error) {
@@ -97,7 +123,7 @@ const PeriodicSalary = () => {
     const fetchJobProfiles = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/jobprofiles', {
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setJobProfiles(response.data);
         } catch (error) {
@@ -113,13 +139,13 @@ const PeriodicSalary = () => {
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        { key: '1', label: 'TỔNG QUAN', children: (<div className="tab-content-scrollable"><PayrollCycle onClick={() => setActiveKey('1')} monthlysalaries={monthlysalaries} payrollcycles={payrollcycles} /></div>) },
+                        { key: '1', label: 'TỔNG QUAN', children: (<div className='tab-content-scrollable'><PayrollCycle onClick={() => setActiveKey('1')} monthlysalaries={monthlysalaries} payrollcycles={payrollcycles} /></div>) },
                         (role === 'Admin' || role === 'Director' || role === 'Accountant') &&
-                        { key: '2', label: 'CHU KỲ LƯƠNG', children: (<div className="tab-content-scrollable"><PayrollCycleList onClick={() => setActiveKey('2')} fetchPayrollCycles={fetchPayrollCycles} payrollcycles={payrollcycles} /></div>) },
+                        { key: '2', label: 'CHU KỲ LƯƠNG', children: (<div className='tab-content-scrollable'><PayrollCycleList onClick={() => setActiveKey('2')} fetchPayrollCycles={fetchPayrollCycles} payrollcycles={payrollcycles} /></div>) },
                         role === 'Accountant' &&
-                        { key: '3', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey('3')} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },
-                        { key: '4', label: 'CHÍNH SÁCH LƯƠNG', children: (<div className="tab-content-scrollable"><SalaryPolicy onClick={() => setActiveKey('4')} /></div>) },
-                        { key: '5', label: 'CHÍNH SÁCH PHÚC LỢI', children: (<div className="tab-content-scrollable"><BenefitPolicy onClick={() => setActiveKey('5')} /></div>) },
+                        { key: '3', label: 'LƯƠNG VÀ PHÚC LỢI', children: <Benefit_Salary onClick={() => setActiveKey('3')} insurances={insurances} incomeTaxes={incomeTaxes} familyMembers={familyMembers} fetchMonthlySalaries={fetchMonthlySalaries} overtimes={overtimes} monthlysalaries={monthlysalaries} employees={employees} payrollcycles={payrollcycles} jobprofiles={jobprofiles} /> },
+                        { key: '4', label: 'CHÍNH SÁCH LƯƠNG', children: (<div className='tab-content-scrollable'><SalaryPolicy onClick={() => setActiveKey('4')} /></div>) },
+                        { key: '5', label: 'CHÍNH SÁCH PHÚC LỢI', children: (<div className='tab-content-scrollable'><BenefitPolicy onClick={() => setActiveKey('5')} /></div>) },
                     ]}
                 />
             </div>

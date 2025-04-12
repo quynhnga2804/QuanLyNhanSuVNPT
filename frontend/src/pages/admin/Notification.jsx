@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { List, Modal, Input, DatePicker, Tag, Form, Badge, Button, Dropdown, Tooltip, Menu, Flex, Select, message, Typography } from 'antd';
-import { EllipsisOutlined, CheckOutlined, DeleteOutlined } from '@ant-design/icons';
+import { List, Modal, Input, DatePicker, Tag, Form, Badge, Button, Dropdown, Tooltip, Menu, Flex, Select, message, Typography, FloatButton } from 'antd';
+import { EllipsisOutlined, CheckOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
@@ -208,11 +208,6 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const menu = (
         <Menu>
-            {(role === 'Admin' || role === 'Director') && (
-                <Menu.Item key='add-new' onClick={handleAddNew}>
-                    Gửi thông báo mới
-                </Menu.Item>
-            )}
             <Menu.Item key='mark-all-read' onClick={handleMarkAllRead}>
                 Đánh dấu tất cả là đã đọc
             </Menu.Item>
@@ -239,7 +234,7 @@ const Notifications = ({ fetchUnreadCount }) => {
     };
 
     return (
-        <div style={{ borderRadius: '15px', width: '96%', margin: '20px 2%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
+        <div style={{ borderRadius: '15px', width: '96%', margin: '20px 2%', paddingBottom: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
             <div style={{ padding: '9px 20px 12px 20px', fontWeight: '500px' }}>
                 <Flex justify='space-between'>
                     <Typography.Title level={5} type='secondary' style={{ color: '#2b2b2b', fontSize: '16px' }}>
@@ -270,7 +265,7 @@ const Notifications = ({ fetchUnreadCount }) => {
             <List
                 itemLayout='vertical'
                 dataSource={filteredStatuses}
-                style={{ maxHeight: '76vh', padding: '0 20px 20px 20px', overflowY: 'auto' }}
+                style={{ maxHeight: '73vh', padding: '0 20px 20px 20px', overflowY: 'auto' }}
                 renderItem={(item) => (
                     <List.Item
                         key={item.NotificationID}
@@ -316,6 +311,9 @@ const Notifications = ({ fetchUnreadCount }) => {
                     </List.Item>
                 )}
             />
+
+            {(role === 'Admin' || role === 'Director') && (<FloatButton onClick={handleAddNew} icon={<PlusOutlined />} tooltip={<div>Tạo thông báo mới</div>} />)}
+
             {selectedNotification && (
                 <div style={{
                     position: 'fixed', top: '20%', left: '50%', transform: 'translateX(-50%)',
