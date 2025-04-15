@@ -1,11 +1,8 @@
 import { Table, Flex, message } from 'antd';
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 
 const MonthlySalaryUser = ({monthlySalaryUser}) => {
     const uniquePayroll = Array.from( new Map(monthlySalaryUser.map(s => [s.ID_PayrollCycle, { text: s.PayrollCycle?.PayrollName, value: s.ID_PayrollCycle }])).values());
-    // const uniqueOTType = [...new Set(mappedOvertimeData.map(ov => ov.OTType))];
-    // const uniqueStatus = [...new Set(mappedOvertimeData.map(ov => ov.Status))];
 
     // Formatter cho tiền tệ
     const currencyFormatter = new Intl.NumberFormat('vi-VN', {

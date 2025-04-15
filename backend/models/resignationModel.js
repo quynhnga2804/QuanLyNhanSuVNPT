@@ -23,8 +23,20 @@ const Resignation = sequelize.define('Resignation', {
     type: DataTypes.DATE,
     allowNull: false,
   },
+  Status: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+  },
+  CreateAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  ApprovedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 }, {
   tableName: 'resignations',
-  timestamps: false, // Không sử dụng timestamps
+  timestamps: false,
 });
 module.exports = Resignation;

@@ -6,14 +6,16 @@ import ChangePasswordModal from "./ChangePasswordModal";
 import { NotificationContext } from "./NotificationContext";
 import { ModalContext } from "../../api/ModalContext";
 import axios from "axios";
+import { UserContext } from "../../api/UserContext";
 
 const HeaderUser = ({ employeeinfo }) => {
     const navigate = useNavigate();
-    const username = JSON.parse(localStorage.getItem("user")).name || "";
+    const { user } = useContext(UserContext);
+    const username = user?.name || "";
     const [imageUrl, setImageUrl] = useState(null);
     const {unreadCount} = useContext(NotificationContext);
     const {isChangePassVisible, setChangePassVisible, modalMessage, setModalMessage, isForcedChange, setIsForcedChange} = useContext(ModalContext);
-    const role = JSON.parse(localStorage.getItem('user')).role;
+    const role = user?.role.toLowerCase();
     const forceChange = localStorage.getItem("forceChangePass");
 
     const handleMenuClick = ({ key }) => {
@@ -69,7 +71,7 @@ const HeaderUser = ({ employeeinfo }) => {
                     icon: <UserOutlined />,
                     label: "Thông tin nhân viên",
                 },
-                role !== "Employee" && {
+                role !== "employee" && {
                     key: "admin/home",
                     icon: <TeamOutlined />,
                     label: "Quản lý nhân sự",
