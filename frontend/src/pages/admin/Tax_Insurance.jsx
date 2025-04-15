@@ -1,9 +1,8 @@
 import { Table, Button, Flex, InputNumber, Space, Typography, Modal, Form, Input, message, Dropdown } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import { debounce, filter } from 'lodash';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { get, put, post, del } from '../../api/apiService';
 
 const Tax_Insurance = () => {
     const token = localStorage.getItem('token');
@@ -30,9 +29,10 @@ const Tax_Insurance = () => {
 
     const fetchTaxes = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/incometaxes', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            // const response = await axios.get('http://localhost:5000/api/admin/incometaxes', {
+            //     headers: { "Authorization": `Bearer ${token}` }
+            // });
+            const response = await get('/admin/incometaxes');
             const sortedData = response.data.sort((a, b) => {
                 const aVal = a.MaxValue === null ? Infinity : Number(a.MaxValue);
                 const bVal = b.MaxValue === null ? Infinity : Number(b.MaxValue);
@@ -46,9 +46,7 @@ const Tax_Insurance = () => {
 
     const fetchInsurances = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/insurances', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await get('admin/insurances');
             setInsurances(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy bảng bảo hiểm:', error);
@@ -71,13 +69,7 @@ const Tax_Insurance = () => {
             const values = await editTaxForm.validateFields();
             values.ChangeDate = today;
             if (!isValidInsert(values.MaxValue, values.TaxRate, editingTax.ID)) return;
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/incometaxes/${editingTax.ID}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/incometaxes/${editingTax.ID}`, values);
             fetchTaxes();
             message.success('Chỉnh sửa thuế thành công!');
             handleEditTaxCancel();
@@ -101,13 +93,7 @@ const Tax_Insurance = () => {
         try {
             const values = await editInsForm.validateFields();
             values.ChangeDate = today;
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/insurances/${editingIns.InsuranceType}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/insurances/${editingIns.InsuranceType}`, values);
             fetchInsurances();
             message.success('Chỉnh sửa bảo hiểm thành công!');
             handleEditInsCancel();
@@ -130,10 +116,7 @@ const Tax_Insurance = () => {
             const values = await addTaxForm.validateFields();
             values.ChangeDate = today;
             if (!isValidInsert(values.MaxValue, values.TaxRate)) return;
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/incometaxes', values, {
-                headers: { Authorization: `Bearer ${token}`, },
-            });
+            await post('/admin/incometaxes', values);
             fetchTaxes();
             message.success('Thêm mới thuế thành công!');
             handleAddTaxCancel();
@@ -155,10 +138,7 @@ const Tax_Insurance = () => {
         try {
             const values = await addInsForm.validateFields();
             values.ChangeDate = today;
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/insurances', values, {
-                headers: { Authorization: `Bearer ${token}`, },
-            });
+            await post('/admin/insurances', values);
             fetchInsurances();
             message.success('Thêm mới bảo hiểm thành công!');
             handleAddInsCancel();
@@ -219,10 +199,7 @@ const Tax_Insurance = () => {
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/incometaxes/${record.ID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/incometaxes/${record.ID}`);
                     message.success(`Xóa dữ liệu thuế thành công!`);
                     fetchTaxes();
                 } catch (error) {
@@ -241,10 +218,7 @@ const Tax_Insurance = () => {
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/insurances/${record.InsuranceType}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/insurances/${record.InsuranceType}`);
                     message.success(`Xóa dữ liệu bảo hiểm thành công!`);
                     fetchInsurances();
                 } catch (error) {

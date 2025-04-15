@@ -1,15 +1,18 @@
 import { Table, Flex, Space, Typography } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { debounce } from 'lodash';
 import { DatePicker } from 'antd';
+const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
+import { UserContext } from '../../api/UserContext';
 
 const AttendanceList = ({ attendances, employees, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [newAttendances, setNewAttendances] = useState([]);
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
-    const role = JSON.parse(localStorage.getItem('user')).role;
+    const { user } = useContext(UserContext);
+    const workEmail = user?.email;
+    const role = user?.role.toLowerCase();
 
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
@@ -73,7 +76,7 @@ const AttendanceList = ({ attendances, employees, departments }) => {
     }, 500);
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
@@ -83,7 +86,7 @@ const AttendanceList = ({ attendances, employees, departments }) => {
         }
     }, [role, employees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' ? newAttendances : attendances;
+    const dataSource = role === 'manager' ? newAttendances : attendances;
 
     const filteredAttendances = dataSource.filter(ate => {
         const matchessearchQuery = searchQuery === '' ||
@@ -103,21 +106,22 @@ const AttendanceList = ({ attendances, employees, departments }) => {
                 </Typography.Title>
 
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
-                    <Space style={{ border: '1px solid #d9d9d9', borderRadius: '5px', padding: '0 5px' }}>
-                        <DatePicker
-                            style={{ border: 'none' }}
-                            placeholder='Từ ngày'
+                    <Space  direction="vertical" size={12}>
+                        <RangePicker
                             format='DD-MM-YYYY'
-                            onChange={(date) => setFromDate(date)}
-                        />
-                        <DatePicker
-                            style={{ border: 'none' }}
-                            placeholder='Đến ngày'
-                            format='DD-MM-YYYY'
-                            onChange={(date) => setToDate(date)}
+                            placeholder={['Từ ngày', 'Đến ngày']}
+                            onChange={(dates) => {
+                                if (dates && dates.length === 2) {
+                                    setFromDate(dates[0]);
+                                    setToDate(dates[1]);
+                                } else {
+                                    setFromDate(null);
+                                    setToDate(null);
+                                }
+                            }}
                         />
                     </Space>
-
+                    
                     <Space>
                         <Search
                             placeholder='Tìm kiếm địa điểm...'

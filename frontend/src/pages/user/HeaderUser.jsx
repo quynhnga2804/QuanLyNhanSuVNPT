@@ -9,8 +9,7 @@ import axios from "axios";
 
 const HeaderUser = ({ employeeinfo }) => {
     const navigate = useNavigate();
-    const username = localStorage.getItem("username") || "";
-    // const [isModalVisible, setModalVisible] = useState(false);
+    const username = JSON.parse(localStorage.getItem("user")).name || "";
     const [imageUrl, setImageUrl] = useState(null);
     const {unreadCount} = useContext(NotificationContext);
     const {isChangePassVisible, setChangePassVisible, modalMessage, setModalMessage, isForcedChange, setIsForcedChange} = useContext(ModalContext);
@@ -21,7 +20,6 @@ const HeaderUser = ({ employeeinfo }) => {
         if (key === "profile") {
             navigate("/user/generalinfo/profile");
         } else if (key === "change-password") {
-            // setModalVisible(true); // Hiển thị modal đổi mật khẩu
             setChangePassVisible(true);
         } else if (key === "logout") {
             localStorage.removeItem("token");
@@ -31,7 +29,6 @@ const HeaderUser = ({ employeeinfo }) => {
     };
 
     useEffect(() => {
-        // const shouldForceChange = localStorage.getItem('forceChangePass');
         if (forceChange === 'true') {
           setModalMessage('Bạn cần đổi mật khẩu để tiếp tục!');
           setChangePassVisible(true);

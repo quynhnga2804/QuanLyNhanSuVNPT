@@ -1,36 +1,31 @@
 import { Table, Button, Flex, Space, Typography, message } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import { DatePicker } from 'antd';
+const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put } from '../../api/apiService';
 
 const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [tableFilters, setTableFilters] = useState({});
     const [newOTs, setNewOTs] = useState([]);
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
-    const role = JSON.parse(localStorage.getItem('user')).role;
+    const { user } = useContext(UserContext);
+    const workEmail = user?.email;
+    const role = user?.role.toLowerCase();
 
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
 
     const handleApprove = async (record) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/overtimes/${record.ID_OT}`,
-                { 
-                    Status: 'Approved',
-                    ApprovedAt: new Date().toISOString(),
-                 },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+            await put(`/admin/overtimes/${record.ID_OT}`, {
+                Status: 'Approved',
+                ApprovedAt: new Date().toISOString(),
+            });
             fetchOvertimes();
             message.success('Đã duyệt!');
         } catch (error) {
@@ -40,18 +35,10 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
 
     const handleReject = async (record) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/overtimes/${record.ID_OT}`,
-                { 
-                    Status: 'Rejected',
-                    ApprovedAt: new Date().toISOString(),
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+            await put(`/admin/overtimes/${record.ID_OT}`, {
+                Status: 'Rejected',
+                ApprovedAt: new Date().toISOString(),
+            });
             fetchOvertimes();
             message.success('Đã từ chối!');
         } catch (error) {
@@ -68,14 +55,14 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
     };
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const empID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.EmployeeID;
             const filtered = overtimes.filter(ate => ate.ManagerID === empID);
             setNewOTs(filtered);
         }
     }, [role, overtimes, employees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' ? newOTs : overtimes;
+    const dataSource = role === 'manager' ? newOTs : overtimes;
     const filteredovertimes = dataSource.filter(ate => {
         const matchesSearchQuery = searchQuery === '' ||
             ate.EmployeeID.toLowerCase().includes(searchQuery) ||
@@ -208,7 +195,7 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
         },
     ];
 
-    if (role === 'Manager') {
+    if (role === 'manager') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -232,20 +219,21 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
                 </Typography.Title>
 
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
-                    <Space style={{ border: '1px solid #d9d9d9', borderRadius: '5px', padding: '0 5px' }}>
-                        <DatePicker
-                            style={{ border: 'none' }}
-                            placeholder='Từ ngày'
-                            format='DD-MM-YYYY'
-                            onChange={(date) => setFromDate(date)}
-                        />
-                        <DatePicker
-                            style={{ border: 'none' }}
-                            placeholder='Đến ngày'
-                            format='DD-MM-YYYY'
-                            onChange={(date) => setToDate(date)}
-                        />
-                    </Space>
+                    <Space  direction="vertical" size={12}>
+                                            <RangePicker
+                                                format='DD-MM-YYYY'
+                                                placeholder={['Từ ngày', 'Đến ngày']}
+                                                onChange={(dates) => {
+                                                    if (dates && dates.length === 2) {
+                                                        setFromDate(dates[0]);
+                                                        setToDate(dates[1]);
+                                                    } else {
+                                                        setFromDate(null);
+                                                        setToDate(null);
+                                                    }
+                                                }}
+                                            />
+                                        </Space>
 
                     <Space>
                         <Search

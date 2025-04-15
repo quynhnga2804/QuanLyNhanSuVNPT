@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { Card, Row, Col, Typography, Button } from 'antd';
-import { FilePdfOutlined, SolutionOutlined, DollarOutlined, DeploymentUnitOutlined, FilePptOutlined, TeamOutlined, ClusterOutlined } from '@ant-design/icons';
+import { FilePdfOutlined, SolutionOutlined, DollarOutlined, DeploymentUnitOutlined, TeamOutlined, ClusterOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../../api/UserContext';
 
 const { Title, Text } = Typography;
 
 const AdminHome = ({ dtEmployees, dtEmployeeContracts, dtDivisions, dtDepartments }) => {
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
-  const role = JSON.parse(localStorage.getItem('user'))?. role;
+  const role = user?. role.toLowerCase();
 
   const data = [
-    role !== 'Accountant' ? { title: 'Nhân sự', value: dtEmployees?.length || 0, color: '#ffc226', icon: <TeamOutlined />, path: '../employees' } : null,
-    role !== 'Accountant' ? { title: 'Hợp đồng lao động', value: dtEmployeeContracts?.length || 0, color: '#33ad39', icon: <SolutionOutlined />, path: '../contracts' } : null,
-    role !== 'Manager' ? { title: 'Lương', value: 5, color: '#03A9F4', icon: <DollarOutlined />, path: '../periodicsalaries' } : null,
-    role !== 'Accountant' && role !== 'Manager' ? { title: 'Bộ phận', value: dtDivisions?.length, color: '#f63838', icon: <DeploymentUnitOutlined />, path: '../organizationalstructures' } : null,
-    role !== 'Accountant' ? { title: 'Phòng ban', value: dtDepartments?.length, color: '#b12dd4', icon: <ClusterOutlined /> } : null,
-    role !== 'Manager' && role !== 'Accountant' ? { title: 'Báo cáo', value: 0, color: '#00E676', icon: <FilePdfOutlined /> } : null,
+    role !== 'accountant' ? { title: 'Nhân sự', value: dtEmployees?.length || 0, color: '#ffc226', icon: <TeamOutlined />, path: '../employees' } : null,
+    role !== 'accountant' ? { title: 'Hợp đồng lao động', value: dtEmployeeContracts?.length || 0, color: '#33ad39', icon: <SolutionOutlined />, path: '../contracts' } : null,
+    role !== 'manager' ? { title: 'Lương', value: 5, color: '#03A9F4', icon: <DollarOutlined />, path: '../periodicsalaries' } : null,
+    role !== 'accountant' && role !== 'manager' ? { title: 'Bộ phận', value: dtDivisions?.length, color: '#f63838', icon: <DeploymentUnitOutlined />, path: '../organizationalstructures' } : null,
+    role !== 'accountant' ? { title: 'Phòng ban', value: dtDepartments?.length, color: '#b12dd4', icon: <ClusterOutlined /> } : null,
+    role !== 'manager' && role !== 'accountant' ? { title: 'Báo cáo', value: 0, color: '#00E676', icon: <FilePdfOutlined /> } : null,
   ].filter(Boolean);
 
   return (

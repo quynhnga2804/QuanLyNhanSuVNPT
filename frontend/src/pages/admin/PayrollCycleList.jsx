@@ -1,10 +1,10 @@
-import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState, useEffect } from 'react';
+import { Table, Button, Flex, Space, Typography, Modal, Form, Input, message } from 'antd';
+import React, { useState, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
-import { UserAddOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put, post, del } from '../../api/apiService';
 
 const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,7 +13,8 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
     const [editingPayrollCycle, setEditingPayrollCycle] = useState(null);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
-    const role = JSON.parse(localStorage.getItem('user')).role;
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
 
     const handleEdit = (record) => {
         setEditingPayrollCycle(record);
@@ -30,12 +31,7 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
         try {
             const values = await editForm.validateFields();
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/payrollcycles/${editingPayrollCycle.ID_PayrollCycle}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/payrollcycles/${editingPayrollCycle.ID_PayrollCycle}`, values);
             fetchPayrollCycles();
             message.success('Chỉnh sửa thành công!');
             handleEditCancel();
@@ -50,10 +46,8 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
             message.warning("Đang tồn tại chu kỳ lương chưa hoàn thành. Không thể tạo mới!");
             return;
         }
-
         setIsAddModalOpen(true);
     };
-
 
     const handleAddCancel = () => {
         setIsAddModalOpen(false);
@@ -63,14 +57,8 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
             const payload = { ...values, Status: 'Chưa bắt đầu' };
-            await axios.post('http://localhost:5000/api/admin/payrollcycles', payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await post('/admin/payrollcycles', payload);
             fetchPayrollCycles();
             message.success('Thêm mới thành công!');
             handleAddCancel();
@@ -88,11 +76,8 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/payrollcycles/${record.ID_PayrollCycle}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    message.success(`Xóa ${record.PayrollName} thành công!`);
+                    await del(`/admin/payrollcycles/${record.ID_PayrollCycle}`);
+                    message.success(`Xóa chu kỳ ${record.PayrollName} thành công!`);
                     fetchPayrollCycles();
                 } catch (error) {
                     message.error('Xóa thất bại, vui lòng thử lại.');
@@ -103,15 +88,9 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
 
     const handleOpen = async (record) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/payrollcycles/${record.ID_PayrollCycle}`,
-                { Status: "Đang xử lý" },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+            await put(`/admin/payrollcycles/${record.ID_PayrollCycle}`, {
+                Status: "Đang xử lý"
+            });
             fetchPayrollCycles();
             message.success('Đã mở chu kỳ lương mới!');
         } catch (error) {
@@ -169,9 +148,9 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
             minWidth: 113,
             render: (_, record) => (
                 <>
-                    {role === 'Accountant' ? <Button type="link" disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleOpen(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Mở</Button> : null }
-                    {role !== 'Accountant' ? <Button type="link" disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button> : null }
-                    {role !== 'Accountant' ? <Button type="link" danger disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button> : null }
+                    {role === 'accountant' ? <Button type="link" disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleOpen(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Mở</Button> : null}
+                    {role !== 'accountant' ? <Button type="link" disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleEdit(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button> : null}
+                    {role !== 'accountant' ? <Button type="link" danger disabled={record.Status === 'Hoàn thành' || record.Status === 'Đang xử lý'} onClick={() => handleDelete(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button> : null}
                 </>
             ),
         }
@@ -201,7 +180,7 @@ const PayrollCycleList = ({ payrollcycles, fetchPayrollCycles }) => {
                         />
                     </Space>
 
-                    {(role === 'Admin' || role === 'Director') &&
+                    {(role === 'admin' || role === 'director') &&
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới

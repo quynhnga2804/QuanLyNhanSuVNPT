@@ -1,10 +1,11 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { debounce, min } from 'lodash';
+import { debounce } from 'lodash';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put, post, del } from '../../api/apiService';
 
 const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,7 +14,8 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
     const [editingFamilyMember, setEditingFamilyMember] = useState(null);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
-    const role = JSON.parse(localStorage.getItem('user')).role;
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
 
     const handleEdit = (record) => {
         setEditingFamilyMember(record);
@@ -44,11 +46,8 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/familymembers/${record.FamilyMemberID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    message.success(`Xóa ${record.FullName} thành công!`);
+                    await del(`/admin/familymembers/${record.FamilyMemberID}`);
+                    message.success(`Xóa phụ thuộc ${record.FullName} thành công!`);
                     fetchFamilyMembers();
                 } catch (error) {
                     message.error('Xóa thất bại, vui lòng thử lại.');
@@ -60,13 +59,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/familymembers', values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await post('/admin/familymembers', values);
             fetchFamilyMembers();
             message.success('Thêm mới thành công!');
             handleAddCancel();
@@ -78,13 +71,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/familymembers/${editingFamilyMember.FamilyMemberID}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/familymembers/${editingFamilyMember.FamilyMemberID}`, values);
             fetchFamilyMembers();
             message.success('Chỉnh sửa thành công!');
             handleEditCancel();
@@ -149,7 +136,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
         },
     ];
 
-    if (role !== 'Accountant') {
+    if (role !== 'accountant') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -190,7 +177,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
                         />
                     </Space>
                     
-                    {role !== 'Accountant' && (
+                    {role !== 'accountant' && (
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới <UserAddOutlined />

@@ -1,11 +1,12 @@
 import { Button, message, Descriptions, Form, Modal, Select, Input, Dropdown, Flex, Space, Table, Typography } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { CaretDownOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import SideContent from './SideContent';
 import Search from 'antd/es/transfer/search';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { post, put, del } from '../../api/apiService';
 
 const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, laborcontracts, jobprofiles, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -19,17 +20,17 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     const [endDateDisabled, setEndDateDisabled] = useState(true);
     const [selectedEmployeeContract, setSelectedEmployeeContract] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
-    const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newEmployeeContracts, setNewEmployeeContracts] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const workEmail = user?.email;
 
     const handleStartDateChange = (e) => {
         setStartDate(e.target.value);
     };
 
-    const handleContractInputChange = (value) => {
-
+    const handleContractInputChange = (value, form) => {
         const selectedLabContract = laborcontracts.find(lab => lab.ID_Contract === value);
         if (selectedLabContract) {
             const contractType = selectedLabContract.ContractType;
@@ -40,14 +41,14 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                 if (months > 0 && startDate) {
                     const endDate = new Date(startDate);
                     endDate.setMonth(endDate.getMonth() + months);
-                    addForm.setFieldsValue({ EndDate: endDate.toISOString().split("T")[0] });
+                    form.setFieldsValue({ EndDate: endDate.toISOString().split("T")[0] });
                     setEndDateDisabled(true);
                 }
             } else if (contractType.includes(" thời hạn")) {
-                addForm.setFieldsValue({ EndDate: null });
+                form.setFieldsValue({ EndDate: null });
                 setEndDateDisabled(true);
             } else {
-                addForm.setFieldsValue({ EndDate: null });
+                form.setFieldsValue({ EndDate: null });
                 setEndDateDisabled(false);
             }
         }
@@ -77,14 +78,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                 return;
             }
 
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/employeecontracts', values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
+            await post('/admin/employeecontracts', values);
             fetchEmployeeContracts();
             message.success(`Thêm mới ${values.EmployeeID} thành công!`);
             handleAddCancel();
@@ -107,20 +101,13 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-
             const requestData = {
                 EmployeeID: editingEmployContract.EmployeeID,
                 ID_Contract: editingEmployContract.ID_Contract,
                 ...values,
             };
 
-            await axios.put(`http://localhost:5000/api/admin/employeecontracts/${editingEmployContract.employcontractID}`, requestData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/employeecontracts/${editingEmployContract.employcontractID}`, requestData);
             fetchEmployeeContracts();
             message.success('Chỉnh sửa thành công!');
             handleEditCancel();
@@ -138,10 +125,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/employeecontracts/${editingEmployContract.employcontractID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/employeecontracts/${editingEmployContract.employcontractID}`);
                     message.success(`Xóa hợp đồng của ${record.EmployeeID} thành công!`);
                     fetchEmployeeContracts();
                 } catch (error) {
@@ -170,7 +154,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     };
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
@@ -181,7 +165,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
         }
     }, [role, employees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' && newEmployeeContracts.length > 0 ? newEmployeeContracts : employeecontracts;
+    const dataSource = role === 'manager' && newEmployeeContracts.length > 0 ? newEmployeeContracts : employeecontracts;
 
     const mergedContracts = dataSource.map(emp => {
         const contract = laborcontracts.find(lc => lc.ID_Contract === emp.ID_Contract);
@@ -429,7 +413,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                         <Input type="date" onChange={handleStartDateChange} />
                     </Form.Item>
                     <Form.Item label="Loại hợp đồng" name="ID_Contract" rules={[{ required: true }]}>
-                        <Select onChange={handleContractInputChange} disabled={!startDate}>
+                        <Select onChange={(value) => handleContractInputChange(value, addForm)} disabled={!startDate}>
                             {laborcontracts.map(lab => (
                                 <Select.Option key={lab.ID_Contract} value={lab.ID_Contract}>
                                     ({lab.ID_Contract}) {lab.ContractType}
@@ -444,7 +428,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
             </Modal>
 
             {/* Chỉnh sửa */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Hợp Đồng</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered>
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Hợp Đồng</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered>
                 <Form form={editForm} layout='vertical'>
                     <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
                         <Select>
@@ -459,7 +443,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                         <Input type="date" onChange={handleStartDateChange} />
                     </Form.Item>
                     <Form.Item label="Loại hợp đồng" name="ID_Contract" rules={[{ required: true }]}>
-                        <Select onChange={handleContractInputChange} disabled={!startDate}>
+                        <Select onChange={(value) => handleContractInputChange(value, editForm)} disabled={!startDate}>
                             {laborcontracts.map(lab => (
                                 <Select.Option key={lab.ID_Contract} value={lab.ID_Contract}>
                                     ({lab.ID_Contract}) {lab.ContractType}

@@ -1,9 +1,10 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put, post, del } from '../../api/apiService';
 
 const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,10 +13,11 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
   const [editingJobProfile, setEditingJobProfile] = useState(null);
   const [editForm] = Form.useForm();
   const [addForm] = Form.useForm();
-  const role = JSON.parse(localStorage.getItem('user')).role;
-  const workEmail = JSON.parse(localStorage.getItem('user')).email;
   const [newJobProfiles, setNewJobProfiles] = useState([]);
   const [tableFilters, setTableFilters] = useState({});
+  const { user } = useContext(UserContext);
+  const role = user?.role.toLowerCase();
+  const workEmail = user?.email;
 
   const uniqueEmploymentStatuses = [...new Set(jobprofiles.map(emp => emp.EmploymentStatus).filter(Boolean))];
 
@@ -33,13 +35,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
   const handleEditSave = async () => {
     try {
       const values = await editForm.validateFields();
-      const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/admin/jobprofiles/${editingJobProfile.EmployeeID}`, values, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      await put(`/admin/jobprofiles/${editingJobProfile.EmployeeID}`, values);
       fetchJobProfiles();
       message.success('Chỉnh sửa thành công!');
       handleEditCancel();
@@ -60,13 +56,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
   const handleAddSave = async () => {
     try {
       const values = await addForm.validateFields();
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/admin/jobprofiles', values, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      await post('/admin/jobprofiles', values);
       fetchJobProfiles();
       message.success('Thêm mới thành công!');
       handleAddCancel();
@@ -84,10 +74,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
       cancelText: 'Hủy',
       onOk: async () => {
         try {
-          const token = localStorage.getItem('token');
-          await axios.delete(`http://localhost:5000/api/admin/jobprofiles/${record.EmployeeID}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await del(`/admin/jobprofiles/${record.EmployeeID}`);
           message.success(`Xóa ${record.EmployeeID} thành công!`);
           fetchJobProfiles();
         } catch (error) {
@@ -98,7 +85,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
   };
 
   useEffect(() => {
-    if (role === 'Manager') {
+    if (role === 'manager') {
       const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
       const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
       const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
@@ -176,7 +163,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
     },
   ];
 
-  if (role === 'Director' || role === 'Admin') {
+  if (role === 'director' || role === 'admin') {
     columns.push({
       title: 'CHỨC NĂNG',
       dataIndex: 'actions',
@@ -200,7 +187,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
     setTableFilters(filters);
   };
 
-  const dataSource = role === 'Manager' && newJobProfiles.length > 0 ? newJobProfiles : jobprofiles;
+  const dataSource = role === 'manager' && newJobProfiles.length > 0 ? newJobProfiles : jobprofiles;
   const filteredJobProfiles = dataSource.filter(dvs => {
     const matchesSearchQuery = searchQuery === '' ||
       dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
@@ -228,7 +215,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
             />
           </Space>
 
-          {(role === 'Admin' || role === 'Director') &&
+          {(role === 'admin' || role === 'director') &&
             <Button type='primary' onClick={handleAddNew}>
               <Space>
                 Tạo mới <UserAddOutlined />

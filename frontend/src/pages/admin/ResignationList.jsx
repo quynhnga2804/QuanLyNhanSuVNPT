@@ -1,98 +1,25 @@
-import { Button, message, Form, Modal, Flex, Space, Table, Typography } from 'antd';
-import React, { useState, useEffect } from 'react';
+import { Button, Flex, Space, Table, Typography } from 'antd';
+import React, { useState, useEffect, useContext } from 'react';
 import { FileExcelOutlined } from '@ant-design/icons';
 import Search from 'antd/es/transfer/search';
 import { debounce } from 'lodash';
 import exportToExcel from '../../utils/exportToExcel';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
 
-const ResignationList = ({ resignations, employees, departments, fetchEmployeeContracts }) => {
+const ResignationList = ({ resignations, employees, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const today = new Date();
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingEmployContract, setEditingEmployContract] = useState(null);
-    const [editForm] = Form.useForm();
-    const [selectedEmployeeContract, setSelectedEmployeeContract] = useState(null);
-    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
-    const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newResignations, setNewResignations] = useState([]);
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const workEmail = user?.email;
 
     const handleSearch = debounce((value) => {
         setSearchQuery(value.toLowerCase());
     }, 500);
 
-    const handleEdit = (record) => {
-        setEditingEmployContract(record);
-        editForm.setFieldsValue(record);
-        setIsEditModalOpen(true);
-    };
-
-    const handleEditCancel = () => {
-        setIsEditModalOpen(false);
-        editForm.resetFields();
-    };
-
-    const handleEditSave = async () => {
-        try {
-            const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-
-            const requestData = {
-                EmployeeID: editingEmployContract.EmployeeID,
-                ID_Contract: editingEmployContract.ID_Contract,
-                ...values,
-            };
-
-            await axios.put(`http://localhost:5000/api/admin/employeecontracts/${editingEmployContract.employcontractID}`, requestData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            fetchEmployeeContracts();
-            message.success('Chỉnh sửa thành công!');
-            handleEditCancel();
-        } catch (error) {
-            message.error('Sửa thất bại, vui lòng thử lại.');
-        }
-    };
-
-    const handleDelete = (record) => {
-        Modal.confirm({
-            title: 'Xác nhận xóa',
-            content: `Bạn có chắc chắn muốn xóa hợp đồng ${record.EmployeeID} không?`,
-            okText: 'Xóa',
-            okType: 'danger',
-            cancelText: 'Hủy',
-            onOk: async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/employeecontracts/${editingEmployContract.employcontractID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    message.success(`Xóa hợp đồng của ${record.EmployeeID} thành công!`);
-                    fetchEmployeeContracts();
-                } catch (error) {
-                    message.error('Xóa thất bại, vui lòng thử lại.');
-                }
-            },
-        });
-    };
-
-    const handleDetails = (record) => {
-        setSelectedEmployeeContract(record);
-        setIsShowModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setIsShowModalOpen(false);
-        setSelectedEmployeeContract(null);
-    };
-
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
@@ -103,7 +30,7 @@ const ResignationList = ({ resignations, employees, departments, fetchEmployeeCo
         }
     }, [role, employees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' && newResignations.length > 0 ? newResignations : resignations;
+    const dataSource = role === 'manager' && newResignations.length > 0 ? newResignations : resignations;
 
     const filteredResignations = dataSource.filter(res =>
         res.EmployeeID.toLowerCase().includes(searchQuery.toLowerCase()) ||

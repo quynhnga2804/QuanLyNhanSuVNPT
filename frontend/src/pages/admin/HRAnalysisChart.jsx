@@ -1,11 +1,13 @@
-import React, {useState, useMemo, useEffect} from "react";
+import React, {useState, useMemo, useEffect, useContext} from "react";
 import { Card, Flex } from "antd";
 import { PieChart, LineChart, CartesianGrid, Line, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import moment from 'moment';
+import { UserContext } from "../../api/UserContext";
 
 const HRAnalysisChart = ({ employees, departments, jobprofiles, personalprofiles, resignations}) => {
-    const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const workEmail = user?.email;
     const [newEmployees, setNewEmployees] = useState([]);
  
     const resignedEmployeeIDs = useMemo(() => new Set(resignations.map(res => res.EmployeeID)), [resignations]); 
@@ -51,7 +53,7 @@ const HRAnalysisChart = ({ employees, departments, jobprofiles, personalprofiles
     }, [employees, jobprofiles, personalprofiles, resignations, resignedEmployeeIDs]);  // Chỉ cập nhật khi dữ liệu thay đổi
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = mergedEmployees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
 
@@ -61,7 +63,7 @@ const HRAnalysisChart = ({ employees, departments, jobprofiles, personalprofiles
         }
     }, [role, mergedEmployees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' ? newEmployees : mergedEmployees;
+    const dataSource = role === 'manager' ? newEmployees : mergedEmployees;
 
     const departmentGenderData = useMemo(() => {
         if (!dataSource || !departments) return [];
@@ -224,10 +226,7 @@ const HRAnalysisChart = ({ employees, departments, jobprofiles, personalprofiles
                 // Chỉ tính nhân viên nếu họ đã vào làm và chưa nghỉ việc trong tháng này
                 if (startMonth && startMonth <= month && (!endMonth || endMonth >= month)) {
                     departmentCounts[departmentName] = (departmentCounts[departmentName] || 0) + 1;
-                    console.log("departmentCount: ", departmentCounts[departmentName]);
                 }
-                console.log("startmonth", startMonth);
-                console.log("endMonth: ", endMonth);
             });
             
     

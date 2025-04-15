@@ -1,8 +1,8 @@
 import { Tabs } from 'antd';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import LaborContract from './LaborContract';
 import ReginationList from './ResignationList';
+import { get } from '../../api/apiService';
 
 const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, departments }) => {
     const [laborcontracts, setlaborcontracts] = useState([]);
@@ -12,26 +12,19 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, depart
         return localStorage.getItem('activeKey') || '1';
     });
 
-    const token = localStorage.getItem('token');
-    const role = JSON.parse(localStorage.getItem('user')).role;
-
     useEffect(() => {
         localStorage.setItem("activeKey", activeKey);
     }, [activeKey]);
 
     useEffect(() => {
-        if (token) {
-            fetchLaborContracts(token);
-            fetchJobProfiles(token);
-            fetchResignations(token);
-        }
+        fetchLaborContracts();
+        fetchJobProfiles();
+        fetchResignations();
     }, []);
 
     const fetchLaborContracts = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/laborcontracts', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await get('/admin/laborcontracts');
             setlaborcontracts(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách hồ sơ:', error);
@@ -40,9 +33,7 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, depart
 
     const fetchJobProfiles = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/jobprofiles', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await get('/admin/jobprofiles');
             setjobprofiles(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách hồ sơ:', error);
@@ -51,9 +42,7 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, depart
 
     const fetchResignations = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/resignations', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await get('/admin/resignations');
             setresignations(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách hồ sơ:', error);
@@ -68,9 +57,7 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, depart
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        role !== 'Accountant' &&
                         { key: '1', label: 'HỢP ĐỒNG LAO ĐỘNG', children: <LaborContract onClick={() => setActiveKey('1')} departments={departments} employees={employees} employeecontracts={employeecontracts} laborcontracts={laborcontracts} jobprofiles={jobprofiles} fetchEmployeeContracts={fetchEmployeeContracts} /> },
-                        role !== 'Accountant' &&
                         { key: '2', label: 'DANH SÁCH NGHỈ VIỆC', children: <ReginationList onClick={() => setActiveKey('2')} departments={departments} resignations={resignations} employees={employees} /> },
                     ]}
                 />

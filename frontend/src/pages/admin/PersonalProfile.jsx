@@ -1,10 +1,11 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
-import dayjs from 'dayjs';
 import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put, post, del } from '../../api/apiService';
 
 const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,10 +14,12 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
     const [editingPersonalProfile, setEditingPersonalProfile] = useState(null);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
-    const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newPersonalProfiles, setNewPersonalProfiles] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
+
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const workEmail = user?.email;
 
     const uniqueEducations = [...new Set(personalprofiles.map(per => per.Education).filter(Boolean))];
 
@@ -34,13 +37,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/personalprofiles/${editingPersonalProfile.EmployeeID}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/personalprofiles/${editingPersonalProfile.EmployeeID}`, values);
             fetchPersonalProfiles();
             message.success('Chỉnh sửa thành công!');
             handleEditCancel();
@@ -61,13 +58,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/personalprofiles', values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await post('/admin/personalprofiles', values);
             fetchPersonalProfiles();
             message.success('Thêm mới thành công!');
             handleAddCancel();
@@ -85,10 +76,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/personalprofiles/${record.EmployeeID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/personalprofiles/${record.EmployeeID}`);
                     message.success(`Xóa ${record.EmployeeID} thành công!`);
                     fetchPersonalProfiles();
                 } catch (error) {
@@ -99,7 +87,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
     };
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
@@ -209,7 +197,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
         },
     ];
 
-    if (role === 'Director' || role === 'Admin') {
+    if (role === 'director' || role === 'admin') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -233,7 +221,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
         setTableFilters(filters);
     };
 
-    const dataSource = role === 'Manager' && newPersonalProfiles.length > 0 ? newPersonalProfiles : personalprofiles;
+    const dataSource = role === 'manager' && newPersonalProfiles.length > 0 ? newPersonalProfiles : personalprofiles;
     const filteredpersonalprofiles = dataSource.filter(dvs => {
         const matchesSearchQuery = searchQuery === '' ||
             dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
@@ -267,7 +255,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
                         />
                     </Space>
 
-                    {(role === 'Admin' || role === 'Director') &&
+                    {(role === 'admin' || role === 'director') &&
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới <UserAddOutlined />

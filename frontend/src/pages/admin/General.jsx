@@ -1,10 +1,11 @@
 import { Table, Button, Descriptions, Upload, Flex, Select, Space, Typography, Modal, Form, Input, message, Image } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put, post, del } from '../../api/apiService';
 
 const General = ({ employees, departments, users, fetchEmployees, fetchUsers, employeecontracts }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -16,10 +17,12 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const [previewImage, setPreviewImage] = useState(null);
     const [editForm] = Form.useForm();
     const [addForm] = Form.useForm();
-    const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
     const [newEmployees, setNewEmployees] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
+
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const workEmail = user?.email;
 
     const uniqueGenders = [...new Set(employees.map(emp => emp.Gender).filter(Boolean))];
     const uniquePositions = [...new Set(employees.map(emp => emp.Position).filter(Boolean))];
@@ -58,23 +61,15 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const handleEditSave = async (form, selectedImage) => {
         try {
             const values = await form.validateFields();
-            const token = localStorage.getItem('token');
-
             const formData = new FormData();
             Object.keys(values).forEach(key => {
-                formData.append(key, values[key]);
+                formData.append(key, values[key] || '');
             });
 
-            if (selectedImage) {
+            if (selectedImage)
                 formData.append('Image', selectedImage);
-            }
 
-            await axios.put(`http://localhost:5000/api/admin/employees/${values.EmployeeID}`, formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await put(`/admin/employees/${values.EmployeeID}`, formData);
 
             fetchEmployees();
             message.success('Chỉnh sửa thành công!');
@@ -97,23 +92,17 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
 
             const formData = new FormData();
             Object.keys(values).forEach(key => {
-                formData.append(key, values[key]);
+                formData.append(key, values[key] || '');
             });
 
             if (selectedImage) {
                 formData.append('Image', selectedImage);
             }
 
-            await axios.post('http://localhost:5000/api/admin/employees', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await post('/admin/employees', formData);
             fetchEmployees();
             message.success('Thêm mới nhân sự thành công!');
             handleAddCancel();
@@ -131,7 +120,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     };
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
             const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
@@ -140,7 +129,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
         }
     }, [role, employees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' ? newEmployees : employees;
+    const dataSource = role === 'manager' ? newEmployees : employees;
     const filteredEmployees = dataSource.filter(emp => {
         const matchesSearchQuery = searchQuery === '' ||
             emp.FullName.toLowerCase().includes(searchQuery) ||
@@ -168,10 +157,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/employees/${record.EmployeeID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/employees/${record.EmployeeID}`);
                     message.success(`Xóa nhân sự ${record.FullName} thành công!`);
                     fetchEmployees();
                 } catch (error) {
@@ -183,21 +169,13 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
 
     const createUser = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:5000/api/admin/users/create',
+            const response = await post('/admin/users/create',
                 {
                     WorkEmail: selectedEmployee.WorkEmail,
                     UserName: newUser.UserName,
                     Password: newUser.Password,
                     Role: newUser.Role,
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                }
-            );
+                });
 
             if (response.status === 200 || response.status === 201) {
                 message.success('Tạo tài khoản thành công!');
@@ -233,10 +211,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             okType: 'danger',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    const response = await axios.delete(`http://localhost:5000/api/admin/users/delete/${email}`, {
-                        headers: { 'Authorization': `Bearer ${token}` },
-                    });
+                    const response = await del(`/admin/users/delete/${email}`);
 
                     if (response.status === 200) {
                         message.success('Xóa tài khoản thành công!');
@@ -351,7 +326,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
         },
     ];
 
-    if (role !== 'Manager') {
+    if (role !== 'manager') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -383,7 +358,7 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                         />
                     </Space>
 
-                    {role !== 'Manager' && (
+                    {role !== 'manager' && (
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới <UserAddOutlined />
@@ -506,11 +481,11 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                     onChange={(value) => setNewUser({ ...newUser, Role: value })}
                     style={{ width: '100%' }}
                 >
-                    <Select.Option value='Admin'>Admin</Select.Option>
-                    <Select.Option value='Director'>Giám đốc</Select.Option>
-                    <Select.Option value='Manager'>Quản lý</Select.Option>
-                    <Select.Option value='Accountant'>Kế toán</Select.Option>
-                    <Select.Option value='Employee'>Nhân viên</Select.Option>
+                    <Select.Option value='admin'>Admin</Select.Option>
+                    <Select.Option value='director'>Giám đốc</Select.Option>
+                    <Select.Option value='manager'>Quản lý</Select.Option>
+                    <Select.Option value='accountant'>Kế toán</Select.Option>
+                    <Select.Option value='employee'>Nhân viên</Select.Option>
                 </Select>
             </Modal>
 

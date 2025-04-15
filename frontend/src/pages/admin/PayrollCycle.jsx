@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Card, Table, Progress, Flex, Typography, Space, Button, Col, Row } from 'antd';
-import { debounce } from 'lodash';
+import { Divider, Card, Table, Progress, Typography, Col, Row } from 'antd';
 import dayjs from 'dayjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from 'react-chartjs-2';
@@ -107,7 +106,7 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
             // Chuyển đổi thành mảng để vẽ biểu đồ
             const labels = Object.keys(salaryByMonth)
                 .map((monthYear) => dayjs(monthYear, 'MM-YYYY'))
-                .sort((a, b) => a - b) // sắp xếp theo ngày tháng
+                .sort((a, b) => a - b)
                 .map((date) => date.format('MM-YYYY'));
 
             const dataPoints = labels.map((monthYear) => salaryByMonth[monthYear]);
@@ -202,8 +201,8 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles }) => {
 
                 <Col span={10}>
                     <Card>
-                        <AntTitle level={5}>Payment Status</AntTitle>
-                        <Text strong style={{ fontSize: 20 }}>2,400 Employees</Text>
+                        <AntTitle level={5}>Trạng thái thanh toán</AntTitle>
+                        <Text strong style={{ fontSize: 20 }}>2,400 nhân viên</Text>
                         <Progress percent={68} success={{ percent: 68 }} strokeColor='#52c41a' />
                         <Progress percent={17} success={{ percent: 17 }} strokeColor='#faad14' />
                         <Progress percent={15} strokeColor='#722ed1' />

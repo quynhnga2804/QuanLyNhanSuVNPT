@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Checkbox, Form, Image, Input, message } from 'antd';
+import { Button, Form, Image, Input, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../api/api';
+import { UserContext } from '../api/UserContext';
 import logo from '../assets/images/logo.png';
 import dayjs from 'dayjs';
+import { login, verify, sendotp } from '../api/apiService';
 
 const Login = () => {
   const [form] = Form.useForm();
@@ -12,9 +13,8 @@ const Login = () => {
   const [showOtpField, setShowOtpField] = useState(false);
   const [token, setToken] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const { setUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     let timer;
@@ -29,16 +29,12 @@ const Login = () => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
-      const role = JSON.parse(localStorage.getItem('user')).role;
-      if (role === 'Admin') {
-        navigate('/Admin/home');
-      }
-      else if (role === 'Director' || role === 'Manager' || role === 'Accountant' || role === 'Employee') {
+      const role = user?.role.toLowerCase();
+
+      if (role === 'admin') navigate('/Admin/home');
+      else if (role === 'director' || role === 'manager' || role === 'accountant' || role === 'employee')
         navigate('/User/home');
-      }
-      else {
-        navigate('/unauthorized');
-      }
+      else navigate('/unauthorized');
     }
   }, [navigate]);
 
@@ -48,36 +44,23 @@ const Login = () => {
 
     try {
       if (!showOtpField) {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'Application/json' },
-          body: JSON.stringify({ email: values.email, password: values.password }),
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Đăng nhập thất bại');
+        const response = await login('/auth/login', values.email, values.password);
+        const data = response.data;
 
         localStorage.setItem('tempToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
         await sendOtp(values.email);
       } else {
-        const verifyResponse = await fetch('http://localhost:5000/api/auth/verify-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'Application/json' },
-          body: JSON.stringify({ token, otp: values.otp }),
-        });
-
-        const verifyData = await verifyResponse.json();
-        if (!verifyResponse.ok) throw new Error(verifyData.message || 'Xác minh OTP thất bại');
+        const verifyResponse = await verify('/auth/verify-otp', token, values.otp);
+        const verifyData = verifyResponse.data;
 
         if (verifyData.token) {
           localStorage.setItem('token', verifyData.token);
           setToken(verifyData.token);
           message.success('Đăng nhập thành công!');
           localStorage.removeItem('tempToken');
-          const user = JSON.parse(localStorage.getItem('user'));
-          localStorage.setItem('username', user.name);
+
           //kiểm tra đổi mật khẩu
           const lastChanged = dayjs(user?.lastPasswordChange)
           const now = dayjs();
@@ -91,8 +74,7 @@ const Login = () => {
         }
       }
     } catch (error) {
-      setErrorMessage(error.message);
-      message.error(error.message);
+      message.error(error.response?.data?.message || "Xác thực OTP thất bại!");
     } finally {
       setLoading(false);
     }
@@ -100,22 +82,15 @@ const Login = () => {
 
   const sendOtp = async (email) => {
     try {
-      const otpResponse = await fetch('http://localhost:5000/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'Application/json' },
-        body: JSON.stringify({ email, tokenA: localStorage.getItem('tempToken') }),
-      });
-
-      const otpData = await otpResponse.json();
-      if (!otpResponse.ok) throw new Error(otpData.message || 'Gửi OTP thất bại');
+      const otpResponse = await sendotp('/auth/send-otp', email, localStorage.getItem('tempToken'));
+      const otpData = await otpResponse.data;
 
       setToken(otpData.token);
       setShowOtpField(true);
       setCountdown(60);
       message.info('OTP đã được gửi đến email của bạn');
     } catch (error) {
-      setErrorMessage(error.message);
-      message.error(error.message);
+      message.error(error.response?.data?.message || 'Gửi OTP thất bại');
     }
   };
 
@@ -132,7 +107,7 @@ const Login = () => {
         autoComplete='off'
       >
         <Form.Item style={{ textAlign: 'center' }}>
-          <Image src={logo} width={60} height={60} />
+          <Image src={logo} alt='logo' width={60} height={60} />
         </Form.Item>
 
         <Form.Item label='Email' name='email' rules={[{ required: true, message: 'Vui lòng nhập email!' }]}>

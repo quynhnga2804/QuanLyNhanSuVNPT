@@ -1,8 +1,9 @@
 import { Tabs } from 'antd';
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
 import AttendanceList from './AttendanceList';
 import Overtimes from './Overtimes';
+import { get } from '../../api/apiService';
+import { UserContext } from '../../api/UserContext';
 
 const Attendance = ({ employees, departments }) => {
     const [attendances, setAttendances] = useState([]);
@@ -10,24 +11,21 @@ const Attendance = ({ employees, departments }) => {
     const [activeKey, setActiveKey] = useState(() => {
         return localStorage.getItem("activeKey") || "1";
     });
-    const token = localStorage.getItem('token');
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
 
     useEffect(() => {
         localStorage.setItem("activeKey", activeKey);
     }, [activeKey]);
 
     useEffect(() => {
-        if (token) {
-            fetchAttendances(token);
-            fetchOvertimes(token);
-        }
+        fetchAttendances();
+        fetchOvertimes();
     }, []);
 
     const fetchAttendances = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/attendances', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await get('/admin/attendances');
             setAttendances(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy bảng lương:', error);
@@ -36,9 +34,7 @@ const Attendance = ({ employees, departments }) => {
 
     const fetchOvertimes = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/overtimes', {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await get('/admin/overtimes');
             setOvertimes(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy bảng lương:', error);
@@ -53,8 +49,10 @@ const Attendance = ({ employees, departments }) => {
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        { key: '1', label: 'DANH SÁCH CHẤM CÔNG', children: <AttendanceList onClick={() => setActiveKey("1")} attendances={attendances} employees={employees} departments={departments} /> },
-                        { key: '2', label: 'TĂNG CA', children: <Overtimes overtimes={overtimes} employees={employees} departments={departments} fetchOvertimes={fetchOvertimes} /> },
+                        ...(role === 'admin' || role === 'director' || role === 'manager') ? [
+                            { key: '1', label: 'DANH SÁCH CHẤM CÔNG', children: <AttendanceList onClick={() => setActiveKey("1")} attendances={attendances} employees={employees} departments={departments} /> },
+                            { key: '2', label: 'TĂNG CA', children: <Overtimes overtimes={overtimes} employees={employees} departments={departments} fetchOvertimes={fetchOvertimes} /> },
+                        ] : []
                     ]}
                 />
             </div>

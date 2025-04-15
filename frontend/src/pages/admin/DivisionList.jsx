@@ -1,10 +1,10 @@
-import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
+import { Table, Button, Flex, Space, Typography, Modal, Form, Input, message } from 'antd';
 import React, { useState } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { put, post, del } from '../../api/apiService';
 
 const DivisionList = ({ divisions, fetchDivisions }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -28,13 +28,7 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/divisions/${editingDivision.DivisionID}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/divisions/${editingDivision.DivisionID}`, values);
             fetchDivisions();
             message.success('Chỉnh sửa thành công!');
             handleEditCancel();
@@ -55,13 +49,7 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/divisions', values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await post('/admin/divisions', values);
             fetchDivisions();
             message.success('Thêm mới thành công!');
             handleAddCancel();
@@ -79,10 +67,7 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/divisions/${record.DivisionID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/divisions/${record.DivisionID}`);
                     message.success(`Xóa ${record.DivisionsName} thành công!`);
                     fetchDivisions();
                 } catch (error) {

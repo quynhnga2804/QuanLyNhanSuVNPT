@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button, Flex, Layout } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -15,20 +15,10 @@ import HumanReport from './pages/admin/HumanReport';
 import WorkRegulations from './pages/admin/WorkRegulations';
 import HRPolicy from './pages/admin/HRPolicy';
 import Attendance_Overtime from './pages/admin/Attendance_Overtime';
-import Notification from './pages/admin/Notification';
-import General from './pages/admin/General';
-import Benefit_Salary from './pages/admin/Benefit_Salary';
-import DependentList from './pages/admin/DependentList';
-import LaborContract from './pages/admin/LaborContract';
-import ReginationList from './pages/admin/ResignationList';
-import PayrollCycle from './pages/admin/PayrollCycle';
-import SalaryPolicy from './pages/admin/SalaryPolicy';
-import BenefitPolicy from './pages/admin/BenifitPolicy';
-import HRStatisticsReports from './pages/admin/HRStatisticsReports';
-import HRAnalysisChart from './pages/admin/HRAnalysisChart';
-import JobProfile from './pages/admin/JobProfile';
 import HomeUser from './pages/user/HomeUser';
 import Tax_Insurance from './pages/admin/Tax_Insurance';
+import ProtectedRoute from '../src/api/ProtectedRoute';
+import { UserContext } from './api/UserContext';
 
 const { Sider, Header, Content } = Layout;
 
@@ -41,7 +31,7 @@ const App = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
+  const { user } = useContext(UserContext);
   const workEmail = user?.email;
   const imageUrl = `http://localhost:5000/uploads/${employees.find(emp => emp.WorkEmail === workEmail)?.Image || null}`;
   const [unreadCount, setUnreadCount] = useState(0);
@@ -220,15 +210,15 @@ const App = () => {
         <Content className='contents'>
           <Flex gap='large'>
             <Routes>
-              <Route path='home' element={<AdminHome dtEmployees={dtEmployees} dtDivisions={dtDivisions} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} />
-              <Route path='User/home' element={<HomeUser replace />} />
-              <Route path='employees' element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />} />
-              <Route path='contracts' element={<Contract departments={departments} employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} />
-              <Route path='periodicsalaries' element={<PeriodicSalary />} />
-              <Route path='humanreports' element={<HumanReport departments={departments} employees={employees} />} />
+              <Route path='home' element={<ProtectedRoute element={<AdminHome dtEmployees={dtEmployees} dtDivisions={dtDivisions} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} allowedRoles={['admin', 'director', 'manager', 'accountant']} />} />
+              <Route path='User/home' element={<ProtectedRoute element={<HomeUser replace />} />} allowedRoles={['employee', 'director', 'manager', 'accountant']} />
+              <Route path='employees' element={<ProtectedRoute element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />} allowedRoles={['admin', 'director', 'manager']} />} />
+              <Route path='contracts' element={<ProtectedRoute element={<Contract departments={departments} employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} allowedRoles={['admin', 'director', 'manager']} />} />
+              <Route path='periodicsalaries' element={<ProtectedRoute element={<PeriodicSalary />} allowedRoles={['admin', 'director', 'accountant']} />} />
+              <Route path='humanreports' element={<ProtectedRoute element={<HumanReport departments={departments} employees={employees} />} allowedRoles={['admin', 'director', 'manager']} />} />
               <Route path='organizationalstructures' element={<OrganizationalStructure employees={employees} />} />
-              <Route path='attendance&overtime' element={<Attendance_Overtime employees={employees} departments={departments} />} />
-              <Route path='tax&insurance' element={<Tax_Insurance />} />
+              <Route path='attendance&overtime' element={<ProtectedRoute element={<Attendance_Overtime employees={employees} departments={departments} />} allowedRoles={['admin', 'director', 'manager']} />} />
+              <Route path='tax&insurance' element={<ProtectedRoute element={<Tax_Insurance />} allowedRoles={['admin', 'director']} />} />
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
               <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} />

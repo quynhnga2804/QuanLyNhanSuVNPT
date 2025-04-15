@@ -1,10 +1,11 @@
 import { Table, Select, Input, Form, Flex, Typography, Space, Button, Modal, message } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { debounce } from 'lodash';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { post, put, del } from '../../api/apiService';
 
 const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySalaries, monthlysalaries, employees, payrollcycles, jobprofiles, incomeTaxes }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -14,11 +15,11 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
     const [addForm] = Form.useForm();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editForm] = Form.useForm();
-    const role = JSON.parse(localStorage.getItem('user')).role;
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
     const [selectedPayrollCycleId, setSelectedPayrollCycleId] = useState(null);
 
     const filteredPayrolls = payrollcycles.filter(pay => pay.Status === 'Đang xử lý').map(pay => ({ id: pay.ID_PayrollCycle, name: pay.PayrollName }));
-
     const filteredMonthlySalaries = monthlysalaries.filter(mont => {
         const employee = employees.find(emp => emp.EmployeeID === mont.EmployeeID);
         const fullName = employee ? employee.FullName.toLowerCase() : '';
@@ -143,7 +144,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
         },
     ].filter(col => col.dataIndex !== 'ID_Salary');
 
-    if (role === 'Accountant') {
+    if (role === 'accountant') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -200,7 +201,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
         },
     ];
 
-    if (role === 'Accountant') {
+    if (role === 'accountant') {
         columnEMPs.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -264,7 +265,6 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
 
             const totalOTSalary = addForm.getFieldValue('TotalOTSalary') || 0;
 
@@ -304,11 +304,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
                 PaymentDate: paymentDate,
             };
 
-            // Gửi dữ liệu lên server
-            await axios.post('http://localhost:5000/api/admin/monthlysalaries', data, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
+            await post('/admin/monthlysalaries', data);
             fetchMonthlySalaries();
             message.success('Thêm mới thành công!');
             handleAddCancel();
@@ -319,7 +315,6 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
 
     const handleAddAll = async () => {
         try {
-            const token = localStorage.getItem('token');
             await Promise.all(filteredEmployees.map(async (emp) => {
                 const employeeID = emp.EmployeeID;
 
@@ -383,9 +378,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
                     PaymentDate: dayjs().format('YYYY-MM-DD'),
                 };
 
-                return axios.post('http://localhost:5000/api/admin/monthlysalaries', data, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                return post('/admin/monthlysalaries', data);
             }));
 
             fetchMonthlySalaries();
@@ -419,7 +412,6 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
 
             const totalOT = editForm.getFieldValue('TotalOT') || 0;
             const totalOTSalary = totalOT * 200000;
@@ -454,10 +446,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
                 PaymentDate: paymentDate,
             };
 
-            await axios.put(`http://localhost:5000/api/admin/monthlysalaries/${values.ID_Salary}`, data, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
+            await put(`/admin/monthlysalaries/${values.ID_Salary}`, data);
             fetchMonthlySalaries();
             message.success('Cập nhật thành công!');
             handleEditCancel();
@@ -496,10 +485,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/monthlysalaries/${record.ID_Salary}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/monthlysalaries/${record.ID_Salary}`);
                     message.success(`Xóa thành công!`);
                     fetchMonthlySalaries();
                 } catch (error) {
@@ -530,15 +516,9 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
 
     const handleComplete = async () => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/payrollcycles/${selectedPayrollCycleId}`,
-                { Status: "Hoàn thành" },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+            await put(`/admin/payrollcycles/${selectedPayrollCycleId}`, {
+                Status: "Hoàn thành"
+            });
 
             message.success('Cập nhật lương thành công!');
             handleEditCancel();
@@ -580,7 +560,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
                         />
                     </Space>
 
-                    {role === 'Accountant' && (
+                    {role === 'accountant' && (
                         <Button type='primary' onClick={handleComplete} disabled={filteredEmployees.length > 0 || filteredMonthlySalaries.length === 0}>
                             <Space>Hoàn thành</Space>
                         </Button>
@@ -608,7 +588,7 @@ const Benefit_Salary = ({ familyMembers, insurances, overtimes, fetchMonthlySala
                     Danh sách chưa tính lương ({filteredEmployees.length}/{jobprofiles.length})
                 </Typography.Title>
 
-                {role === 'Accountant' && (
+                {role === 'accountant' && (
                     <Button type='primary' onClick={handleAddAll} disabled={filteredEmployees.length === 0}>
                         <Space>Tính lương tất cả</Space>
                     </Button>

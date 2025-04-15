@@ -1,26 +1,27 @@
 import { Table, Button, Flex, Space, Typography, Image, Select, message, Dropdown, Menu, Checkbox, DatePicker } from 'antd';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { ExportOutlined, FileExcelOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
+import { UserContext } from '../../api/UserContext';
 import dayjs from 'dayjs';
 import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '../../../fonts/Times New Romand Regular';
 
-const HRStatisticsReports = ({ resignations, employees, employeecontracts, departments, jobprofiles, personalprofiles }) => {
+const HRStatisticsReports = ({ resignations, employees, departments, jobprofiles, personalprofiles }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [viewMode, setViewMode] = useState('employees');
     const [searchQuery, setSearchQuery] = useState('');
-    const user = JSON.parse(localStorage.getItem('user'));
-    const role = user.role;
-    const name = user.name;
-    const workEmail = user.email;
     const [newEmployees, setNewEmployees] = useState([]);
     const [dateRange, setDateRange] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
-    const today = dayjs().format('DD/MM/YYYY');
+
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const name = user?.name;
+    const workEmail = user?.email;
 
     const exportToExcel = async (data, fileName = 'DanhSachNhanVien') => {
         if (!data || data.length === 0) {
@@ -158,7 +159,7 @@ const HRStatisticsReports = ({ resignations, employees, employeecontracts, depar
             theme: 'grid',
             margin: { top: 10, left: 14, right: 14 }
         });
-        
+
 
         try {
             const fileHandle = await window.showSaveFilePicker({
@@ -180,7 +181,6 @@ const HRStatisticsReports = ({ resignations, employees, employeecontracts, depar
     };
 
     const resignedEmployeeIDs = useMemo(() => new Set(resignations.map(res => res.EmployeeID)), [resignations]);
-
     const mergedEmployees = useMemo(() => {
         if (!employees || !jobprofiles || !personalprofiles || !resignations) return [];
 
@@ -227,7 +227,7 @@ const HRStatisticsReports = ({ resignations, employees, employeecontracts, depar
     }, 500);
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = mergedEmployees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
 
@@ -237,7 +237,7 @@ const HRStatisticsReports = ({ resignations, employees, employeecontracts, depar
         }
     }, [role, mergedEmployees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' ? newEmployees : mergedEmployees;
+    const dataSource = role === 'manager' ? newEmployees : mergedEmployees;
 
     // 🔹 Hàm lọc dữ liệu theo viewMode
     const getFilteredData = () => {

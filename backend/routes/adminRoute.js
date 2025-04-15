@@ -5,7 +5,6 @@ const authenticateToken = require('../middleware/authMiddleware');
 
 // Kiểm tra xem controller có tồn tại không
 if (!adminController.getAll) {
-    console.error("Lỗi: adminController.getAll bị undefined! Kiểm tra lại adminController.js");
     throw new Error("Lỗi: adminController.getAll bị undefined! Kiểm tra lại adminController.js");
 }
 

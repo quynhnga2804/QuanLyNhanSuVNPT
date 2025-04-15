@@ -1,9 +1,11 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import axios from 'axios';
+import { UserContext } from '../../api/UserContext';
+import { put, post, del } from '../../api/apiService';
 
 const DepartmentList = ({ departments, employees, divisions, fetchDepartments }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -15,8 +17,9 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
     const [addForm] = Form.useForm();
     const [newJobDepartments, setNewDepartments] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
-    const role = JSON.parse(localStorage.getItem('user')).role;
-    const workEmail = JSON.parse(localStorage.getItem('user')).email;
+    const { user } = useContext(UserContext);
+    const role = user?.role.toLowerCase();
+    const workEmail = user?.email;
 
     const uniqueDivisionIDs = [...new Set(departments.map(emp => emp.DivisionID))];
 
@@ -34,13 +37,7 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/admin/departments/${editingDepartment.DepartmentID}`, values, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            await put(`/admin/departments/${editingDepartment.DepartmentID}`, values);
             fetchDepartments();
             message.success('Chỉnh sửa thành công!');
             handleEditCancel();
@@ -58,10 +55,7 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:5000/api/admin/departments/${record.DepartmentID}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+                    await del(`/admin/departments/${record.DepartmentID}`);
                     message.success(`Xóa ${record.DepartmentName} thành công!`);
                     fetchDepartments();
                 } catch (error) {
@@ -83,19 +77,12 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const token = localStorage.getItem('token');
-
             const formData = new FormData();
             Object.keys(values).forEach(key => {
                 formData.append(key, values[key]);
             });
 
-            await axios.post('http://localhost:5000/api/admin/departments', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await post('/admin/departments', formData);
             fetchDepartments();
             message.success('Thêm mới thành công!');
             handleAddCancel();
@@ -155,7 +142,7 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
     };
 
     useEffect(() => {
-        if (role === 'Manager') {
+        if (role === 'manager') {
             const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
             const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
             const filtered = departments.filter(dv => dv.DivisionID === dvID);
@@ -163,7 +150,7 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
         }
     }, [role, employees, departments, workEmail]);
 
-    const dataSource = role === 'Manager' && newJobDepartments.length > 0 ? newJobDepartments : departments;
+    const dataSource = role === 'manager' && newJobDepartments.length > 0 ? newJobDepartments : departments;
     const filteredDepartments = dataSource.filter(dpm => {
         const matchesSearchQuery = searchQuery === '' ||
             dpm.DepartmentID.toLowerCase().includes(searchQuery) ||
