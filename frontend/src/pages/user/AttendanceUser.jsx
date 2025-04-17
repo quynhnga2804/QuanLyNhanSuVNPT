@@ -120,7 +120,7 @@ const AttendanceUser = ({employeeinfo}) => {
                     return;
                 }
                 if (existingCheckout?.CheckOutTime) {
-                    message.warning('Bạn đã check out rồi!');
+                    message.warning('Bạn đã check out hôm nay rồi!');
                     return;
                 }
 
@@ -144,7 +144,6 @@ const AttendanceUser = ({employeeinfo}) => {
             } catch (error) {
                 message.error("Lỗi khi lấy vị trí hoặc lỗi check-out!");
             }
-    
         }, (error) => {
             message.error("Không thể lấy vị trí GPS!");
         });

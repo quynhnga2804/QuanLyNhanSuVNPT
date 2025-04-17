@@ -12,6 +12,7 @@ router.get('/familymembers', authenticateToken, userController.getFamilyMember);
 router.get('/contractinfo', authenticateToken, userController.getContractUser);
 router.get('/attendances', authenticateToken, userController.getAttendancesUser);
 router.get('/overtimes', authenticateToken, userController.getOverTimeUser);
+router.get('/leaves', authenticateToken, userController.getLeaveInfoUser);
 router.get('/monthlysalaries', authenticateToken, userController.getMonthlySalaryUser);
 // Lấy danh sách thông báo
 router.get('/notifications', authenticateToken, userController.getNotifications);
@@ -31,6 +32,8 @@ router.get('/latest-payrollcycle', authenticateToken, userController.getLatestPa
 router.get('/get-managers', authenticateToken, userController.getUserManager);
 // request tăng ca
 router.post('/req-overtime', authenticateToken, userController.addOvertimeEmployeeRe);
+router.post('/leave-req', authenticateToken, userController.addLeaveRequest);
+router.post('/req-resign', authenticateToken, userController.addResignation);
 router.post('/checkin', authenticateToken, userController.postCheckin);
 router.put('/checkout', authenticateToken, userController.putCheckout);
 module.exports = router;

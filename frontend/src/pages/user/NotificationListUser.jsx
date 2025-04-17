@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Layout, List, Modal, Button, Typography, Popconfirm, message, Select } from 'antd';
+import { Layout, List, Modal, Button, Typography, Popconfirm, message, Select, Tooltip } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { Flex } from 'antd/es';
@@ -119,7 +119,7 @@ function NotificationListUser() {
                         onConfirm={() => handleDeleteClick(notification)}
                         okText="Có"
                         cancelText="Không">
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />} />
+                        <Tooltip title="Xóa thông báo"><Button type="link" danger size="small" icon={<DeleteOutlined />} /></Tooltip>
                       </Popconfirm>
                     ]}>
                     <List.Item.Meta 

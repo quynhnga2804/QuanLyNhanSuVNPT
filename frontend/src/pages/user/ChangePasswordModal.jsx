@@ -5,12 +5,13 @@ import axios from "axios";
 
 const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [countdown, setCountdown] = useState(60);
     const [fieldsDisabled, setFieldsDisabled] = useState(false);
     const [passwordChanged, setPasswordChanged] = useState(false);
     const { setIsForcedChange, setModalMessage } = useContext(ModalContext);
-
+    const token = localStorage.getItem("token");
     useEffect(() => {
         if (!visible) {
             form.resetFields(); // Reset form khi đóng modal
@@ -20,19 +21,37 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
         }
     }, [visible]);
 
+    const checkPass = (pass) => {
+        const lengthValid = pass.length >= 8 && pass.length <= 15;
+        const hasUpperCase = /[A-Z]/.test(pass);
+        const hasLowerCase = /[a-z]/.test(pass);
+        const hasSpecialChar = /[!@#%^&*(),.?":{}|<>\/]/.test(pass);
+        return lengthValid && hasUpperCase && hasLowerCase && hasSpecialChar;
+    };
+
     const sendOTP = async () => {
+        setLoading(true);
         try {
             await form.validateFields(["oldPassword", "newPassword", "confirmPassword"]); 
-
-            const token = localStorage.getItem("token");
-            if (!token) {
-                message.error("Bạn chưa đăng nhập!");
+            const oldPassword = form.getFieldValue("oldPassword");
+            const newPassword = form.getFieldValue("newPassword");
+            const confirmPassword = form.getFieldValue("confirmPassword");
+            if (!checkPass(newPassword) || !checkPass(confirmPassword)) {
+                message.error("Mật khẩu phải có ít nhất 8 ký tự, 1 chữ in thường, 1 chữ in hoa và 1 ký tự đặc biệt!");
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                message.error("Mật khẩu nhập lại không khớp! Vui lòng nhập lại!");
                 return;
             }
 
             await axios.post(
                 "http://localhost:5000/api/user/send-otp",
-                { oldPassword: form.getFieldValue("oldPassword") },
+                { 
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -42,6 +61,8 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
             startCountdown();
         } catch (error) {
             message.error(error.response?.data?.message || "Lỗi khi gửi OTP");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -57,11 +78,6 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
 
     const handleChangePassword = async (values) => {
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                message.error("Bạn chưa đăng nhập!");
-                return;
-            }
             await axios.post(
                 "http://localhost:5000/api/user/change-password",
                 {
@@ -126,18 +142,7 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
                     <Form.Item
                         label="Nhập lại mật khẩu mới"
                         name="confirmPassword"
-                        dependencies={["newPassword"]}
-                        rules={[
-                            { required: true, message: "Vui lòng nhập lại mật khẩu mới" },
-                            ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                    if (!value || getFieldValue("newPassword") === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error("Mật khẩu nhập lại không khớp!"));
-                                },
-                            }),
-                        ]}
+                        rules={[{ required: true, message: "Vui lòng nhập lại mật khẩu mới" }]}
                     >
                         <Input.Password disabled={fieldsDisabled} />
                     </Form.Item>
@@ -153,7 +158,7 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
                     )}
 
                     {!otpSent ? (
-                        <Button type="primary" onClick={sendOTP}>
+                        <Button type="primary" onClick={sendOTP} loading={loading}>
                             Gửi OTP
                         </Button>
                     ) : (
