@@ -1,6 +1,6 @@
-import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message, Row, Col, TimePicker, DatePicker, Descriptions } from 'antd';
+import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message, Row, Col, DatePicker, Descriptions } from 'antd';
 import Search from 'antd/es/transfer/search';
-import { FieldTimeOutlined } from '@ant-design/icons';
+import { CalendarOutlined } from '@ant-design/icons';
 import axios from "axios";
 import { debounce, filter } from 'lodash';
 import dayjs from 'dayjs';
@@ -14,103 +14,61 @@ dayjs.extend(isSameOrBefore);
 const { TextArea } = Input;
 const { Option } = Select;
 
-const OvertimeUser = ({employeeinfo}) => {
-    const [overtimeUser, setOvertimeUser] = useState([]);
-    const [latestPayrollCycle, setLatestPayrollCycle] = useState(null);
+const LeaveRequestUser = ({ employeeinfo}) => {
+    const [leaveUser, setLeaveUser] = useState([]);
     const [managerList, setManagerList] = useState([]);
-    const [mappedOvertimeData, setMappedOvertimeData] = useState([]);
+    const [mappedData, setMappedData] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
-    const [selectedOT, setSelectedOT] = useState(null);
+    const [selectedLeaveRe, setSelectedLeaveRe] = useState(null);
     const [dateRange, setDateRange] = useState([]);
     const [addForm] = Form.useForm();
 
-    // const [selectedPayroll, setSelectedPayroll] = useState([]);
-    // const [selectedManager, setSelectedManager] = useState([]);
-    const [selectedOTType, setSelectedOTType] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState([]);
     const token = localStorage.getItem('token');
-
-    // const uniquePayroll = Array.from( new Map(mappedOvertimeData.map(ov => [ov.ID_PayrollCycle, { text: ov.PayrollCycle?.PayrollName, value: ov.ID_PayrollCycle }])).values());
-    const uniqueOTType = [...new Set(mappedOvertimeData.map(ov => ov.OTType))];
-    const uniqueStatus = [...new Set(mappedOvertimeData.map(ov => ov.Status))];
+    const uniqueStatus = [...new Set(mappedData.map(lr => lr.Status))];
 
     const handleAddNew = () => {
-        fetchLatestPayrollCycle(); // gọi lại trước khi kiểm tra
-
-        if (!latestPayrollCycle || !latestPayrollCycle.PayrollName) {
-            message.warning("Chưa mở kỳ lương mới. Vui lòng liên hệ quản lý để mở kỳ lương!");
-            return;
-        }
         addForm.setFieldsValue({
             employeeId: employeeinfo?.EmployeeID,
             fullname: employeeinfo?.FullName,
-            payroll: latestPayrollCycle.PayrollName,
-            payrollID: latestPayrollCycle.ID_PayrollCycle,
-            company: 'VNPT Nghệ An',
             status: 'Chờ duyệt',
         });
         setIsAddModalOpen(true);
     };
 
-    // const filteredAttendanceUser = attendanceUser.filter(att => {
-    //     if (dateRange && dateRange.length === 2) {
-    //         const date = dayjs(att.AttendancesDate);
-    //         return date.isSameOrAfter(dateRange[0].startOf('day')) && date.isSameOrBefore(dateRange[1].endOf('day'));
-    //     }
-    //     return true;
-    // });
-
     const handleAddCancel = () => {
-        // Modal.confirm({
-        //     title: 'Xác nhận hủy?',
-        //     content: 'Mọi thông tin bạn đã nhập sẽ bị xoá.',
-        //     onOk: () => {
-                setIsAddModalOpen(false);
-                addForm.resetFields();
-        //     },
-        // });
+        setIsAddModalOpen(false);
+        addForm.resetFields();
     };
 
     const showModal = (record) => {
-        setSelectedOT(record);
+        setSelectedLeaveRe(record);
         setIsShowModalOpen(true);
     };
 
     const closeModal = () => {
         setIsShowModalOpen(false);
-        setSelectedOT(null);
+        setSelectedLeaveRe(null);
     };
 
     useEffect(() => {
         if (token) {
-            fetchOvertimeUser();
-            fetchLatestPayrollCycle();
+            fetchLeaveInfo();
             fetchManagerList();
         }
-
     }, [token]);
 
-    const fetchOvertimeUser = async () => {
+    const fetchLeaveInfo = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/user/overtimes', {
+            const response = await axios.get('http://localhost:5000/api/user/leaves', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setOvertimeUser(response.data);
+            setLeaveUser(response.data);
         } catch (error) {
-            console.error("Không lấy được dữ liệu tăng ca!", error);
-        }
-    };
-
-    const fetchLatestPayrollCycle = async () => {
-        try {
-            const response = await axios.get(`http://localhost:5000/api/user/latest-payrollcycle`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setLatestPayrollCycle(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy kỳ lương gần nhất:', error);
+            console.error("Lỗi từ backend:", error.response.data);
+            console.error("Không lấy được dữ liệu nghỉ phép!", error);
         }
     };
 
@@ -125,47 +83,43 @@ const OvertimeUser = ({employeeinfo}) => {
         }
     };
 
-    // Đây là useEffect để map tên Manager từ managerList vào overtimeUser
     useEffect(() => {
-        if (overtimeUser.length > 0 && managerList.length > 0) {
-            const mappedData = overtimeUser.map((item) => {
+        if (leaveUser.length > 0 && managerList.length > 0) {
+            const mappedData = leaveUser.map((item) => {
                 const manager = managerList.find((m) => m.EmployeeID === item.ManagerID);
                 return {
                     ...item,
                     ManagerName: manager ? manager.FullName : 'Chưa có',
                 };
             });
-            setMappedOvertimeData(mappedData);
+            setMappedData(mappedData);
         }
-    }, [overtimeUser, managerList]);
+    }, [leaveUser, managerList]);
 
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
-            const newOT = {
+            const newLeaveRe = {
                 EmployeeID: values.employeeId,   
                 ManagerID: values.managerId,
-                ReasonOT: values.reason,
-                OTType: values.otType,
-                DateTime: values.otDate.format('YYYY-MM-DD'),
-                OverTimesHours: parseFloat(values.otHours),
-                Status: values.status,
-                ID_PayrollCycle: values.payrollID,
-                CreatedAt: new Date(),
+                LeaveReason: values.reason,
+                StartDate: values.startDate.toDate(),
+                EndDate: values.endDate.toDate(),
+                Status: 'Pending',
                 
             };
-            await axios.post('http://localhost:5000/api/user/req-overtime', newOT, {
+            await axios.post('http://localhost:5000/api/user/leave-req', newLeaveRe, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
     
-            fetchOvertimeUser();
-            message.success('Tạo đề xuất tăng ca thành công!');
+            fetchLeaveInfo();
+            message.success('Tạo yêu cầu nghỉ phép thành công!');
             handleAddCancel();
         } catch (error) {
-            message.error('Đã xảy ra lỗi thêm tăng ca, vui lòng kiểm tra lại!');
+            message.error('Đã xảy ra lỗi thêm nghỉ phép, vui lòng kiểm tra lại!');
         }
     };
 
@@ -193,58 +147,34 @@ const OvertimeUser = ({employeeinfo}) => {
             render: (employee) => employee?.FullName || '',
         },
         {
-            title: 'KỲ LƯƠNG',
-            dataIndex: 'PayrollCycle',
-            width: 150,
-            align: 'center',
-            ellipsis: true,
-            // filters: uniquePayroll,
-            // filterMode: 'tree',
-            // filterSearch: true,
-            // onFilter: (value, record) => record.ID_PayrollCycle === value,
-            // onFilter: (value, record) => selectedPayroll.length === value || selectedPayroll.includes(record.ID_PayrollCycle),
-            render: (payroll) => payroll?.PayrollName || '',
-        },
-        {
             title: 'NGƯỜI QUẢN LÝ',
             dataIndex: 'ManagerName',
             width: 180,
             align: 'center',
             ellipsis: true,
-            // filters: managerList.map(manager => ({
-            //     text: manager.FullName,
-            //     value: manager.FullName.toLowerCase(),
-            // })),
-            // onFilter: (value, record) => record.ManagerName?.toLowerCase().includes(value),
-            // onFilter: (value, record) => selectedManager.length === value || selectedManager.includes(record?.ManagerName),
-            // filterSearch: true,
             render: (managerName) => managerName || 'Chưa có',
         },
         {
-            title: 'LOẠI NGÀY TĂNG CA',
-            dataIndex: 'OTType',
-            width: 150,
-            align: 'center',
-            ellipsis: true,
-            filters: uniqueOTType.map(ott => ({ text: ott, value: ott })),
-            filterMode: 'tree',
-            filterSearch: true,
-            onFilter: (value, record) => selectedOTType.length === value || selectedOTType.includes(record.OTType),
-        },
-        {
-            title: 'NGÀY TĂNG CA',
-            dataIndex: 'DateTime',
+            title: 'NGÀY BẮT ĐẦU',
+            dataIndex: 'StartDate',
             width: 130,
             align: 'center',
-            sorter: (a, b) => new Date(a.DateTime) - new Date(b.DateTime),
-            render: (date) => new Date(date).toLocaleDateString('vi-VN'),
+            sorter: (a, b) => new Date(a.StartDate) - new Date(b.StartDate),
+            render: (date) => dayjs(date).format('DD/MM/YYYY, HH:mm:ss'),
         },
         {
-            title: 'SỐ GIỜ TĂNG CA',
-            dataIndex: 'OverTimesHours',
+            title: 'NGÀY KẾT THÚC',
+            dataIndex: 'EndDate',
             width: 130,
             align: 'center',
-            sorter: (a, b) => a.OverTimesHours - b.OverTimesHours,
+            sorter: (a, b) => new Date(a.EndDate) - new Date(b.EndDate),
+            render: (date) => dayjs(date).format('DD/MM/YYYY, HH:mm:ss'),
+        },
+        {
+            title: 'LÝ DO XIN NGHỈ',
+            dataIndex: 'LeaveReason',
+            width: 130,
+            align: 'center',
         },
         {
             title: 'TRẠNG THÁI',
@@ -256,7 +186,6 @@ const OvertimeUser = ({employeeinfo}) => {
             filterMode: 'tree',
             filterSearch: true,
             onFilter: (value, record) => selectedStatus.length === value || selectedStatus.includes(record.Status),
-            // render: (status) => mapStatus(status),
             render: (status) => {
                 const { text, color } = mapStatus(status);
                 return <span style={{color: color}}>{text}</span>;
@@ -266,29 +195,30 @@ const OvertimeUser = ({employeeinfo}) => {
 
     const handleSearch = debounce((value) => setSearchQuery(value.toLowerCase()), 500);
 
-    const filteredOvertimes = mappedOvertimeData.filter(ov => {
+    const filteredLeaveRe = mappedData.filter(lr => {
         const matchesSearch =
-            ov.Status?.toLowerCase().includes(searchQuery) ||
-            ov.OTType?.toLowerCase().includes(searchQuery) ||
-            ov.ManagerName?.toLowerCase().includes(searchQuery);
+            lr.Status?.toLowerCase().includes(searchQuery) ||
+            lr.ManagerName?.toLowerCase().includes(searchQuery) || 
+            lr.LeaveReason?.toLowerCase().includes(searchQuery);
     
         const matchesDateRange = dateRange.length === 2
-            ? dayjs(ov.DateTime).isSameOrAfter(dateRange[0].startOf('day')) &&
-              dayjs(ov.DateTime).isSameOrBefore(dateRange[1].endOf('day'))
+            ? ((dayjs(lr.StartDate).isSameOrAfter(dateRange[0].startOf('day')) && dayjs(lr.StartDate).isSameOrBefore(dateRange[1].endOf('day'))) || 
+              (dayjs(lr.EndDate).isSameOrAfter(dateRange[0].startOf('day')) && dayjs(lr.EndDate).isSameOrBefore(dateRange[1].endOf('day'))))
             : true;
+
+        // const matchesDateRange = (dateRange && dateRange.length === 2) ? (
+        //             (emp.StartDate && dayjs(emp.StartDate).isSameOrAfter(dateRange[0].startOf('day')) &&
+        //                 dayjs(emp.StartDate).isSameOrBefore(dateRange[1].endOf('day'))) ||
+        //             (emp.ResignationsDate && dayjs(emp.ResignationsDate).isSameOrAfter(dateRange[0].startOf('day')) &&
+        //                 dayjs(emp.ResignationsDate).isSameOrBefore(dateRange[1].endOf('day')))
+        //         ) : true;
         const matchesFilters = (
-            // (!selectedPayroll.length || selectedPayroll.includes(ov.ID_PayrollCycle)) && 
-            // (!selectedManager.length || selectedManager.includes(ov.ManagerName)) && 
-            (!selectedOTType.length || selectedOTType.includes(ov.OTType)) && 
-            (!selectedStatus.length || selectedStatus.includes(ov.Status))
+            (!selectedStatus.length || selectedStatus.includes(lr.Status))
         );
         return matchesSearch && matchesDateRange && matchesFilters;
     });
     
     const handleTableChange = (pagination, filters, sorter) => {
-        // setSelectedPayroll(filters.ID_PayrollCycle || []);
-        // setSelectedManager(filters.ManagerName || []);
-        setSelectedOTType(filters.OTType || []);
         setSelectedStatus(filters.Status || []);
     };
 
@@ -296,7 +226,7 @@ const OvertimeUser = ({employeeinfo}) => {
         <Flex vertical style={{ width: '100%' }}>
             <Flex justify='space-between' style={{ padding: '10px 20px 0 20px', backgroundColor: '#f0f0f1' }}>
                 <Typography.Text type='secondary' style={{ color: '#2b2b2b', fontSize: '1rem' }}>
-                    Số lượng: {filteredOvertimes.length}
+                    Số lượng: {filteredLeaveRe.length}
                 </Typography.Text>
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
                     <Space>
@@ -321,7 +251,7 @@ const OvertimeUser = ({employeeinfo}) => {
                     </Space>
                     <Button type='primary' onClick={handleAddNew}>
                         <Space>
-                            Tạo mới <FieldTimeOutlined />
+                            Tạo mới <CalendarOutlined />
                         </Space>
                     </Button>
                 </Flex>
@@ -330,7 +260,7 @@ const OvertimeUser = ({employeeinfo}) => {
             <Table
                 className='table_TQ'
                 columns={columns}
-                dataSource={filteredOvertimes.map(ov => ({ ...ov, key: ov.ID_OT }))}
+                dataSource={filteredLeaveRe.map(lr => ({ ...lr, key: lr.LeaveRequestID }))}
                 onChange={handleTableChange}
                 onRow={(record) => ({ onDoubleClick: () => showModal(record), })}
                 bordered
@@ -341,7 +271,7 @@ const OvertimeUser = ({employeeinfo}) => {
 
             <Modal
                 className='editfrm'
-                title={<div style={{ textAlign: 'center', width: '100%', margin: '1rem 0 2rem 0' }}>Thêm Mới Tăng Ca</div>}
+                title={<div style={{ textAlign: 'center', width: '100%', margin: '1rem 0 2rem 0' }}>Thêm Mới Nghỉ Phép</div>}
                 open={isAddModalOpen}
                 onOk={handleAddSave}
                 onCancel={handleAddCancel}
@@ -375,35 +305,19 @@ const OvertimeUser = ({employeeinfo}) => {
                                     ))}
                                 </Select>
                             </Form.Item>
-                            <Form.Item label='Công ty' name='company' initialValue={'VNPT Nghệ An'} rules={[{ required: true }]} >
-                                <Input disabled />
-                            </Form.Item>
-                            <Form.Item label='Kỳ lương' name='payroll' rules={[{ required: true }]}>
-                                <Input disabled />
-                            </Form.Item>
-                            <Form.Item label='Lý do OT' name='reason' rules={[{ required: true }]}>
+                            <Form.Item label='Lý do nghỉ phép' name='reason' rules={[{ required: true }]}>
                                 <TextArea rows={3} />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label='Loại ngày OT' name='otType' rules={[{ required: true }]}>
-                                <Select placeholder="Chọn loại ngày OT">
-                                    <Option value="Ngày thường">Ngày thường</Option>
-                                    <Option value="Cuối tuần">Cuối tuần</Option>
-                                    <Option value="Ngày lễ">Ngày lễ</Option>
-                                </Select>
+                            <Form.Item label='Ngày bắt đầu nghỉ' name='startDate' rules={[{ required: true }]}>
+                                <DatePicker showTime format="DD-MM-YYYY, HH:mm:ss" style={{ width: '100%' }} />
                             </Form.Item>
-                            <Form.Item label='Số giờ OT' name='otHours' rules={[ { required: true, message: 'Vui lòng nhập số giờ OT!' } ]}>
-                                <Input type="number" step="0.01" min="0" />
-                            </Form.Item>
-                            <Form.Item label='Ngày OT' name='otDate' rules={[{ required: true }]}>
-                                <DatePicker format="DD-MM-YYYY" style={{ width: '100%' }} />
+                            <Form.Item label='Ngày kết thúc nghỉ' name='endDate' rules={[{ required: true }]}>
+                                <DatePicker showTime format="DD-MM-YYYY, HH:mm:ss" style={{ width: '100%' }} />
                             </Form.Item>
                             <Form.Item label='Trạng thái' name='status' initialValue={'Chờ duyệt'} rules={[{ required: true }]} >
                                 <Input disabled />
-                            </Form.Item>
-                            <Form.Item name="payrollID" hidden>
-                                <Input />
                             </Form.Item>
                             <Form.Item name="createdAt" hidden>
                                 <Input />
@@ -414,45 +328,39 @@ const OvertimeUser = ({employeeinfo}) => {
             </Modal>
 
             {/* Xem chi tiết tăng ca */}
-            <Modal className='descriptions' title={<div style={{ textAlign: 'center', width: '100%', margin:'1rem 0 2rem 0' }}>Chi Tiết Tăng Ca</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={800} centered>
-                {selectedOT && (
+            <Modal className='descriptions' title={<div style={{ textAlign: 'center', width: '100%', margin:'1rem 0 2rem 0' }}>Chi Tiết Nghỉ Phép</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={800} centered>
+                {selectedLeaveRe && (
                     
                     <Descriptions column={2} size="middle" labelStyle={{width:'120px'}}>
-                        <Descriptions.Item label="Mã OT" labelCol={'120px'}>
-                            {selectedOT.ID_OT}
+                        <Descriptions.Item label="Mã Nghỉ Phép" labelCol={'120px'}>
+                            {selectedLeaveRe.LeaveRequestID }
                         </Descriptions.Item>
-                        <Descriptions.Item label="Ngày OT">
-                            {selectedOT.DateTime ? dayjs(selectedOT.DateTime).format("DD-MM-YYYY") : ""}
+                        <Descriptions.Item label="StartDate">
+                            {selectedLeaveRe.StartDate ? dayjs(selectedLeaveRe.StartDate).format("DD-MM-YYYY, HH:ss:mm") : ""}
                         </Descriptions.Item>
                         <Descriptions.Item label="Tên Nhân Viên">
-                            {selectedOT.Employee?.FullName || ''}
+                            {selectedLeaveRe.Employee?.FullName || ''}
                         </Descriptions.Item>
                         <Descriptions.Item label="Quản lý">
-                            {selectedOT.ManagerName}
+                            {selectedLeaveRe.ManagerName}
                         </Descriptions.Item>
                         <Descriptions.Item label="Lý Do OT">
-                            {selectedOT.ReasonOT}
+                            {selectedLeaveRe.LeaveReason}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Tổng Số Giờ OT">
-                            {selectedOT.OverTimesHours}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Loại Ngày OT">
-                            {selectedOT.OTType}
+                        <Descriptions.Item label="EndDate">
+                            {selectedLeaveRe.EndDate ? dayjs(selectedLeaveRe.EndDate).format("DD-MM-YYYY, HH:ss:mm") : ""}
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng Thái">
-                            <span style={{color: mapStatus(selectedOT.Status)?.color}}>
-                            {mapStatus(selectedOT.Status)?.text}
+                            <span style={{color: mapStatus(selectedLeaveRe.Status)?.color}}>
+                            {mapStatus(selectedLeaveRe.Status)?.text}
                             </span>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Kỳ Lương">
-                            {selectedOT.PayrollCycle?.PayrollName || ''}
-                        </Descriptions.Item>
                         <Descriptions.Item label="CreatedAt">
-                            {selectedOT.CreatedAt}
+                            {selectedLeaveRe.CreatedAt ? dayjs(selectedLeaveRe.CreatedAt).format("DD-MM-YYYY, HH:ss:mm") : ""}
                         </Descriptions.Item>
                         <Descriptions.Item label="ApprovedAt">
                         </Descriptions.Item>
-                            {selectedOT.ApprovedAt}
+                            {selectedLeaveRe.ApprovedAt ? dayjs(selectedLeaveRe.ApprovedAt).format("DD-MM-YYYY, HH:ss:mm") : ""}
                         </Descriptions>
                         
                 )}
@@ -461,4 +369,4 @@ const OvertimeUser = ({employeeinfo}) => {
     );
 };
 
-export default OvertimeUser;
+export default LeaveRequestUser;

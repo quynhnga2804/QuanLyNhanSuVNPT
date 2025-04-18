@@ -16,6 +16,8 @@ const PayrollCycle = require("../models/payrollCycleModel");
 const { OverTime } = require("../models/indexModel");
 const MonthlySalary = require("../models/monthlysalaryModel");
 const Resignation = require("../models/resignationModel");
+const Division = require("../models/divisionModel");
+const LeaveRquest = require("../models/leaverequestModel");
 require("dotenv").config();
 
 const EMAIL_USER = process.env.EMAIL_USER;
@@ -39,9 +41,7 @@ const getEmployeeIDByEmail = async (email, role) => {
         where: { WorkEmail: email },
         attributes: ["EmployeeID"]
     });
-
     if (!employee) {
-        console.error("❌ Không tìm thấy tài khoản với email này!");
         throw new Error("Không tìm thấy tài khoản");
     }
     return employee.EmployeeID;
@@ -56,10 +56,13 @@ exports.getEmployeeInfo = async (req, res) => {
             where: { EmployeeID: employeeID },
             include: {
                 model: Department, 
-                attributes: ['DepartmentName'] 
+                attributes: ['DepartmentName'],
+                include: {
+                    model: Division,
+                    attributes: ['DivisionsName']
+                }
             }
         });
-
         if (!employeeInfo) {
             return res.status(404).json({ message: "Không tìm thấy nhân viên" });
         }
@@ -102,14 +105,13 @@ exports.getJobProfile = async (req, res) => {
         const employeeID = await getEmployeeIDByEmail(email, role);
         
         const jobProfile = await JobProfile.findOne({ where: { EmployeeID: employeeID } });
+        // const resignation = await Resignation.findOne({ where: { EmployeeID: employeeID, Status: 'Approved'}});
         const resignation = await Resignation.findOne({ where: { EmployeeID: employeeID}});
 
         if (!jobProfile) {
             return res.status(404).json({ message: "Không tìm thấy thông tin công việc" });
         }
         res.json({jobProfile, resignation: resignation || null }); 
-        console.log('jobProfile: ', jobProfile);
-        console.log('resignation: ', resignation);
     } catch (error) {
         res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({ 
             message: error.message 
@@ -157,7 +159,7 @@ exports.getFamilyMember = async (req, res) => {
 exports.sendOTP = async (req, res) => {
     try {
         const { email } = req.user;
-        const { oldPassword, newPassword, confirmPassword } = req.body;
+        const { oldPassword } = req.body;
 
         const user = await User.findOne({ where: { WorkEmail: email } });
         if (!user) {
@@ -166,9 +168,6 @@ exports.sendOTP = async (req, res) => {
         const isMatch = await verify(user.Password, oldPassword);
         if (!isMatch) {
             return res.status(400).json({ message: "Mật khẩu cũ không chính xác!" });
-        }
-        if (newPassword !== confirmPassword) {
-            return res.status(400).json({ message: "Mật khẩu mới không khớp!" });
         }
         const otp = generateOTP();
         otpStorage[email] = { otp, expiresAt: Date.now() + 60000 };
@@ -383,6 +382,47 @@ exports.getOverTimeUser = async (req, res) => {
     }
 };
 
+// Lấy thông tin overtime 
+exports.getOverTimeUser = async (req, res) => {
+    try {
+        const { email, role } = req.user;
+        const employeeID = await getEmployeeIDByEmail(email, role);
+        const overtimeUser = await OverTime.findAll({
+            where: { EmployeeID: employeeID },
+            include: [
+                { model: Employee, attributes: ['FullName'] },
+                { model: PayrollCycle, attributes: ['PayrollName'] }
+            ]
+        });
+        if (!overtimeUser || overtimeUser.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy thông tin nggir phép!" });
+        }
+        res.json(overtimeUser);
+    } catch (error) {
+        res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({ message: error.message });
+    }
+};
+
+// Lấy thông tin nghỉ phép 
+exports.getLeaveInfoUser = async (req, res) => {
+    try {
+        const { email, role } = req.user;
+        const employeeID = await getEmployeeIDByEmail(email, role);
+        const leaveInfo = await LeaveRquest.findAll({
+            where: { EmployeeID: employeeID },
+            include: [
+                { model: Employee, attributes: ['FullName'] }
+            ]
+        });
+        if (!leaveInfo || leaveInfo.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy thông tin nghỉ phép!" });
+        }
+        res.json(leaveInfo);
+    } catch (error) {
+        res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({ message: error.message });
+    }
+};
+
 //request tăng ca
 exports.addOvertimeEmployeeRe = async (req, res) => {
     try {
@@ -402,6 +442,25 @@ exports.addOvertimeEmployeeRe = async (req, res) => {
         res.json({ message: 'Tạo thông tin tăng ca thành công!' });
     } catch (error) {
         res.status(500).json({ message: 'Có lỗi xảy ra khi lưu tăng ca!' });
+    }
+};
+exports.addLeaveRequest = async (req, res) => {
+    try {
+        const { EmployeeID, ManagerID, LeaveReason, StartDate, EndDate, Status, CreatedAt } = req.body;
+        await LeaveRquest.create({
+            EmployeeID,
+            ManagerID,
+            LeaveReason,
+            StartDate, 
+            EndDate,
+            Status,
+            CreatedAt 
+        });
+
+        res.json({ message: 'Tạo thông tin nghỉ phép thành công!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Có lỗi xảy ra khi lưu tăng nghỉ phép!' });
     }
 };
 
@@ -425,14 +484,24 @@ exports.getUserManager = async (req, res) => {
     try {
         const { email, role } = req.user;
         const employeeID = await getEmployeeIDByEmail(email, role);
-        //lấy departmentID theo employeeID 
-        const employee = await Employee.findOne({ where: { EmployeeID : employeeID}, attributes: ['DepartmentID'] });
-        const departmentID = employee.DepartmentID;
-        // Lấy ra manager tương ứng của department
-        const managers =  await Employee.findAll({ where: { DepartmentID: departmentID, Position: 'Quản lý'}, });
-        if (!managers) {
-            return res.status(404).json({ message: "Không tìm thấy thông tin quản lý! "});
-        }
+        const employee = await Employee.findOne({
+            where: { EmployeeID: employeeID },
+            attributes: ['DepartmentID'],
+        });
+        
+        const department = await Department.findOne({
+            where: { DepartmentID: employee.DepartmentID },
+            attributes: ['DivisionID']
+        });
+        
+        const divisionID = department.DivisionID;
+        const managers = await Employee.findAll({
+            include: [{
+                model: Department,
+                where: { DivisionID: divisionID },
+            }],
+            where: { Position: 'Quản lý' }
+        });      
         return res.status(200).json(managers);
     }  catch (error) {
         return res.status(500).json({ message: 'Đã xảy ra lỗi máy chủ.' });
@@ -468,5 +537,20 @@ exports.getMonthlySalaryUser = async (req, res) => {
         res.json(monthlySalaryWithJobProfile);
     } catch (error) {
         res.status(error.message === "Bạn không có quyền truy cập!" ? 403 : 500).json({ message: error.message });
+    }
+};
+
+
+// yêu cầu nghỉ việc
+exports.addResignation = async (req, res) => {
+    try {
+        const {EmployeeID, ManagerID, Reason, ResignationsDate, Status, CreatedAt} = req.body;
+        await Resignation.create({ 
+            EmployeeID, ManagerID, Reason, ResignationsDate, Status, CreatedAt
+        });
+        res.json({ message: 'Tạo yêu cầu nghỉ việc thành công!' });
+    } catch (error) {
+        console.error("❌ Lỗi khi tạo resign:", error);
+        res.status(500).json({ message: 'Có lỗi xảy ra khi lưu yêu cầu nghỉ việc!' });
     }
 };

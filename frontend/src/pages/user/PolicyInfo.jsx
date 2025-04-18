@@ -40,7 +40,7 @@ const PolicyInfo = () => {
                     { key: '1', label: 'CHÍNH SÁCH LƯƠNG' },
                     { key: '2', label: 'CHÍNH SÁCH PHÚC LỢI' },
                     { key: '3', label: 'CHÍNH SÁCH NHÂN SỰ' },
-                    { key: '4', label: 'CHÍNH SÁCH LÀM VIỆC' },
+                    { key: '4', label: 'QUY ĐỊNH LÀM VIỆC' },
                 ]}
             />
             </div>

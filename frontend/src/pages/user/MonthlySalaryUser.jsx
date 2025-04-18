@@ -1,4 +1,5 @@
 import { Table, Flex, message } from 'antd';
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 
 const MonthlySalaryUser = ({monthlySalaryUser}) => {
