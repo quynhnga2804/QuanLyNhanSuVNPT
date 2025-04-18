@@ -23,6 +23,7 @@ import BenifitPolicy from './pages/admin/BenifitPolicy.jsx';
 import SalaryPolicy from './pages/admin/SalaryPolicy.jsx';
 import AdminHome from './pages/admin/AdminHome.jsx';
 import WorkRegulations from './pages/admin/WorkRegulations.jsx';
+import LeaveRequestUser from './pages/user/LeaveRequestUser.jsx';
 const { Sider, Content, Header } = Layout;
 
 const AppUser = () => {
@@ -66,7 +67,7 @@ const AppUser = () => {
       });
       setMonthlySalaryUser(response.data);
     } catch (error) {
-      console.log("Lỗi khi lấy dữ liệu lương: ", error);
+      console.log("Chưa có bản ghi ", error);
     }
   };
 
@@ -126,6 +127,7 @@ const AppUser = () => {
                   <Route path="notifications" element={<NotificationListUser />} />
                   <Route path="generalinfo" element={<GeneralInfo />} />
                   <Route path='attendances' element={<AttendanceUser employeeinfo={employeeinfo} />} />
+                  <Route path='leaverequests' element={<LeaveRequestUser employeeinfo={employeeinfo}/>}  />
                   <Route path='overtimes' element={<OvertimeUser employeeinfo={employeeinfo} />} />
                   <Route path='monthlysalaries' element={<MonthlySalaryUser monthlySalaryUser={monthlySalaryUser} />} />
 

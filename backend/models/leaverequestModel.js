@@ -1,8 +1,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Resignation = sequelize.define('Resignation', {
-    ID_Resignation: {
+const LeaveRquest = sequelize.define('LeaveRquest', {
+    LeaveRequestID: { 
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -19,13 +19,17 @@ const Resignation = sequelize.define('Resignation', {
     type: DataTypes.STRING(10),
     allowNull: false,
   },
-  Reason: {
+  LeaveReason: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  ResignationsDate: {
+  StartDate: {
     type: DataTypes.DATE,
     allowNull: false,
+  },
+  EndDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
   Status: {
     type: DataTypes.STRING(20),
@@ -33,14 +37,14 @@ const Resignation = sequelize.define('Resignation', {
   },
   CreatedAt: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
   },
   ApprovedAt: {
     type: DataTypes.DATE,
     allowNull: true,
   },
 }, {
-  tableName: 'resignations',
-  timestamps: false, // Không sử dụng timestamps
+  tableName: 'leaverequests',
+  timestamps: false,
 });
-module.exports = Resignation;
+module.exports = LeaveRquest;

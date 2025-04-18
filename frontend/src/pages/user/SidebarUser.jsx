@@ -7,7 +7,8 @@ import {
     DollarOutlined,
     BookOutlined ,
     LogoutOutlined,
-    UserOutlined
+    UserOutlined,
+    CalendarOutlined
 } from '@ant-design/icons';
 import logo from '../../assets/images/logo.png';
 
@@ -65,9 +66,15 @@ const SidebarUser = ({collapsed}) => {
                         title: 'Chấm công',
                     },
                     {
+                        key: 'leaverequests',
+                        icon: <CalendarOutlined />,
+                        label: !collapsed ? 'Nghỉ phép' : null,
+                        title: 'Nghỉ phép',
+                    },
+                    {
                         key: 'overtimes',
                         icon: <FieldTimeOutlined />,
-                        label: !collapsed ? 'OverTime' : null,
+                        label: !collapsed ? 'Tăng ca' : null,
                         title: 'Tăng ca',
                     },
                     {

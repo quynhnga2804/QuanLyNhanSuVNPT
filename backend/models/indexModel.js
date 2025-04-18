@@ -13,6 +13,7 @@ const PayrollCycle = require('./payrollCycleModel');
 const OverTime = require('./overtimeModel');
 const MonthlySalary = require('./monthlysalaryModel');
 const Resignation = require('./resignationModel');
+const LeaveRquest = require('./leaverequestModel');
 
 
 // Thiết lập quan hệ giữa các bảng
@@ -61,6 +62,9 @@ MonthlySalary.belongsTo(PayrollCycle, { foreignKey: 'ID_PayrollCycle'});
 Resignation.belongsTo(Employee, { foreignKey: 'EmployeeID'});
 Employee.hasMany(Resignation, { foreignKey: 'EmployeeID'});
 
+Employee.hasMany(LeaveRquest, { foreignKey: 'EmployeeID' });
+LeaveRquest.belongsTo(Employee, { foreignKey: 'EmployeeID' });
+
 module.exports = {
   sequelize,
   User,
@@ -74,4 +78,5 @@ module.exports = {
   OverTime,
   MonthlySalary,
   Resignation,
+  LeaveRquest
 };
