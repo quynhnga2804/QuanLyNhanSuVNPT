@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { Op } = require('sequelize');
 const speakeasy = require('speakeasy');
+const nodemailer = require("nodemailer");
+const crypto = require('crypto');
 const Department = require('../models/departmentModel');
 const Division = require('../models/divisionModel');
 const Employee = require('../models/employeeModel');
@@ -22,6 +24,9 @@ const Resignation = require('../models/resignationModel');
 const PersonalProfile = require('../models/personalProfileModel');
 const IncomeTax = require('../models/incometaxModel');
 const Insurance = require('../models/insuranceModel');
+
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 const modelMap = {
   attendance: Attendance,
@@ -60,10 +65,10 @@ const modelMap = {
   users: User,
   usernotification: UserNotification,
   usernotifications: UserNotification,
-  personalprofile : PersonalProfile,
-  personalprofiles : PersonalProfile,
-  resignation : Resignation,
-  resignations : Resignation,
+  personalprofile: PersonalProfile,
+  personalprofiles: PersonalProfile,
+  resignation: Resignation,
+  resignations: Resignation,
 };
 
 // Cấu hình lưu ảnh vào thư mục uploads
@@ -78,7 +83,7 @@ const upload = multer({ storage });
 // Lấy tất cả bản ghi
 const getAll = async (req, res) => {
   try {
-    if (!['Admin', 'Director', 'Manager', 'Accountant'].includes(req.user.role))
+    if (!['admin', 'director', 'manager', 'hr', 'accountant'].includes(req.user.role.toLowerCase()))
       return res.status(403).json({ message: 'Bạn không có quyền truy cập!' });
 
     const Model = modelMap[req.params.model];
@@ -109,7 +114,7 @@ const getById = async (req, res) => {
 // Thêm mới
 const create = async (req, res) => {
   try {
-    if (!['Admin', 'Director', 'Manager', 'Accountant'].includes(req.user.role))
+    if (!['admin', 'director', 'manager', 'accountant'].includes(req.user.role.toLowerCase()))
       throw new Error("Bạn không có quyền truy cập!");
 
     const Model = modelMap[req.params.model];
@@ -135,7 +140,7 @@ const create = async (req, res) => {
 // Thêm mới tài khoản người dùng
 const createUser = async (req, res) => {
   try {
-    if (!['Admin', 'Director'].includes(req.user.role))
+    if (!['admin', 'director', 'hr'].includes(req.user.role.toLowerCase()))
       throw new Error("Bạn không có quyền truy cập!");
 
     const { WorkEmail, UserName, Password, Role } = req.body;
@@ -148,6 +153,7 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: "Email đã tồn tại!" });
     }
 
+    console.log("Tạo tài khoản mới với thông tin:", { WorkEmail, UserName, Password, Role });
     const hashedPassword = await hash(Password);
 
     // Tạo secret key cho 2FA
@@ -180,15 +186,12 @@ const createUser = async (req, res) => {
 // Xóa tài khoản người dùng
 const deleteUser = async (req, res) => {
   try {
-    if (!['Admin', 'Director'].includes(req.user.role))
+    if (!['admin', 'director'].includes(req.user.role.toLowerCase()))
       throw new Error("Bạn không có quyền truy cập!");
 
-    const { email } = req.params;
-    const user = await User.findOne({ where: { WorkEmail: email } });
-
-    if (!user) {
-      return res.status(404).json({ message: "Tài khoản không tồn tại!" });
-    }
+    const { id } = req.params;
+    const user = await User.findOne({ where: { UserID: id } });
+    if (!user) return res.status(404).json({ message: "Tài khoản không tồn tại!" });
 
     // Xóa user
     await user.destroy();
@@ -199,7 +202,6 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 };
-
 
 // Cập nhật
 const update = async (req, res) => {
@@ -289,6 +291,48 @@ const search = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  try {
+    if (!['admin', 'director', 'hr'].includes(req.user.role.toLowerCase()))
+      throw new Error("Bạn không có quyền truy cập!");
+
+    const { id } = req.params;
+    const user = await User.findOne({ where: { UserID: id } });
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng!' });
+
+    const newPassword = crypto.randomBytes(4).toString('hex');
+    const hashedPassword = await hash(newPassword);
+
+    const [updated] = await User.update(
+      { Password: hashedPassword },
+      { where: { UserID: id } }
+    );
+
+    if (updated) {
+      const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+      });
+
+      const mailOptions = {
+        from: `"VNPT Nghệ An" <${EMAIL_USER}>`,
+        to: user.WorkEmail,
+        subject: 'Mật khẩu mới từ hệ thống quản lý nhân sự',
+        text: `Mật khẩu mới của bạn là: ${newPassword}`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: 'Đã reset mật khẩu và gửi email thành công!' });
+    } else {
+      res.status(500).json({ message: 'Cập nhật thất bại!!!' });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+};
+
 const createModelWithImage = [upload.single('Image'), create];
 const updateModelWithImage = [upload.single('Image'), update];
-module.exports = { getAll, getById, remove, search, createModelWithImage, updateModelWithImage, createUser, deleteUser };
+module.exports = { getAll, getById, remove, search, createModelWithImage, updateModelWithImage, createUser, deleteUser, resetPassword };

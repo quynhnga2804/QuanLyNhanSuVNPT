@@ -11,14 +11,16 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null);
-    const [editForm] = Form.useForm();
-    const [addForm] = Form.useForm();
     const [newEmployees, setNewEmployees] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
+    const [previewImage, setPreviewImage] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editForm] = Form.useForm();
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [addForm] = Form.useForm();
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createForm] = Form.useForm();
 
     const { user } = useContext(UserContext);
     const role = user?.role.toLowerCase();
@@ -29,12 +31,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const uniqueDepartmentIDs = [...new Set(employees.map(emp => emp.DepartmentID).filter(Boolean))];
 
     const userAccount = users.find(user => user.WorkEmail === selectedEmployee?.WorkEmail);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [newUser, setNewUser] = useState({ UserName: '', Password: '', Role: 'employee' });
-
-    const handleCreateAccount = () => {
-        setIsCreateModalOpen(true);
-    };
 
     const showModal = (record) => {
         setSelectedEmployee(record);
@@ -61,6 +57,22 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const handleEditSave = async (form, selectedImage) => {
         try {
             const values = await form.validateFields();
+            for (let key in values) {
+                const requiredFields = ['EmployeeID', 'FullName', 'PhoneNumber', 'DepartmentID', 'JobTitle', 'Position', 'StartDate'];
+
+                if (requiredFields.includes(key)) {
+                    const value = values[key];
+
+                    if (typeof value === 'string') {
+                        if (value.trim() === '') {
+                            const fieldTitle = fieldTitles[key] || key;
+                            message.error(`Trường "${fieldTitle}" không được để khoảng trắng!`);
+                            return;
+                        }
+                        values[key] = value.trim();
+                    }
+                }
+            }
             const formData = new FormData();
             Object.keys(values).forEach(key => {
                 formData.append(key, values[key] || '');
@@ -89,10 +101,35 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
         addForm.resetFields();
     };
 
+    const fieldTitles = {
+        EmployeeID: 'Mã nhân viên',
+        FullName: 'Họ và tên',
+        PhoneNumber: 'Số điện thoại',
+        JobTitle: 'Chức danh',
+        Position: 'Chức vụ',
+        StartDate: 'Ngày bắt đầu',
+        DepartmentID: 'Phòng ban',
+    };
+
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
+            for (let key in values) {
+                const requiredFields = ['EmployeeID', 'FullName', 'PhoneNumber', 'DepartmentID', 'JobTitle', 'Position', 'StartDate'];
 
+                if (requiredFields.includes(key)) {
+                    const value = values[key];
+
+                    if (typeof value === 'string') {
+                        if (value.trim() === '') {
+                            const fieldTitle = fieldTitles[key] || key;
+                            message.error(`Trường "${fieldTitle}" không được để khoảng trắng!`);
+                            return;
+                        }
+                        values[key] = value.trim();
+                    }
+                }
+            }
             const formData = new FormData();
             Object.keys(values).forEach(key => {
                 formData.append(key, values[key] || '');
@@ -118,6 +155,126 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
     const handleTableChange = (pagination, filters, sorter) => {
         setTableFilters(filters);
     };
+
+    const handleDelete = (record) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa nhân sự ${record.FullName} (Mã: ${record.EmployeeID}) không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    await del(`/admin/employees/${record.EmployeeID}`);
+                    message.success(`Xóa nhân sự ${record.FullName} thành công!`);
+                    fetchEmployees();
+                } catch (error) {
+                    message.error('Xóa thất bại, vui lòng thử lại.');
+                }
+            },
+        });
+    };
+
+    const handleCreateAccountOpen = () => {
+        createForm.setFieldsValue({
+            UserName: selectedEmployee?.FullName || '',
+            Password: '',
+            Role: 'employee',
+        });
+        setIsCreateModalOpen(true);
+    };
+
+    const handleCreateAccountCancel = () => {
+        setIsCreateModalOpen(false);
+        addForm.resetFields();
+    };
+
+    const handleCreateAccountSave = async () => {
+        try {
+            const values = await createForm.validateFields();
+            values.WorkEmail = selectedEmployee?.WorkEmail || '';
+            const response = await post('/admin/users/create', values);
+            if (response.status === 200 || response.status === 201) {
+                fetchUsers();
+                message.success('Tạo tài khoản thành công!');
+                handleCreateAccountCancel();
+            } else {
+                message.error('Lỗi khi tạo tài khoản!');
+            }
+        } catch (error) {
+            message.error('Lỗi kết nối server!');
+        }
+    };
+
+    const handleViewAccount = (user) => {
+        Modal.info({
+            title: 'Thông Tin Tài Khoản',
+            content: (
+                <div>
+                    <p><b>WorkEmail:</b> {user.WorkEmail}</p>
+                    <p><b>Username:</b> {user.UserName}</p>
+                    <p><b>Role:</b> {user.Role}</p>
+                </div>
+            ),
+            footer: [
+                <Button style={{ float: 'right', marginLeft: '15px' }} key="reset" type="primary" onClick={() => handleResetPassword(user.UserID)}>
+                    Cấp lại mật khẩu
+                </Button>,
+                <Button style={{ float: 'right' }} key="close" onClick={() => Modal.destroyAll()}>
+                    Đóng
+                </Button>,
+            ],
+        });
+    };
+
+    const handleDeleteAccount = async (email) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa tài khoản',
+            content: `Bạn có chắc chắn muốn xóa tài khoản của nhân viên này không?\nHành động này không thể hoàn tác!`,
+            okText: 'Xóa',
+            cancelText: 'Hủy',
+            okType: 'danger',
+            onOk: async () => {
+                try {
+                    const response = await del(`/admin/users/delete/${email}`);
+
+                    if (response.status === 200) {
+                        message.success('Xóa tài khoản thành công!');
+                        fetchUsers();
+                    } else {
+                        message.error('Lỗi khi xóa tài khoản!');
+                    }
+                } catch (error) {
+                    message.error('Lỗi kết nối server!');
+                }
+            },
+            onCancel: () => {
+                message.info('Hủy xóa tài khoản!');
+            },
+        });
+    };
+
+    const handleResetPassword = async (id) => {
+        Modal.confirm({
+            title: 'Xác nhận cấp lại mật khẩu',
+            content: `Bạn có chắc chắn muốn cấp lại mật khẩu cho nhân viên này không?`,
+            okText: 'Tiếp tục',
+            cancelText: 'Hủy',
+            okType: 'danger',
+            onOk: async () => {
+                try {
+                    await post(`/admin/reset-password/${id}`);
+                    message.success('Đã cấp lại mật khẩu và gửi email!');
+                } catch (error) {
+                    message.error('Không thể cấp lại mật khẩu!');
+                }
+            },
+            onCancel: () => {
+                message.info('Hủy cấp lại mật khẩu!');
+            },
+        });
+    };
+
 
     useEffect(() => {
         if (role === 'manager') {
@@ -147,88 +304,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
 
         return matchesSearchQuery && matchesGenderFilter && matchesPositionFilter && matchesDepartmentFilter;
     });
-
-    const handleDelete = (record) => {
-        Modal.confirm({
-            title: 'Xác nhận xóa',
-            content: `Bạn có chắc chắn muốn xóa nhân sự ${record.FullName} (Mã: ${record.EmployeeID}) không?`,
-            okText: 'Xóa',
-            okType: 'danger',
-            cancelText: 'Hủy',
-            onOk: async () => {
-                try {
-                    await del(`/admin/employees/${record.EmployeeID}`);
-                    message.success(`Xóa nhân sự ${record.FullName} thành công!`);
-                    fetchEmployees();
-                } catch (error) {
-                    message.error('Xóa thất bại, vui lòng thử lại.');
-                }
-            },
-        });
-    };
-
-    const createUser = async () => {
-        try {
-            const response = await post('/admin/users/create',
-                {
-                    WorkEmail: selectedEmployee.WorkEmail,
-                    UserName: newUser.UserName,
-                    Password: newUser.Password,
-                    Role: newUser.Role,
-                });
-
-            if (response.status === 200 || response.status === 201) {
-                message.success('Tạo tài khoản thành công!');
-                fetchUsers();
-            } else {
-                message.error('Lỗi khi tạo tài khoản!');
-            }
-        } catch (error) {
-            console.error(error);
-            message.error('Lỗi kết nối server!');
-        }
-    };
-
-    const handleViewAccount = (user) => {
-        Modal.info({
-            title: 'Thông Tin Tài Khoản',
-            content: (
-                <div>
-                    <p><b>WorkEmail:</b> {user.WorkEmail}</p>
-                    <p><b>Username:</b> {user.UserName}</p>
-                    <p><b>Role:</b> {user.Role}</p>
-                </div>
-            ),
-        });
-    };
-
-    const handleDeleteAccount = async (email) => {
-        Modal.confirm({
-            title: 'Xác nhận xóa tài khoản',
-            content: `Bạn có chắc chắn muốn xóa tài khoản của nhân viên này không?\nHành động này không thể hoàn tác!`,
-            okText: 'Xóa',
-            cancelText: 'Hủy',
-            okType: 'danger',
-            onOk: async () => {
-                try {
-                    const response = await del(`/admin/users/delete/${email}`);
-
-                    if (response.status === 200) {
-                        message.success('Xóa tài khoản thành công!');
-                        fetchUsers();
-                    } else {
-                        message.error('Lỗi khi xóa tài khoản!');
-                    }
-                } catch (error) {
-                    console.error(error);
-                    message.error('Lỗi kết nối server!');
-                }
-            },
-            onCancel: () => {
-                message.info('Hủy xóa tài khoản!');
-            },
-        });
-    };
 
     const columns = [
         {
@@ -391,7 +466,6 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Chi Tiết Nhân Sự</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={750} centered>
                 {selectedEmployee && (
                     <Descriptions column={2} size='small'>
-                        {/* Hình ảnh */}
                         <Descriptions.Item>
                             <Image
                                 src={selectedEmployee.Image ? `http://localhost:5000/uploads/${selectedEmployee.Image}` : '/default-avatar.png'}
@@ -411,10 +485,10 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
                             {userAccount ? (
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
                                     <Button type='primary' onClick={() => handleViewAccount(userAccount)}>Xem Tài Khoản</Button>
-                                    <Button type='danger' onClick={() => handleDeleteAccount(userAccount.WorkEmail)}>Xóa Tài Khoản</Button>
+                                    <Button type='danger' onClick={() => handleDeleteAccount(userAccount.UserID)}>Xóa Tài Khoản</Button>
                                 </div>
                             ) : (
-                                <Button type='primary' style={{ display: 'block', margin: '10px auto' }} onClick={handleCreateAccount}>
+                                <Button type='primary' style={{ display: 'block', margin: '10px auto' }} onClick={handleCreateAccountOpen}>
                                     Tạo Tài Khoản
                                 </Button>
                             )}
@@ -463,30 +537,25 @@ const General = ({ employees, departments, users, fetchEmployees, fetchUsers, em
             </Modal>
 
             {/* Tạo tài khoản người dùng */}
-            <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Tạo Tài Khoản Người Dùng</div>} open={isCreateModalOpen} onCancel={() => setIsCreateModalOpen(false)} onOk={async () => { await createUser(); setIsCreateModalOpen(false); }} centered>
-                <Input
-                    placeholder='Nhập Username'
-                    value={newUser.UserName}
-                    onChange={(e) => setNewUser({ ...newUser, UserName: e.target.value })}
-                    style={{ marginBottom: '10px' }}
-                />
-                <Input.Password
-                    placeholder='Nhập Password'
-                    value={newUser.Password}
-                    onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
-                    style={{ marginBottom: '10px' }}
-                />
-                <Select
-                    value={newUser.Role}
-                    onChange={(value) => setNewUser({ ...newUser, Role: value })}
-                    style={{ width: '100%' }}
-                >
-                    <Select.Option value='admin'>Admin</Select.Option>
-                    <Select.Option value='director'>Giám đốc</Select.Option>
-                    <Select.Option value='manager'>Quản lý</Select.Option>
-                    <Select.Option value='accountant'>Kế toán</Select.Option>
-                    <Select.Option value='employee'>Nhân viên</Select.Option>
-                </Select>
+            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Tạo Tài Khoản Người Dùng</div>} open={isCreateModalOpen} onOk={handleCreateAccountSave} onCancel={handleCreateAccountCancel} centered>
+                <Form form={createForm} layout='vertical'>
+                    <Form.Item label='Tên tài khoản' name='UserName' rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản!' }]}>
+                        <Input placeholder='Nhập Username' />
+                    </Form.Item>
+                    <Form.Item label='Mật khẩu' name='Password' rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}>
+                        <Input.Password placeholder='Nhập Password' />
+                    </Form.Item>
+                    <Form.Item label='Phân quyền' name='Role' rules={[{ required: true, message: 'Vui lòng chọn quyền!' }]}>
+                        <Select placeholder='Chọn phân quyền'>
+                            <Select.Option value='admin'>Admin</Select.Option>
+                            <Select.Option value='director'>Giám đốc</Select.Option>
+                            <Select.Option value='manager'>Quản lý</Select.Option>
+                            <Select.Option value='accountant'>Kế toán</Select.Option>
+                            <Select.Option value='employee'>Nhân viên</Select.Option>
+                            <Select.Option value='hr'>HR</Select.Option>
+                        </Select>
+                    </Form.Item>
+                </Form>
             </Modal>
 
             {/* Chỉnh sửa */}

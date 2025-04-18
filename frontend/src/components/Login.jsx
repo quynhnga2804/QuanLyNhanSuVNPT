@@ -44,6 +44,11 @@ const Login = () => {
 
     try {
       if (!showOtpField) {
+        if (!values.email.trim() || !values.password.trim()) {
+          message.warning('Vui lòng không nhập khoảng trắng!');
+          return;
+        }
+
         const response = await login('/auth/login', values.email, values.password);
         const data = response.data;
 
@@ -64,7 +69,6 @@ const Login = () => {
           //kiểm tra đổi mật khẩu
           const lastChanged = dayjs(user?.lastPasswordChange)
           const now = dayjs();
-          console.log("lastchange: ", lastChanged);
           if (now.diff(lastChanged, "month") >= 3) {
             localStorage.setItem('forceChangePass', 'true');
           }

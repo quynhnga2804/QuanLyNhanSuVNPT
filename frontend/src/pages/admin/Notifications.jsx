@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { List, Modal, Input, DatePicker, Tag, Form, Badge, Button, Dropdown, Tooltip, Menu, Flex, Select, message, Typography, FloatButton } from 'antd';
 import { EllipsisOutlined, CheckOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import dayjs from 'dayjs';
+import { UserContext } from '../../api/UserContext';
+import { get, post } from '../../api/apiService';
 
 const { Option } = Select;
 
@@ -13,12 +14,12 @@ const Notifications = ({ fetchUnreadCount }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addForm] = Form.useForm();
     const token = localStorage.getItem('token');
-    const currentUser = JSON.parse(localStorage.getItem('user'));
-    const workEmail = currentUser?.email;
+    const { user } = useContext(UserContext);
+    const workEmail = user?.email;
     const [filterType, setFilterType] = useState('all');
     const EmployeeID = employees.find(emp => emp.WorkEmail === workEmail)?.EmployeeID;
     const [selectedNotification, setSelectedNotification] = useState(null);
-    const role = currentUser?.role;
+    const role = user?.role.toLowerCase();
 
     const filteredStatuses = notifications.filter(item => {
         const isDeleted = usernotifications.some(userNo =>
@@ -30,9 +31,9 @@ const Notifications = ({ fetchUnreadCount }) => {
         if (isDeleted) return false;
 
         if (filterType === 'sent') return item.sentID === EmployeeID;
-        if (filterType === 'received') return item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All');
-        if (filterType === 'expired') return (item.sentID === EmployeeID || item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All')) && item.ExpiredAt && dayjs(item.ExpiredAt).isBefore(dayjs());
-        return item.sentID === EmployeeID || item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All');
+        if (filterType === 'received') return item.receivedID === EmployeeID;
+        if (filterType === 'expired') return (item.sentID === EmployeeID || item.receivedID === EmployeeID) && item.ExpiredAt && dayjs(item.ExpiredAt).isBefore(dayjs());
+        return item.sentID === EmployeeID || item.receivedID === EmployeeID;
     });
 
     useEffect(() => {
@@ -59,13 +60,7 @@ const Notifications = ({ fetchUnreadCount }) => {
                 formData.append(key, values[key]);
             });
             formData.append('sentID', EmployeeID);
-
-            await axios.post('http://localhost:5000/api/admin/notifications', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await post('/admin/notifications', formData);
 
             fetchNotifications();
             message.success('Gửi thông báo thành công!');
@@ -77,10 +72,7 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/employees', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
+            const response = await get('/admin/employees');
             setEmployees(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy thông báo:', error);
@@ -89,10 +81,7 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const fetchNotifications = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/notifications', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
+            const response = await get('/admin/notifications');
             setNotifications(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy thông báo:', error);
@@ -101,10 +90,7 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const fetchUserNotifications = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/admin/usernotifications', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
+            const response = await get('/admin/usernotifications');
             setUserNotifications(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy thông báo:', error);
@@ -121,12 +107,10 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const handleDeleteNotification = async (notificationID) => {
         try {
-            await axios.post('http://localhost:5000/api/admin/usernotifications', {
+            await post('/admin/usernotifications', {
                 EmployeeID: EmployeeID,
                 NotificationID: notificationID,
                 IsDeleted: 1
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             setNotifications(prev => prev.filter(item => item.NotificationID !== notificationID));
@@ -137,12 +121,10 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const handleReadNotification = async (notificationID) => {
         try {
-            await axios.post('http://localhost:5000/api/admin/usernotifications', {
+            await post('/admin/usernotifications', {
                 EmployeeID: EmployeeID,
                 NotificationID: notificationID,
                 IsRead: 1,
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             setUserNotifications((prev) => [
@@ -168,9 +150,7 @@ const Notifications = ({ fetchUnreadCount }) => {
 
     const handleMarkAllRead = async () => {
         try {
-            const employeeNotifications = notifications.filter(noti => noti.sentID === EmployeeID || noti.receivedID === EmployeeID);
-
-            const newReadNotifications = employeeNotifications.filter(noti =>
+            const newReadNotifications = filteredStatuses.filter(noti =>
                 !usernotifications.some(uNoti => uNoti.NotificationID === noti.NotificationID)
             ).map(noti => ({
                 EmployeeID: EmployeeID,
@@ -178,17 +158,11 @@ const Notifications = ({ fetchUnreadCount }) => {
                 IsDeleted: 0,
                 IsRead: 1,
             }));
+            console.log('newReadNotifications', newReadNotifications);
 
             if (newReadNotifications.length > 0) {
                 await Promise.all(newReadNotifications.map(noti =>
-                    fetch('http://localhost:5000/api/admin/usernotifications', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(noti),
-                    })
+                    post('/admin/usernotifications', noti)
                 ));
             }
 
@@ -201,7 +175,6 @@ const Notifications = ({ fetchUnreadCount }) => {
             fetchUnreadCount();
             message.success('Tất cả thông báo đã được đánh dấu là đã đọc!');
         } catch (error) {
-            console.error('Lỗi khi cập nhật thông báo:', error);
             message.error('Có lỗi xảy ra, vui lòng thử lại!');
         }
     };
@@ -221,7 +194,7 @@ const Notifications = ({ fetchUnreadCount }) => {
         if (noti.sentID === EmployeeID) {
             tagColor = 'blue';
             tagText = 'Đã gửi';
-        } else if (noti.receivedID === EmployeeID || (noti.receivedID !== EmployeeID && noti.receivedID === 'All')) {
+        } else if (noti.receivedID === EmployeeID) {
             tagColor = 'green';
             tagText = 'Đã nhận';
         }
@@ -248,7 +221,7 @@ const Notifications = ({ fetchUnreadCount }) => {
                             style={{ width: 170 }}
                         >
                             <Option value='all'>Tất cả</Option>
-                            {(role === 'Admin' || role === 'Director') && <Option value='sent'>Thông báo gửi đi</Option>}
+                            {(role === 'admin' || role === 'director') && <Option value='sent'>Thông báo gửi đi</Option>}
                             <Option value='received'>Thông báo nhận</Option>
                             <Option value='expired'>Thông báo hết hạn</Option>
                         </Select>
@@ -279,7 +252,7 @@ const Notifications = ({ fetchUnreadCount }) => {
                                         {item.Title} - {dayjs(item.ExpiredAt).format('DD/MM/YYYY')}
                                     </span>
                                 </Badge>
-                                {(role === 'Admin' || role === 'Director') && renderNotificationTitle(item)}
+                                {(role === 'admin' || role === 'director') && renderNotificationTitle(item)}
                             </Flex>
 
                             <Flex gap={12}>
@@ -312,7 +285,7 @@ const Notifications = ({ fetchUnreadCount }) => {
                 )}
             />
 
-            {(role === 'Admin' || role === 'Director') && (<FloatButton onClick={handleAddNew} icon={<PlusOutlined />} tooltip={<div>Tạo thông báo mới</div>} />)}
+            {(role === 'admin' || role === 'director') && (<FloatButton onClick={handleAddNew} icon={<PlusOutlined />} tooltip={<div>Tạo thông báo mới</div>} />)}
 
             {selectedNotification && (
                 <div style={{
@@ -379,3 +352,4 @@ const Notifications = ({ fetchUnreadCount }) => {
 };
 
 export default Notifications;
+

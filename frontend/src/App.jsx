@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Flex, Layout } from 'antd';
+import { Button, Flex, Layout, message } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import './App.css';
 import Sidebar from './pages/admin/Sidebar';
 import EmployeeList from './pages/admin/EmployeeList';
@@ -18,7 +17,9 @@ import Attendance_Overtime from './pages/admin/Attendance_Overtime';
 import HomeUser from './pages/user/HomeUser';
 import Tax_Insurance from './pages/admin/Tax_Insurance';
 import ProtectedRoute from '../src/api/ProtectedRoute';
+import Notifications from './pages/admin/Notifications';
 import { UserContext } from './api/UserContext';
+import { get } from './api/apiService';
 
 const { Sider, Header, Content } = Layout;
 
@@ -39,7 +40,7 @@ const App = () => {
   const [newContracts, setnewContracts] = useState([]);
   const [newDepartments, setnewDepartments] = useState([]);
   const [newDivisions, setnewDivisions] = useState([]);
-  const role = user?.role;
+  const role = user?.role.toLowerCase();
 
   useEffect(() => {
     if (token) {
@@ -60,7 +61,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (role === 'Manager') {
+    if (role === 'manager') {
       const dpID = employees.find(emp => emp.WorkEmail?.includes(workEmail))?.DepartmentID;
       const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
       const filterDivisions = divisions.filter(dv => dv.DivisionID === dvID);
@@ -82,88 +83,65 @@ const App = () => {
     }
   }, [role, employees, departments, employeecontracts, workEmail]);
 
-  const dtEmployees = role === 'Manager' ? newEmployees : employees;
-  const dtDivisions = role === 'Manager' ? newDivisions : divisions;
-  const dtDepartments = role === 'Manager' ? newDepartments : departments;
-  const dtEmployeeContracts = role === 'Manager' ? newContracts : employeecontracts;
+  const dtEmployees = role === 'manager' ? newEmployees : employees;
+  const dtDivisions = role === 'manager' ? newDivisions : divisions;
+  const dtDepartments = role === 'manager' ? newDepartments : departments;
+  const dtEmployeeContracts = role === 'manager' ? newContracts : employeecontracts;
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/employees', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
+      const response = await get('/admin/employees');
       setEmployees(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách nhân viên:', error);
+      message.error('Lỗi khi lấy danh sách nhân viên');
     }
   };
 
   const fetchDepartments = async () => {
     try {
-      const url = 'http://localhost:5000/api/admin/departments';
-      const response = await axios.get(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
+      const url = '/admin/departments';
+      const response = await get(url);
       setDepartments(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách phòng ban:', error);
+      message.error('Lỗi khi lấy danh sách phòng ban');
     }
   };
 
   const fetchDivisions = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/divisions', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
+      const response = await get('/admin/divisions');
       setDivisions(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách nhân viên:', error);
+      message.error('Lỗi khi lấy danh sách phòng ban');
     }
   };
 
   const fetchEmployeeContracts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/employeecontracts', {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
+      const response = await get('/admin/employeecontracts');
       setemployeecontracts(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách hồ sơ nhân sự:', error);
+      message.error('Lỗi khi lấy danh sách hồ sơ nhân sự');
     }
   };
 
   const fetchUnreadCount = async () => {
     try {
-      const resNoti = await axios.get("http://localhost:5000/api/admin/notifications", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const resNoti = await get("/admin/notifications");
 
-      const resUserNoti = await axios.get("http://localhost:5000/api/admin/usernotifications", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const resUserNoti = await get("/admin/usernotifications");
 
       const notifications = resNoti.data;
       const usernotifications = resUserNoti.data;
       const currentUser = JSON.parse(localStorage.getItem("user"));
       const workEmail = currentUser?.email;
-      const employeesRes = await axios.get("http://localhost:5000/api/admin/employees", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const employeesRes = await get("/admin/employees");
 
       const employees = employeesRes.data;
       const EmployeeID = employees.find(emp => emp.WorkEmail === workEmail)?.EmployeeID;
 
       const filteredNotifications = notifications.filter((item) =>
-        (item.sentID === EmployeeID || item.receivedID === EmployeeID || (item.sentID !== EmployeeID && item.receivedID === 'All')) &&
+        (item.sentID === EmployeeID || item.receivedID === EmployeeID) &&
         !usernotifications.some((userNo) =>
           userNo.NotificationID === item.NotificationID &&
           userNo.EmployeeID === EmployeeID &&
@@ -179,7 +157,7 @@ const App = () => {
 
       setUnreadCount(unreadCount);
     } catch (error) {
-      console.error("Lỗi khi lấy số lượng thông báo:", error);
+      message.error("Lỗi khi lấy số lượng thông báo");
     }
   };
 
@@ -221,7 +199,7 @@ const App = () => {
               <Route path='tax&insurance' element={<ProtectedRoute element={<Tax_Insurance />} allowedRoles={['admin', 'director']} />} />
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
-              <Route path='notifications' element={<Notification fetchUnreadCount={fetchUnreadCount} />} />
+              <Route path='notifications' element={<Notifications fetchUnreadCount={fetchUnreadCount} employees={employees} />} />
             </Routes>
           </Flex>
         </Content>

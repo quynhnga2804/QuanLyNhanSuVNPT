@@ -17,6 +17,7 @@ router.put('/:model/:id', authenticateToken, adminController.updateModelWithImag
 router.delete('/:model/:id', authenticateToken, adminController.remove);
 // Thao tác với tài khoản
 router.post("/users/create", authenticateToken, adminController.createUser);
-router.delete("/users/delete/:email", authenticateToken, adminController.deleteUser);
+router.delete("/users/delete/:id", authenticateToken, adminController.deleteUser);
+router.post("/reset-password/:id", authenticateToken, adminController.resetPassword);
 
 module.exports = router;

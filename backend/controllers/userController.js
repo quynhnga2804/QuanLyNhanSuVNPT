@@ -35,10 +35,6 @@ const otpStorage = {};
 
 // Hàm tìm EmployeeID theo email và kiểm tra quyền truy cập
 const getEmployeeIDByEmail = async (email, role) => {
-    if (!['Admin', 'Director', 'Manager', 'Accountant', 'Employee'].includes(role)) {
-        throw new Error("Bạn không có quyền truy cập!");
-    }
-
     const employee = await Employee.findOne({
         where: { WorkEmail: email },
         attributes: ["EmployeeID"]

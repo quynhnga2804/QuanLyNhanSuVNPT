@@ -22,7 +22,7 @@ const AdminHeader = ({ onLogout, imageUrl, unreadCount }) => {
             label: <Text strong>{username || 'Người dùng'}</Text>,
             disabled: true,
         },
-        role !== 'Admin' && {
+        role !== 'admin' && {
             key: 'User/home',
             label: 'Thông tin cá nhân',
             onClick: () => navigate('../User/home'),

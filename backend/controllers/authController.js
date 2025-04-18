@@ -67,7 +67,7 @@ exports.sendOTP = async (req, res) => {
             subject: "Mã OTP đăng nhập",
             text: `Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 1 phút.`,
         };
-
+        
         await transporter.sendMail(mailOptions);
         res.json({ message: "OTP đã được gửi! Hãy kiểm tra email của bạn!", token });
     } catch (error) {
