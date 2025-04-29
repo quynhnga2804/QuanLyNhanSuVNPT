@@ -1,4 +1,4 @@
-import { Button, message, Descriptions, Form, Modal, Select, Input, Dropdown, Flex, Space, Table, Typography } from 'antd';
+import { Button, message, Descriptions, Form, Modal, Select, Input, Dropdown, Flex, Space, Table, Typography, DatePicker } from 'antd';
 import React, { useState, useEffect, useContext } from 'react';
 import { CaretDownOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import SideContent from './SideContent';
@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import { UserContext } from '../../api/UserContext';
 import { post, put, del } from '../../api/apiService';
 
-const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, laborcontracts, jobprofiles, departments }) => {
+const EmployeeContractList = ({ employees, fetchEmployeeContracts, employeecontracts, laborcontracts, jobprofiles, departments }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const today = new Date();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -22,29 +22,31 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
     const [newEmployeeContracts, setNewEmployeeContracts] = useState([]);
     const [tableFilters, setTableFilters] = useState({});
+    const [contractFilter, setContractFilter] = useState(null);
     const { user } = useContext(UserContext);
     const role = user?.role.toLowerCase();
-    const workEmail = user?.email;
 
-    const handleStartDateChange = (e) => {
-        setStartDate(e.target.value);
+    const handleStartDateChange = (date) => {
+        setStartDate(date.format('YYYY-MM-DD'));
     };
 
     const handleContractInputChange = (value, form) => {
         const selectedLabContract = laborcontracts.find(lab => lab.ID_Contract === value);
+
         if (selectedLabContract) {
             const contractType = selectedLabContract.ContractType;
 
-            if (contractType.includes("năm") || contractType.includes("tháng")) {
-                const months = contractType.includes("năm") ? parseInt(contractType.match(/\d+/)?.[0] || 0, 10) * 12 : parseInt(contractType.match(/\d+/)?.[0] || 0, 10);
+            if (contractType.includes('năm') || contractType.includes('tháng')) {
+                const match = contractType.match(/\d+/); // tìm số trong chuỗi
+                const number = match ? parseInt(match[0], 10) : 0;
+                const months = contractType.includes('năm') ? number * 12 : number;
 
                 if (months > 0 && startDate) {
-                    const endDate = new Date(startDate);
-                    endDate.setMonth(endDate.getMonth() + months);
-                    form.setFieldsValue({ EndDate: endDate.toISOString().split("T")[0] });
+                    const endDate = dayjs(startDate).add(months, 'month');
+                    form.setFieldsValue({ EndDate: endDate });
                     setEndDateDisabled(true);
                 }
-            } else if (contractType.includes(" thời hạn")) {
+            } else if (contractType.includes('thời hạn')) {
                 form.setFieldsValue({ EndDate: null });
                 setEndDateDisabled(true);
             } else {
@@ -89,7 +91,11 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
 
     const handleEdit = (record) => {
         setEditingEmployContract(record);
-        editForm.setFieldsValue(record);
+        editForm.setFieldsValue({
+            ...record,
+            StartDate: record.StartDate ? dayjs(record.StartDate, 'YYYY-MM-DD') : null,
+            EndDate: record.EndDate ? dayjs(record.EndDate, 'YYYY-MM-DD') : null,
+        });
         setIsEditModalOpen(true);
     };
 
@@ -155,18 +161,13 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
 
     useEffect(() => {
         if (role === 'manager') {
-            const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
-            const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
-            const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
-            const newEmployees = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
-            const relatedEmployeeIDs = newEmployees.map(dv => dv.EmployeeID);
+            const relatedEmployeeIDs = employees.map(dv => dv.EmployeeID);
             const filtered = employeecontracts.filter(emp => relatedEmployeeIDs.includes(emp.EmployeeID));
             setNewEmployeeContracts(filtered);
         }
-    }, [role, employees, departments, workEmail]);
+    }, [role, employees]);
 
-    const dataSource = role === 'manager' && newEmployeeContracts.length > 0 ? newEmployeeContracts : employeecontracts;
-
+    const dataSource = role === 'manager' ? newEmployeeContracts : employeecontracts;
     const mergedContracts = dataSource.map(emp => {
         const contract = laborcontracts.find(lc => lc.ID_Contract === emp.ID_Contract);
         return {
@@ -191,7 +192,14 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
         const selectedStatus = tableFilters.Status || [];
         const matchesStatusFilter = selectedStatus.length === 0 || selectedStatus.includes(emp.Status);
 
-        return matchesSearchQuery && matchesStatusFilter;
+        const matchesContractFilter = !contractFilter || (contractFilter === 'sắp hết hạn' && (() => {
+            if (!emp.EndDate) return false;
+            const endDate = new Date(emp.EndDate);
+            const diffDays = (endDate - today) / (1000 * 60 * 60 * 24);
+            return diffDays <= 30 && diffDays >= 0;
+        })());
+
+        return matchesSearchQuery && matchesStatusFilter && matchesContractFilter;
     });
 
     const columns = [
@@ -318,23 +326,11 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
             render: (_, record) => {
                 const endDate = record.EndDate ? new Date(record.EndDate) : null;
                 const isExpired = endDate && endDate < today;
-
                 const menuProps = {
                     items: [
-                        {
-                            key: 'edit',
-                            label: isExpired ? <span style={{ color: 'gray' }}>Chỉnh sửa</span> : 'Chỉnh sửa',
-                            onClick: () => {
-                                if (!isExpired) handleEdit(record);
-                            },
-                            disabled: isExpired,
-                        },
-                        {
-                            key: 'details', label: 'Chi tiết', onClick: () => handleDetails(record),
-                        },
-                        {
-                            key: 'delete', label: 'Xóa', onClick: () => handleDelete(record),
-                        },
+                        { key: 'details', label: 'Chi tiết', onClick: () => handleDetails(record) },
+                        { key: 'edit', label: isExpired ? <span style={{ color: 'gray' }}>Chỉnh sửa</span> : 'Chỉnh sửa', onClick: () => { if (!isExpired) handleEdit(record) }, disabled: isExpired },
+                        { key: 'delete', label: isExpired ? <span style={{ color: 'gray' }}>Xóa</span> : 'Xóa', onClick: () => handleDelete(record) },
                     ],
                 };
 
@@ -367,6 +363,14 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                         />
                     </Space>
 
+                    <Select
+                        style={{ width: 190 }}
+                        allowClear
+                        options={[{ value: 'sắp hết hạn', label: 'Hợp đồng sắp hết hạn' }]}
+                        placeholder='Lựa chọn'
+                        onChange={(value) => setContractFilter(value)}
+                    />
+
                     <Button type='primary' onClick={handleAddNew}>
                         <Space>
                             Tạo mới <PlusCircleOutlined />
@@ -397,7 +401,7 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
             {/* Thêm mới */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Hợp Đồng</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
                 <Form form={addForm} layout='vertical'>
-                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
+                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true, message: 'Vui lòng chọn nhân viên!' }]}>
                         <Select>
                             {employees
                                 .filter(emp => !nowContracts.some(contract => contract.EmployeeID === emp.EmployeeID))
@@ -408,11 +412,10 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                                 ))}
                         </Select>
                     </Form.Item>
-
-                    <Form.Item label="Ngày bắt đầu" name="StartDate" rules={[{ required: true }]}>
-                        <Input type="date" onChange={handleStartDateChange} />
+                    <Form.Item label='Ngày bắt đầu' name='StartDate' rules={[{ required: true }]}>
+                        <DatePicker placeholder='Chọn ngày' format={'DD/MM/YYYY'} onChange={handleStartDateChange} style={{ width: '100%' }} />
                     </Form.Item>
-                    <Form.Item label="Loại hợp đồng" name="ID_Contract" rules={[{ required: true }]}>
+                    <Form.Item label='Loại hợp đồng' name='ID_Contract' rules={[{ required: true }]}>
                         <Select onChange={(value) => handleContractInputChange(value, addForm)} disabled={!startDate}>
                             {laborcontracts.map(lab => (
                                 <Select.Option key={lab.ID_Contract} value={lab.ID_Contract}>
@@ -421,8 +424,8 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Ngày kết thúc" name="EndDate" rules={[{ required: !endDateDisabled }]}>
-                        <Input type="date" disabled={endDateDisabled} />
+                    <Form.Item label='Ngày kết thúc' name='EndDate' rules={[{ required: !endDateDisabled }]}>
+                        <DatePicker disabled={endDateDisabled} placeholder='Chọn ngày' format={'DD/MM/YYYY'} onChange={handleStartDateChange} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -439,10 +442,11 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Ngày bắt đầu" name="StartDate" rules={[{ required: true }]}>
-                        <Input type="date" onChange={handleStartDateChange} />
+                    <Form.Item label='Ngày bắt đầu' name='StartDate' rules={[{ required: true }]}>
+                        {/* <Input type='date' onChange={handleStartDateChange} /> */}
+                        <DatePicker placeholder='Chọn ngày' format={'DD/MM/YYYY'} onChange={handleStartDateChange} style={{ width: '100%' }} />
                     </Form.Item>
-                    <Form.Item label="Loại hợp đồng" name="ID_Contract" rules={[{ required: true }]}>
+                    <Form.Item label='Loại hợp đồng' name='ID_Contract' rules={[{ required: true }]}>
                         <Select onChange={(value) => handleContractInputChange(value, editForm)} disabled={!startDate}>
                             {laborcontracts.map(lab => (
                                 <Select.Option key={lab.ID_Contract} value={lab.ID_Contract}>
@@ -451,8 +455,8 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Ngày kết thúc" name="EndDate" rules={[{ required: !endDateDisabled }]}>
-                        <Input type="date" disabled={endDateDisabled} />
+                    <Form.Item label='Ngày kết thúc' name='EndDate' rules={[{ required: !endDateDisabled }]}>
+                        <DatePicker disabled={endDateDisabled} placeholder='Chọn ngày' format={'DD/MM/YYYY'} onChange={handleStartDateChange} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -460,32 +464,32 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
             {/* Chi tiết */}
             <Modal title={<div style={{ textAlign: 'center', width: '100%' }}>Chi Tiết Hợp Đồng</div>} open={isShowModalOpen} onCancel={closeModal} footer={null} width={650} centered>
                 {selectedEmployeeContract && (
-                    <Descriptions column={2} size="small">
-                        <Descriptions.Item label="Mã Nhân Viên">
+                    <Descriptions column={2} size='small'>
+                        <Descriptions.Item label='Mã Nhân Viên'>
                             {selectedEmployeeContract.EmployeeID}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Ngày bắt đầu">
-                            {selectedEmployeeContract.StartDate}
+                        <Descriptions.Item label='Ngày bắt đầu'>
+                            {selectedEmployeeContract.StartDate ? dayjs(selectedEmployeeContract.StartDate).format('DD-MM-YYYY') : ''}
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Họ và Tên">
+                        <Descriptions.Item label='Họ và Tên'>
                             {employees.find(emp => emp.EmployeeID === selectedEmployeeContract.EmployeeID).FullName}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Ngày kết thúc">
-                            {selectedEmployeeContract.EndDate || 'Không thời hạn'}
+                        <Descriptions.Item label='Ngày kết thúc'>
+                            {selectedEmployeeContract.EndDate ? dayjs(selectedEmployeeContract.EndDate).format('DD-MM-YYYY') : 'Không thời hạn'}
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Mã hợp đồng">
+                        <Descriptions.Item label='Mã hợp đồng'>
                             {selectedEmployeeContract.ID_Contract}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Loại hợp đồng">
+                        <Descriptions.Item label='Loại hợp đồng'>
                             {jobprofiles.find(job => job.EmployeeID === selectedEmployeeContract.EmployeeID).EmploymentStatus}
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Tên hợp đồng">
+                        <Descriptions.Item label='Tên hợp đồng'>
                             {laborcontracts.find(lab => lab.ID_Contract === selectedEmployeeContract.ID_Contract).ContractType}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Trạng thái">
+                        <Descriptions.Item label='Trạng thái'>
                             {!selectedEmployeeContract.EndDate || new Date(selectedEmployeeContract.EndDate) >= today
                                 ? <span style={{ color: 'green' }}>Hoạt động</span>
                                 : <span style={{ color: 'red' }}>Hết hạn</span>}
@@ -497,4 +501,4 @@ const LaborContract = ({ employees, fetchEmployeeContracts, employeecontracts, l
     )
 }
 
-export default LaborContract
+export default EmployeeContractList

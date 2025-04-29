@@ -9,6 +9,7 @@ const userRoutes = require('./routes/userRoute');
 const authenticateToken = require('./middleware/authMiddleware');
 const app = express();
 const path = require("path");
+const { login } = require('./controllers/authController');
 
 app.use(helmet({crossOriginResourcePolicy: false}));
 
@@ -19,12 +20,14 @@ app.use(cors());
 
 // Giới hạn số lần đăng nhập thất bại
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 phút
-  max: 5, // Giới hạn mỗi IP chỉ được 5 lần thử đăng nhập trong 15 phút
-  message: 'Quá nhiều lần đăng nhập thất bại, vui lòng thử lại sau 15 phút'
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: 'Quá nhiều lần đăng nhập thất bại, vui lòng thử lại sau 15 phút!' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/login', loginLimiter, login);
 
 sequelize.sync({ force: false }) // false sẽ giữ nguyên dữ liệu và tạo bảng nếu chưa tồn tại
   .then(() => {

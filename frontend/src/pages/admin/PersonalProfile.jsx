@@ -3,7 +3,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
-import axios from 'axios';
 import { UserContext } from '../../api/UserContext';
 import { put, post, del } from '../../api/apiService';
 
@@ -19,7 +18,6 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
 
     const { user } = useContext(UserContext);
     const role = user?.role.toLowerCase();
-    const workEmail = user?.email;
 
     const uniqueEducations = [...new Set(personalprofiles.map(per => per.Education).filter(Boolean))];
 
@@ -88,15 +86,11 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
 
     useEffect(() => {
         if (role === 'manager') {
-            const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
-            const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
-            const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
-            const newEmployees = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
-            const relatedEmployeeIDs = newEmployees.map(dv => dv.EmployeeID);
+            const relatedEmployeeIDs = employees.map(dv => dv.EmployeeID);
             const filtered = personalprofiles.filter(emp => relatedEmployeeIDs.includes(emp.EmployeeID));
             setNewPersonalProfiles(filtered);
         }
-    }, [role, employees, departments, workEmail]);
+    }, [role, employees]);
 
     const columns = [
         {
@@ -197,7 +191,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
         },
     ];
 
-    if (role === 'director' || role === 'admin') {
+    if (role === 'admin' || role === 'hr') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -221,7 +215,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
         setTableFilters(filters);
     };
 
-    const dataSource = role === 'manager' && newPersonalProfiles.length > 0 ? newPersonalProfiles : personalprofiles;
+    const dataSource = role === 'manager' ? newPersonalProfiles : personalprofiles;
     const filteredpersonalprofiles = dataSource.filter(dvs => {
         const matchesSearchQuery = searchQuery === '' ||
             dvs.EmployeeID.toLowerCase().includes(searchQuery) ||
@@ -255,7 +249,7 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
                         />
                     </Space>
 
-                    {(role === 'admin' || role === 'director') &&
+                    {(role === 'hr' || role === 'admin') &&
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới <UserAddOutlined />

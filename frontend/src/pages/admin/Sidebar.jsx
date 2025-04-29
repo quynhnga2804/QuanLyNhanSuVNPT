@@ -5,8 +5,8 @@ import logo from '../../assets/images/logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserContext } from '../../api/UserContext';
 
-const Sidebar = ({ collapsed, onLogout, imageUrl }) => {
-    const [activeKey, setActiveKey] = useState(1);
+const Sidebar = ({ collapsed, onLogout }) => {
+    const [activeKey, setActiveKey] = useState('1');
     const navigate = useNavigate();
     const location = useLocation();
     const { user } = useContext(UserContext);
@@ -22,7 +22,7 @@ const Sidebar = ({ collapsed, onLogout, imageUrl }) => {
         <Menu.Item key={key} icon={
             collapsed ? (
                 <Tooltip title={label} placement="right">
-                    <span>{icon}</span>
+                    <span onClick={() => setActiveKey('1')}>{icon}</span>
                 </Tooltip>
             ) : icon
         }>
@@ -53,21 +53,21 @@ const Sidebar = ({ collapsed, onLogout, imageUrl }) => {
 
             <Menu mode='inline' selectedKeys={[selectedKey]} defaultOpenKeys={['sub1']} activeKey={activeKey} onChange={setActiveKey} onClick={handleMenuClick} className='menu-bar'>
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="base" title={!collapsed ? 'Quản lý chung' : null}>
-                    {role !== 'accountant' ? getItem('employees', <TeamOutlined onClick={() => setActiveKey('1')} />, 'Danh sách nhân sự') : null}
-                    {role !== 'accountant' ? getItem('contracts', <CarryOutOutlined onClick={() => setActiveKey('1')} />, 'Hợp đồng lao động') : null}
-                    {getItem('periodicsalaries', <DollarOutlined onClick={() => setActiveKey('1')} />, 'Bảng lương định kỳ')}
-                    {getItem('humanreports', <ReconciliationOutlined onClick={() => setActiveKey('1')} />, 'Báo cáo')}
+                    {getItem('employees', <TeamOutlined />, 'Danh sách nhân sự')}
+                    {role !== 'accountant' ? getItem('contracts', <CarryOutOutlined />, 'Hợp đồng lao động') : null}
+                    {role === 'accountant' ? getItem('periodicsalaries', <DollarOutlined />, 'Bảng lương định kỳ') : null}
+                    {(role === 'manager' || role === 'hr') ? getItem('humanreports', <ReconciliationOutlined />, 'Báo cáo') : null}
                 </Menu.ItemGroup>
 
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="org" title={!collapsed ? 'Thiết kế tổ chức' : null}>
-                    {role !== 'accountant' ? getItem('organizationalstructures', <ClusterOutlined onClick={() => setActiveKey('1')} />, 'Cơ cấu tổ chức') : null}
-                    {getItem('attendance&overtime', <SolutionOutlined onClick={() => setActiveKey('1')} />, 'Công thời')}
-                    {role === 'admin' ? getItem('tax&insurance', <DiffOutlined onClick={() => setActiveKey('1')} />, 'Thuế và bảo hiểm') : null}
+                    {role !== 'accountant' ? getItem('organizationalstructures', <ClusterOutlined />, 'Cơ cấu tổ chức') : null}
+                    {(role === 'hr' || role === 'director' || role === 'manager') ? getItem('attendance&overtime', <SolutionOutlined />, 'Công thời') : null}
+                    {role === 'admin' ? getItem('tax&insurance', <DiffOutlined />, 'Thuế và bảo hiểm') : null}
                 </Menu.ItemGroup>
 
                 <Menu.ItemGroup style={{ margin: '0 10px' }} key="policy" title={!collapsed ? 'Quy định & Chính sách' : null}>
-                    {getItem('workregulations', <ReadOutlined onClick={() => setActiveKey('1')} />, 'Quy định làm việc')}
-                    {getItem('hrpolicies', <WalletOutlined onClick={() => setActiveKey('1')} />, 'Chính sách nhân sự')}
+                    {getItem('workregulations', <ReadOutlined />, 'Quy định làm việc')}
+                    {getItem('hrpolicies', <WalletOutlined />, 'Chính sách nhân sự')}
                 </Menu.ItemGroup>
 
                 <Menu.Item key="logout" icon={collapsed ? (<Tooltip title="Đăng xuất" placement="right"><span><LogoutOutlined /></span></Tooltip>) : <LogoutOutlined />} onClick={onLogout}>

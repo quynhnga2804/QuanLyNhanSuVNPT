@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import { UserContext } from '../../api/UserContext';
 import { put } from '../../api/apiService';
 
-const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
+const Overtimes = ({ overtimes, employees, fetchOvertimes }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [tableFilters, setTableFilters] = useState({});
     const [newOTs, setNewOTs] = useState([]);
@@ -60,9 +60,9 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
             const filtered = overtimes.filter(ate => ate.ManagerID === empID);
             setNewOTs(filtered);
         }
-    }, [role, overtimes, employees, departments, workEmail]);
+    }, [role, overtimes, employees]);
 
-    const dataSource = role === 'manager' ? newOTs : overtimes;
+    const dataSource = role === 'manager' ? newOTs : overtimes.filter(ove => ove.Status.toLowerCase() !== 'pending');
     const filteredovertimes = dataSource.filter(ate => {
         const matchesSearchQuery = searchQuery === '' ||
             ate.EmployeeID.toLowerCase().includes(searchQuery) ||
@@ -155,7 +155,6 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
                 if (date) return dayjs(date).format('DD-MM-YYYY');
                 return '';
             }
-
         },
         {
             title: 'NGÀY DUYỆT',
@@ -219,21 +218,21 @@ const Overtimes = ({ overtimes, employees, fetchOvertimes, departments }) => {
                 </Typography.Title>
 
                 <Flex align='center' gap='2rem' style={{ paddingBottom: '10px' }}>
-                    <Space  direction="vertical" size={12}>
-                                            <RangePicker
-                                                format='DD-MM-YYYY'
-                                                placeholder={['Từ ngày', 'Đến ngày']}
-                                                onChange={(dates) => {
-                                                    if (dates && dates.length === 2) {
-                                                        setFromDate(dates[0]);
-                                                        setToDate(dates[1]);
-                                                    } else {
-                                                        setFromDate(null);
-                                                        setToDate(null);
-                                                    }
-                                                }}
-                                            />
-                                        </Space>
+                    <Space direction="vertical" size={12}>
+                        <RangePicker
+                            format='DD-MM-YYYY'
+                            placeholder={['Từ ngày', 'Đến ngày']}
+                            onChange={(dates) => {
+                                if (dates && dates.length === 2) {
+                                    setFromDate(dates[0]);
+                                    setToDate(dates[1]);
+                                } else {
+                                    setFromDate(null);
+                                    setToDate(null);
+                                }
+                            }}
+                        />
+                    </Space>
 
                     <Space>
                         <Search

@@ -17,7 +17,7 @@ const { OverTime } = require("../models/indexModel");
 const MonthlySalary = require("../models/monthlysalaryModel");
 const Resignation = require("../models/resignationModel");
 const Division = require("../models/divisionModel");
-const LeaveRquest = require("../models/leaverequestModel");
+const Leave = require("../models/leaveModel");
 require("dotenv").config();
 
 const EMAIL_USER = process.env.EMAIL_USER;
@@ -408,7 +408,7 @@ exports.getLeaveInfoUser = async (req, res) => {
     try {
         const { email, role } = req.user;
         const employeeID = await getEmployeeIDByEmail(email, role);
-        const leaveInfo = await LeaveRquest.findAll({
+        const leaveInfo = await Leave.findAll({
             where: { EmployeeID: employeeID },
             include: [
                 { model: Employee, attributes: ['FullName'] }
@@ -447,7 +447,7 @@ exports.addOvertimeEmployeeRe = async (req, res) => {
 exports.addLeaveRequest = async (req, res) => {
     try {
         const { EmployeeID, ManagerID, LeaveReason, StartDate, EndDate, Status, CreatedAt } = req.body;
-        await LeaveRquest.create({
+        await Leave.create({
             EmployeeID,
             ManagerID,
             LeaveReason,

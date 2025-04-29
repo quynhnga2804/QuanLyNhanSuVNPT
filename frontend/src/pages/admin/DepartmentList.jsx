@@ -188,7 +188,6 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
 
             <Table
                 className='table_TQ'
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 columns={columns}
                 dataSource={filteredDepartments.map(dpm => ({ ...dpm, key: dpm.DepartmentID }))}
                 bordered

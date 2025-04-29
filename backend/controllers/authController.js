@@ -41,8 +41,8 @@ exports.login = async (req, res) => {
             await user.save();
         }
 
-        const token = jwt.sign({ email: user.WorkEmail, name: user.UserName, role: user.Role, lastPasswordChange: user.LastPasswordChange }, SECRET_KEY, { expiresIn: "5m" });
-        res.json({ token, user: { email: user.WorkEmail, name: user.UserName, role: user.Role, lastPasswordChange: user.LastPasswordChange } });
+        const token = jwt.sign({ email: user.WorkEmail, name: user.UserName, role: user.Role, lastPasswordChange: user.LastPasswordChange, status: user.Status }, SECRET_KEY, { expiresIn: "5m" });
+        res.json({ token, user: { email: user.WorkEmail, name: user.UserName, role: user.Role, lastPasswordChange: user.LastPasswordChange, status: user.Status } });
     } catch (error) {
         console.error("Lỗi đăng nhập:", error);
         res.status(500).json({ message: "Lỗi server" });
@@ -67,7 +67,7 @@ exports.sendOTP = async (req, res) => {
             subject: "Mã OTP đăng nhập",
             text: `Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 1 phút.`,
         };
-        
+
         await transporter.sendMail(mailOptions);
         res.json({ message: "OTP đã được gửi! Hãy kiểm tra email của bạn!", token });
     } catch (error) {
@@ -92,7 +92,7 @@ exports.verifyOTP = async (req, res) => {
 
         const tokenB = jwt.sign({ email, name, role, lastPasswordChange }, SECRET_KEY, { expiresIn: "10h" });
 
-        res.json({ message: "Xác thực thành công!", token: tokenB});
+        res.json({ message: "Xác thực thành công!", token: tokenB });
     } catch (error) {
         console.error("Lỗi xác thực OTP:", error);
         res.status(400).json({ message: "OTP hết hạn hoặc không hợp lệ!" });

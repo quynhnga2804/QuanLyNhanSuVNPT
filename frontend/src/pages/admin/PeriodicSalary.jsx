@@ -8,8 +8,7 @@ import PayrollCycleList from './PayrollCycleList';
 import { UserContext } from '../../api/UserContext';
 import { get } from '../../api/apiService';
 
-const PeriodicSalary = () => {
-    const [employees, setEmployees] = useState([]);
+const PeriodicSalary = ({  departments, employees }) => {
     const [incomeTaxes, setIncomeTaxes] = useState([]);
     const [insurances, setInsurances] = useState([]);
     const [monthlysalaries, setMonthlySalaries] = useState([]);
@@ -28,7 +27,6 @@ const PeriodicSalary = () => {
     }, [activeKey]);
 
     useEffect(() => {
-        fetchEmployees();
         fetchMonthlySalaries();
         fetchPayrollCycles();
         fetchJobProfiles();
@@ -37,15 +35,6 @@ const PeriodicSalary = () => {
         fetchIncomeTaxes();
         fetchInsurances();
     }, []);
-
-    const fetchEmployees = async () => {
-        try {
-            const response = await get('/admin/employees');
-            setEmployees(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy danh sách nhân viên:', error);
-        }
-    };
 
     const fetchIncomeTaxes = async () => {
         try {
@@ -118,7 +107,7 @@ const PeriodicSalary = () => {
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        { key: '1', label: 'TỔNG QUAN', children: (<div className='tab-content-scrollable'><PayrollCycle onClick={() => setActiveKey('1')} monthlysalaries={monthlysalaries} payrollcycles={payrollcycles} /></div>) },
+                        { key: '1', label: 'TỔNG QUAN', children: (<div className='tab-content-scrollable'><PayrollCycle onClick={() => setActiveKey('1')}  employees={employees} departments={departments} monthlysalaries={monthlysalaries} payrollcycles={payrollcycles} /></div>) },
                         (role === 'admin' || role === 'director' || role === 'accountant') &&
                         { key: '2', label: 'CHU KỲ LƯƠNG', children: (<div className='tab-content-scrollable'><PayrollCycleList onClick={() => setActiveKey('2')} fetchPayrollCycles={fetchPayrollCycles} payrollcycles={payrollcycles} /></div>) },
                         role === 'accountant' &&

@@ -15,6 +15,7 @@ const MonthlySalary = require('../models/monthlysalaryModel');
 const PayrollCycle = require('../models/payrollCycleModel');
 const JobProfile = require('../models/jobProfileModel');
 const LaborContract = require('../models/laborcontractModel');
+const Leave = require('../models/leaveModel');
 const Overtime = require('../models/overtimeModel');
 const FamilyMember = require('../models/familyMemberModel');
 const Attendance = require('../models/attendanceModel');
@@ -49,6 +50,8 @@ const modelMap = {
   insurances: Insurance,
   laborcontract: LaborContract,
   laborcontracts: LaborContract,
+  leave: Leave,
+  leaves: Leave,
   monthlysalary: MonthlySalary,
   monthlysalaries: MonthlySalary,
   notification: Notification,
@@ -65,10 +68,6 @@ const modelMap = {
   users: User,
   usernotification: UserNotification,
   usernotifications: UserNotification,
-  personalprofile: PersonalProfile,
-  personalprofiles: PersonalProfile,
-  resignation: Resignation,
-  resignations: Resignation,
 };
 
 // Cấu hình lưu ảnh vào thư mục uploads
@@ -114,7 +113,7 @@ const getById = async (req, res) => {
 // Thêm mới
 const create = async (req, res) => {
   try {
-    if (!['admin', 'director', 'manager', 'accountant'].includes(req.user.role.toLowerCase()))
+    if (!['admin', 'director', 'manager', 'accountant', 'hr'].includes(req.user.role.toLowerCase()))
       throw new Error("Bạn không có quyền truy cập!");
 
     const Model = modelMap[req.params.model];
@@ -166,6 +165,7 @@ const createUser = async (req, res) => {
       Password: hashedPassword,
       Role,
       twoFactorSecret,
+      Status: 'Active',
     });
 
     res.status(201).json({
@@ -175,6 +175,7 @@ const createUser = async (req, res) => {
         UserName: newUser.UserName,
         Role: newUser.Role,
         twoFactorSecret,
+        Status: 'Active',
       },
     });
   } catch (error) {
@@ -186,7 +187,7 @@ const createUser = async (req, res) => {
 // Xóa tài khoản người dùng
 const deleteUser = async (req, res) => {
   try {
-    if (!['admin', 'director'].includes(req.user.role.toLowerCase()))
+    if (!['admin', 'director', 'hr'].includes(req.user.role.toLowerCase()))
       throw new Error("Bạn không có quyền truy cập!");
 
     const { id } = req.params;
@@ -318,7 +319,8 @@ const resetPassword = async (req, res) => {
         from: `"VNPT Nghệ An" <${EMAIL_USER}>`,
         to: user.WorkEmail,
         subject: 'Mật khẩu mới từ hệ thống quản lý nhân sự',
-        text: `Mật khẩu mới của bạn là: ${newPassword}`,
+        text: `Mật khẩu mới của bạn là: ${newPassword}. Vui lòng không chia sẻ mật khẩu này với bất kỳ ai!`,
+        html: `Mật khẩu mới của bạn là: <strong>${newPassword}</strong>.<br/>Vui lòng không chia sẻ mật khẩu này với bất kỳ ai!`,
       };
 
       await transporter.sendMail(mailOptions);

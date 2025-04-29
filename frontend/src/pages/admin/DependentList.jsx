@@ -136,7 +136,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
         },
     ];
 
-    if (role !== 'accountant') {
+    if (role === 'hr') {
         columns.push({
             title: 'CHỨC NĂNG',
             dataIndex: 'actions',
@@ -177,7 +177,7 @@ const DependentList = ({ employees, familyMembers, fetchFamilyMembers }) => {
                         />
                     </Space>
                     
-                    {role !== 'accountant' && (
+                    {role === 'hr' && (
                         <Button type='primary' onClick={handleAddNew}>
                             <Space>
                                 Tạo mới <UserAddOutlined />

@@ -1,7 +1,7 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const LeaveRquest = sequelize.define('LeaveRquest', {
+const Leave = sequelize.define('Leave', {
     LeaveRequestID: { 
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -44,7 +44,7 @@ const LeaveRquest = sequelize.define('LeaveRquest', {
     allowNull: true,
   },
 }, {
-  tableName: 'leaverequests',
+  tableName: 'leaves',
   timestamps: false,
 });
-module.exports = LeaveRquest;
+module.exports = Leave;

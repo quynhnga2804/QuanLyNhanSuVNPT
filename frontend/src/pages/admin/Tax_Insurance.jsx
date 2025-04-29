@@ -239,7 +239,7 @@ const Tax_Insurance = () => {
             title: 'THU NHẬP ÁP DỤNG TỐI ĐA (VNĐ)',
             dataIndex: 'MaxValue',
             align: 'right',
-            render: (value, i) => value ? new Intl.NumberFormat('vi-VN').format(value) : 'Vô cực',
+            render: (value, i) => value ? new Intl.NumberFormat('vi-VN').format(value) : 'Còn lại',
         },
         {
             title: 'THUẾ SUẤT',

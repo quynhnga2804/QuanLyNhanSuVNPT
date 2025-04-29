@@ -49,10 +49,8 @@ const Attendance = ({ employees, departments }) => {
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        ...(role === 'admin' || role === 'director' || role === 'manager') ? [
-                            { key: '1', label: 'DANH SÁCH CHẤM CÔNG', children: <AttendanceList onClick={() => setActiveKey("1")} attendances={attendances} employees={employees} departments={departments} /> },
-                            { key: '2', label: 'TĂNG CA', children: <Overtimes overtimes={overtimes} employees={employees} departments={departments} fetchOvertimes={fetchOvertimes} /> },
-                        ] : []
+                        { key: '1', label: 'DANH SÁCH CHẤM CÔNG', children: <AttendanceList onClick={() => setActiveKey("1")} attendances={attendances} employees={employees} departments={departments} /> },
+                        { key: '2', label: 'TĂNG CA', children: <Overtimes overtimes={overtimes} employees={employees} departments={departments} fetchOvertimes={fetchOvertimes} /> },
                     ]}
                 />
             </div>

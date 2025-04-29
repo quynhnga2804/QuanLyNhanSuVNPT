@@ -6,7 +6,7 @@ import { debounce } from 'lodash';
 import { UserContext } from '../../api/UserContext';
 import { put, post, del } from '../../api/apiService';
 
-const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) => {
+const JobProfile = ({ employees, fetchJobProfiles, jobprofiles }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -86,15 +86,11 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
 
   useEffect(() => {
     if (role === 'manager') {
-      const dpID = employees.find(emp => emp.WorkEmail.includes(workEmail))?.DepartmentID;
-      const dvID = departments.find(dv => dv.DepartmentID === dpID)?.DivisionID;
-      const relatedDepartmentIDs = departments.filter(dv => dv.DivisionID === dvID).map(dv => dv.DepartmentID);
-      const newEmployees = employees.filter(emp => relatedDepartmentIDs.includes(emp.DepartmentID));
-      const relatedEmployeeIDs = newEmployees.map(dv => dv.EmployeeID);
+      const relatedEmployeeIDs = employees.map(dv => dv.EmployeeID);
       const filtered = jobprofiles.filter(emp => relatedEmployeeIDs.includes(emp.EmployeeID));
       setNewJobProfiles(filtered);
     }
-  }, [role, employees, departments, workEmail]);
+  }, [role, employees]);
 
   const columns = [
     {
@@ -163,7 +159,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
     },
   ];
 
-  if (role === 'director' || role === 'admin') {
+  if (role === 'admin' || role === 'hr') {
     columns.push({
       title: 'CHỨC NĂNG',
       dataIndex: 'actions',
@@ -215,7 +211,7 @@ const JobProfile = ({ employees, fetchJobProfiles, jobprofiles, departments }) =
             />
           </Space>
 
-          {(role === 'admin' || role === 'director') &&
+          {(role === 'hr' || role === 'admin') &&
             <Button type='primary' onClick={handleAddNew}>
               <Space>
                 Tạo mới <UserAddOutlined />
