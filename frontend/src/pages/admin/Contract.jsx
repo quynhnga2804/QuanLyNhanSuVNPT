@@ -1,8 +1,8 @@
 import { Tabs } from 'antd';
 import React, { useState, useEffect } from 'react';
-import LaborContract from './LaborContract';
-import ReginationList from './ResignationList';
+import EmployeeContractList from './EmployeeContractList';
 import { get } from '../../api/apiService';
+import LaborContractList from './LaborContractList';
 
 const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, departments }) => {
     const [laborcontracts, setlaborcontracts] = useState([]);
@@ -57,8 +57,8 @@ const Contract = ({ employeecontracts, fetchEmployeeContracts, employees, depart
                     activeKey={activeKey}
                     onChange={setActiveKey}
                     items={[
-                        { key: '1', label: 'HỢP ĐỒNG LAO ĐỘNG', children: <LaborContract onClick={() => setActiveKey('1')} departments={departments} employees={employees} employeecontracts={employeecontracts} laborcontracts={laborcontracts} jobprofiles={jobprofiles} fetchEmployeeContracts={fetchEmployeeContracts} /> },
-                        { key: '2', label: 'DANH SÁCH NGHỈ VIỆC', children: <ReginationList onClick={() => setActiveKey('2')} departments={departments} resignations={resignations} employees={employees} /> },
+                        { key: '1', label: 'HỢP ĐỒNG LAO ĐỘNG', children: <EmployeeContractList onClick={() => setActiveKey('1')} departments={departments} employees={employees} employeecontracts={employeecontracts} laborcontracts={laborcontracts} jobprofiles={jobprofiles} fetchEmployeeContracts={fetchEmployeeContracts} /> },
+                        { key: '2', label: 'CÁC LOẠI HỢP ĐỒNG', children: <LaborContractList onClick={() => setActiveKey('1')} laborcontracts={laborcontracts} fetchLaborContracts={fetchLaborContracts} /> },
                     ]}
                 />
             </div>

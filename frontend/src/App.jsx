@@ -3,7 +3,7 @@ import { Button, Flex, Layout, message } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import './App.css';
 import Sidebar from './pages/admin/Sidebar';
-import EmployeeList from './pages/admin/EmployeeList';
+import Employee from './pages/admin/Employee';
 import PeriodicSalary from './pages/admin/PeriodicSalary';
 import Contract from './pages/admin/Contract';
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -18,13 +18,13 @@ import HomeUser from './pages/user/HomeUser';
 import Tax_Insurance from './pages/admin/Tax_Insurance';
 import ProtectedRoute from '../src/api/ProtectedRoute';
 import Notifications from './pages/admin/Notifications';
+import Error404 from './components/Error404';
 import { UserContext } from './api/UserContext';
 import { get } from './api/apiService';
 
 const { Sider, Header, Content } = Layout;
 
 const App = () => {
-  const [newtoken, setToken] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -44,15 +44,14 @@ const App = () => {
 
   useEffect(() => {
     if (token) {
-      setToken(token);
-      fetchEmployees(token);
-      fetchEmployeeContracts(token);
-      fetchDivisions(token);
-      fetchDepartments(token);
+      fetchEmployees();
+      fetchEmployeeContracts();
+      fetchDivisions();
+      fetchDepartments();
     } else {
       window.location.href = '/';
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchUnreadCount();
@@ -93,7 +92,7 @@ const App = () => {
       const response = await get('/admin/employees');
       setEmployees(response.data);
     } catch (error) {
-      message.error('Lỗi khi lấy danh sách nhân viên');
+      console.error('Lỗi khi lấy danh sách nhân viên:', error);
     }
   };
 
@@ -103,7 +102,7 @@ const App = () => {
       const response = await get(url);
       setDepartments(response.data);
     } catch (error) {
-      message.error('Lỗi khi lấy danh sách phòng ban');
+      console.error('Lỗi khi lấy danh sách phòng ban:', error);
     }
   };
 
@@ -112,7 +111,7 @@ const App = () => {
       const response = await get('/admin/divisions');
       setDivisions(response.data);
     } catch (error) {
-      message.error('Lỗi khi lấy danh sách phòng ban');
+      console.error('Lỗi khi lấy danh sách phòng ban:', error);
     }
   };
 
@@ -121,20 +120,17 @@ const App = () => {
       const response = await get('/admin/employeecontracts');
       setemployeecontracts(response.data);
     } catch (error) {
-      message.error('Lỗi khi lấy danh sách hồ sơ nhân sự');
+      console.error('Lỗi khi lấy danh sách hồ sơ nhân sự:', error);
     }
   };
 
   const fetchUnreadCount = async () => {
     try {
       const resNoti = await get("/admin/notifications");
-
       const resUserNoti = await get("/admin/usernotifications");
 
       const notifications = resNoti.data;
       const usernotifications = resUserNoti.data;
-      const currentUser = JSON.parse(localStorage.getItem("user"));
-      const workEmail = currentUser?.email;
       const employeesRes = await get("/admin/employees");
 
       const employees = employeesRes.data;
@@ -154,10 +150,9 @@ const App = () => {
           userNo.EmployeeID === EmployeeID &&
           userNo.IsRead === 1)
       ).length;
-
       setUnreadCount(unreadCount);
     } catch (error) {
-      message.error("Lỗi khi lấy số lượng thông báo");
+      console.log('Lỗi khi lấy số lượng thông báo:', error);
     }
   };
 
@@ -166,8 +161,6 @@ const App = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('workEmail');
     localStorage.removeItem('activeKey');
-    localStorage.removeItem('username');
-    setToken(null);
     navigate('/', { replace: true });
   };
 
@@ -181,25 +174,27 @@ const App = () => {
       </Sider>
 
       <Layout>
-        <Header className='header'style={{marginBottom: '1px'}}>
+        <Header className='header' style={{ marginBottom: '1px' }}>
           <AdminHeader onLogout={handleLogout} unreadCount={unreadCount} imageUrl={imageUrl} />
         </Header>
 
         <Content className='contents'>
           <Flex gap='large'>
             <Routes>
-              <Route path='home' element={<ProtectedRoute element={<AdminHome dtEmployees={dtEmployees} dtDivisions={dtDivisions} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} allowedRoles={['admin', 'director', 'manager', 'accountant']} />} />
+              <Route path='home' element={<ProtectedRoute element={<AdminHome dtEmployees={dtEmployees} dtDivisions={dtDivisions} dtEmployeeContracts={dtEmployeeContracts} dtDepartments={dtDepartments} />} allowedRoles={['admin', 'director', 'manager', 'accountant', 'hr']} />} />
               <Route path='User/home' element={<ProtectedRoute element={<HomeUser replace />} />} allowedRoles={['employee', 'director', 'manager', 'accountant']} />
-              <Route path='employees' element={<ProtectedRoute element={<EmployeeList fetchDepartments={fetchDepartments} departments={departments} employees={employees} fetchEmployees={fetchEmployees} />} allowedRoles={['admin', 'director', 'manager']} />} />
-              <Route path='contracts' element={<ProtectedRoute element={<Contract departments={departments} employees={employees} employeecontracts={employeecontracts} fetchEmployeeContracts={fetchEmployeeContracts} />} allowedRoles={['admin', 'director', 'manager']} />} />
-              <Route path='periodicsalaries' element={<ProtectedRoute element={<PeriodicSalary />} allowedRoles={['admin', 'director', 'accountant']} />} />
-              <Route path='humanreports' element={<ProtectedRoute element={<HumanReport departments={departments} employees={employees} />} allowedRoles={['admin', 'director', 'manager']} />} />
-              <Route path='organizationalstructures' element={<OrganizationalStructure employees={employees} />} />
-              <Route path='attendance&overtime' element={<ProtectedRoute element={<Attendance_Overtime employees={employees} departments={departments} />} allowedRoles={['admin', 'director', 'manager']} />} />
+              <Route path='employees' element={<ProtectedRoute element={<Employee fetchDepartments={fetchDepartments} departments={dtDepartments} employees={dtEmployees} fetchEmployees={fetchEmployees} />} allowedRoles={['admin', 'director', 'manager', 'hr', 'accountant']} />} />
+              <Route path='contracts' element={<ProtectedRoute element={<Contract departments={dtDepartments} employees={dtEmployees} employeecontracts={dtEmployeeContracts} fetchEmployeeContracts={fetchEmployeeContracts} />} allowedRoles={['admin', 'director', 'manager', 'hr']} />} />
+              <Route path='periodicsalaries' element={<ProtectedRoute element={<PeriodicSalary departments={dtDepartments} employees={dtEmployees} />} allowedRoles={['admin', 'director', 'accountant']} />} />
+              <Route path='humanreports' element={<ProtectedRoute element={<HumanReport departments={dtDepartments} employees={dtEmployees} />} allowedRoles={['admin', 'director', 'manager']} />} />
+              <Route path='organizationalstructures' element={<OrganizationalStructure employees={dtEmployees} />} />
+              <Route path='attendance&overtime' element={<ProtectedRoute element={<Attendance_Overtime employees={dtEmployees} departments={dtDepartments} />} allowedRoles={['admin', 'director', 'manager', 'hr']} />} />
               <Route path='tax&insurance' element={<ProtectedRoute element={<Tax_Insurance />} allowedRoles={['admin', 'director']} />} />
               <Route path='workregulations' element={<WorkRegulations />} />
               <Route path='hrpolicies' element={<HRPolicy />} />
-              <Route path='notifications' element={<Notifications fetchUnreadCount={fetchUnreadCount} employees={employees} />} />
+              <Route path='notifications' element={<Notifications fetchUnreadCount={fetchUnreadCount} employees={dtEmployees} />} />
+              <Route path="/notfound" element={<Error404 />} />
+              <Route path="*" element={<Error404 />} />
             </Routes>
           </Flex>
         </Content>

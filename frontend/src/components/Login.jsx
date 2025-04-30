@@ -32,7 +32,7 @@ const Login = () => {
       const role = user?.role.toLowerCase();
 
       if (role === 'admin') navigate('/Admin/home');
-      else if (role === 'director' || role === 'manager' || role === 'accountant' || role === 'employee')
+      else if (role === 'director' || role === 'manager' || role === 'accountant' || role === 'hr' || role === 'employee')
         navigate('/User/home');
       else navigate('/unauthorized');
     }
@@ -55,6 +55,11 @@ const Login = () => {
         localStorage.setItem('tempToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
+
+        if (user.status.toLowerCase() === 'inactive') {
+          message.error('Tài khoản của bạn đã bị khóa!');
+          return;
+        }
         await sendOtp(values.email);
       } else {
         const verifyResponse = await verify('/auth/verify-otp', token, values.otp);

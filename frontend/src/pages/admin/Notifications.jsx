@@ -7,10 +7,10 @@ import { get, post } from '../../api/apiService';
 
 const { Option } = Select;
 
-const Notifications = ({ fetchUnreadCount }) => {
+const Notifications = ({ fetchUnreadCount, employees }) => {
     const [notifications, setNotifications] = useState([]);
     const [usernotifications, setUserNotifications] = useState([]);
-    const [employees, setEmployees] = useState([]);
+    // const [employees, setEmployees] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addForm] = Form.useForm();
     const token = localStorage.getItem('token');
@@ -37,7 +37,6 @@ const Notifications = ({ fetchUnreadCount }) => {
     });
 
     useEffect(() => {
-        fetchEmployees(token);
         fetchNotifications(token);
         fetchUserNotifications(token);
     }, []);
@@ -70,15 +69,6 @@ const Notifications = ({ fetchUnreadCount }) => {
         }
     };
 
-    const fetchEmployees = async () => {
-        try {
-            const response = await get('/admin/employees');
-            setEmployees(response.data);
-        } catch (error) {
-            console.error('Lỗi khi lấy thông báo:', error);
-        }
-    };
-
     const fetchNotifications = async () => {
         try {
             const response = await get('/admin/notifications');
@@ -106,17 +96,27 @@ const Notifications = ({ fetchUnreadCount }) => {
     };
 
     const handleDeleteNotification = async (notificationID) => {
-        try {
-            await post('/admin/usernotifications', {
-                EmployeeID: EmployeeID,
-                NotificationID: notificationID,
-                IsDeleted: 1
-            });
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Xác nhận xóa thông báo này?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    await post('/admin/usernotifications', {
+                        EmployeeID: EmployeeID,
+                        NotificationID: notificationID,
+                        IsDeleted: 1
+                    });
 
-            setNotifications(prev => prev.filter(item => item.NotificationID !== notificationID));
-        } catch (error) {
-            console.error('Lỗi khi xóa thông báo:', error);
-        }
+                    setNotifications(prev => prev.filter(item => item.NotificationID !== notificationID));
+                } catch (error) {
+                    console.error('Lỗi khi xóa thông báo:', error);
+                }
+            },
+        });
+
     };
 
     const handleReadNotification = async (notificationID) => {
@@ -258,26 +258,11 @@ const Notifications = ({ fetchUnreadCount }) => {
                             <Flex gap={12}>
                                 {!isNotificationRead(item.NotificationID) && (
                                     <Tooltip title='Đánh dấu đã đọc'>
-                                        <Button
-                                            type='text'
-                                            icon={<CheckOutlined />}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleReadNotification(item.NotificationID);
-                                            }}
-                                        />
+                                        <Button type='text' icon={<CheckOutlined />} onClick={(e) => { e.stopPropagation(); handleReadNotification(item.NotificationID); }}/>
                                     </Tooltip>
                                 )}
                                 <Tooltip title='Xóa thông báo'>
-                                    <Button
-                                        type='text'
-                                        danger
-                                        icon={<DeleteOutlined />}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteNotification(item.NotificationID);
-                                        }}
-                                    />
+                                    <Button type='text' danger icon={<DeleteOutlined />} onClick={(e) => { e.stopPropagation(); handleDeleteNotification(item.NotificationID); }}/>
                                 </Tooltip>
                             </Flex>
                         </Flex>
@@ -311,9 +296,9 @@ const Notifications = ({ fetchUnreadCount }) => {
 
             {/* Gửi thông báo */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>📩 Gửi Thông Báo</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered >
-                <Form form={addForm} layout='vertical'>
-                    <Form.Item label='Người nhận' name='receivedID' rules={[{ required: true, message: 'Vui lòng chọn người nhận!' }]}>
-                        <Select placeholder='Chọn nhân viên nhận thông báo'>
+                <Form form={addForm} layout='hivercal'>
+                    <Form.Item label='' name='receivedID' rules={[{ required: true, message: 'Vui lòng chọn người nhận!' }]}>
+                        <Select placeholder='Người nhận' style={{ borderBottom: '1px solid #d9d9d9', boxShadow: 'none' }} bordered={false}>
                             <Select.Option key='All' value='All'>
                                 Mọi người
                             </Select.Option>
@@ -325,24 +310,24 @@ const Notifications = ({ fetchUnreadCount }) => {
                         </Select>
                     </Form.Item>
 
-                    <Form.Item label='Tiêu đề' name='Title' rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}>
-                        <Input placeholder='Nhập tiêu đề thông báo...' />
+                    <Form.Item label='' name='Title' rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}>
+                        <Input placeholder='Tiêu đề' maxLength={80} style={{ borderBottom: '1px solid #d9d9d9', borderRadius: 0, boxShadow: 'none' }} bordered={false} />
                     </Form.Item>
 
-                    <Form.Item label='Loại thông báo' name='Type'>
-                        <Select placeholder='Chọn loại thông báo'>
+                    <Form.Item label='' name='Type'>
+                        <Select placeholder='Loại thông báo' rules={[{ required: true, message: 'Vui lòng phân loại!' }]} style={{ borderBottom: '1px solid #d9d9d9', boxShadow: 'none' }} bordered={false}>
                             <Select.Option value='Chung'>📢 Thông báo chung</Select.Option>
                             <Select.Option value='Khẩn cấp'>⚠️ Khẩn cấp</Select.Option>
                             <Select.Option value='Nhắc nhở'>🔔 Nhắc nhở</Select.Option>
                         </Select>
                     </Form.Item>
 
-                    <Form.Item label='Nội dung' name='Message' rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}>
-                        <Input.TextArea rows={4} placeholder='Nhập nội dung thông báo...' />
+                    <Form.Item label='' name='Message' rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}>
+                        <Input.TextArea rows={8} placeholder='Nội dung thông báo...' style={{ borderBottom: '1px solid #d9d9d9', borderRadius: 0, boxShadow: 'none' }} bordered={false} />
                     </Form.Item>
 
-                    <Form.Item label='Thời hạn' name='ExpiredAt'>
-                        <DatePicker placeholder='Chọn thời gian hết hạn' style={{ width: '100%' }} />
+                    <Form.Item label='' name='ExpiredAt' rules={[{ required: true, message: 'Vui lòng chọn thời hạn!' }]}>
+                        <DatePicker placeholder='Thời hạn' style={{ width: '100%', borderBottom: '1px solid #d9d9d9', borderRadius: 0, boxShadow: 'none' }} bordered={false} />
                     </Form.Item>
                 </Form>
             </Modal>

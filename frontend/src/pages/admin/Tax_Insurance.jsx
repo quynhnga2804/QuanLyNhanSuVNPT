@@ -29,9 +29,6 @@ const Tax_Insurance = () => {
 
     const fetchTaxes = async () => {
         try {
-            // const response = await axios.get('http://localhost:5000/api/admin/incometaxes', {
-            //     headers: { "Authorization": `Bearer ${token}` }
-            // });
             const response = await get('/admin/incometaxes');
             const sortedData = response.data.sort((a, b) => {
                 const aVal = a.MaxValue === null ? Infinity : Number(a.MaxValue);
@@ -239,7 +236,7 @@ const Tax_Insurance = () => {
             title: 'THU NHẬP ÁP DỤNG TỐI ĐA (VNĐ)',
             dataIndex: 'MaxValue',
             align: 'right',
-            render: (value, i) => value ? new Intl.NumberFormat('vi-VN').format(value) : 'Vô cực',
+            render: (value, i) => value ? new Intl.NumberFormat('vi-VN').format(value) : 'Còn lại',
         },
         {
             title: 'THUẾ SUẤT',
