@@ -67,7 +67,7 @@ const AppUser = () => {
       });
       setMonthlySalaryUser(response.data);
     } catch (error) {
-      console.log("Chưa có bản ghi ", error);
+      console.log("Chưa có bản ghi lương!", error);
     }
   };
 
