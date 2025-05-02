@@ -2,8 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from "react";
 import { Layout, Card, Typography, Avatar, Table, Flex, message } from "antd";
 import { ClockCircleOutlined, FileTextOutlined, DollarOutlined, BarChartOutlined } from "@ant-design/icons";
 import { Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar } from "recharts";
-import '../../App.css';
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 import { Link, useNavigate } from "react-router-dom";
 import { NotificationContext } from "./NotificationContext";
 
@@ -77,7 +76,7 @@ const HomeUser = ({employeeinfo, monthlySalaryUser, contractUsers}) => {
       const fetchImage = async () => {
         try {
           const token = localStorage.getItem("token"); // Lấy token
-          const response = await axios.get(`http://localhost:5000/uploads/${employeeinfo.Image}`,
+          const response = await axiosClient.get(`http://localhost:5000/uploads/${employeeinfo.Image}`,
             {
               headers: { Authorization: `Bearer ${token}` },
               responseType: "blob",
@@ -106,29 +105,6 @@ const HomeUser = ({employeeinfo, monthlySalaryUser, contractUsers}) => {
   const handleNavigate = (path) => {
     navigate(path);
   };
-
-  useEffect(() => {
-    const notifyExpiringContracts = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/user/notify-expiring-contracts", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        message.success(response.data.message);
-      } catch (error) {
-        console.error('Lỗi khi gửi thông báo:', error);
-      }
-    };
-
-    if (!hasNotified.current) {
-      notifyExpiringContracts();
-      hasNotified.current = true;
-    }
-
-    // Nếu cần gọi API định kỳ mỗi ngày, bạn có thể dùng setInterval:
-    const interval = setInterval(notifyExpiringContracts, 24 * 60 * 60 * 1000); // 24 giờ (24h * 60p * 60s * 1000ms)
-
-    return () => clearInterval(interval); // Dọn dẹp khi component unmount
-  }, []);
 
   return (
     <Layout className="home-container" >

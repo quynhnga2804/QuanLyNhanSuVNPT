@@ -3,7 +3,7 @@ import { Button, Flex, Layout, Affix, message } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { UserContext } from './api/UserContext.jsx';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosClient from './api/axiosClient.js';
 
 import './App.css';
 import Sidebar from './pages/user/SidebarUser.jsx';
@@ -51,7 +51,7 @@ const AppUser = () => {
 
   const fetchEmployeeInfo = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/user/employeeinfo', {
+      const response = await axiosClient.get('/user/employeeinfo', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployeeInfo(response.data);
@@ -62,22 +62,22 @@ const AppUser = () => {
 
   const fetchMonthlySalaryUser = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/user/monthlysalaries', {
+      const response = await axiosClient.get('/user/monthlysalaries', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMonthlySalaryUser(response.data);
     } catch (error) {
       console.log("Chưa có bản ghi lương!", error);
+      // message.error("Không lấy được dữ liệu lương!");
     }
   };
 
   const fetchContractUser = async () => {
     try {
-      const contractResponse = await fetch("http://localhost:5000/api/user/contractinfo", {
+      const contractResponse = await axiosClient.get("/user/contractinfo", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const contractData = await contractResponse.json();
-      if (!contractResponse.ok) throw new Error(contractData.message);
+      const contractData = contractResponse.data;
       setContractUsers(contractData);
     } catch (error) {
       console.log("Lỗi khi lấy dữ liệu hợp đồng: ", error);
@@ -124,7 +124,7 @@ const AppUser = () => {
                   </Route>
 
                   <Route path="home" element={<HomeUser employeeinfo={employeeinfo} monthlySalaryUser={monthlySalaryUser} contractUsers={contractUsers} />} />
-                  <Route path="notifications" element={<NotificationListUser />} />
+                  <Route path="notifications" element={<NotificationListUser contractUsers={contractUsers} />} />
                   <Route path="generalinfo" element={<GeneralInfo />} />
                   <Route path='attendances' element={<AttendanceUser employeeinfo={employeeinfo} />} />
                   <Route path='leaverequests' element={<LeaveRequestUser employeeinfo={employeeinfo}/>}  />

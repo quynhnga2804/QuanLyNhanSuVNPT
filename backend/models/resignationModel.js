@@ -2,7 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Resignation = sequelize.define('Resignation', {
-    ID_Resignation: {
+   ID_Resignation: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,

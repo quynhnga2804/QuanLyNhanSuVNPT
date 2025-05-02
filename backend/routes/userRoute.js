@@ -36,5 +36,4 @@ router.post('/leave-req', authenticateToken, userController.addLeaveRequest);
 router.post('/req-resign', authenticateToken, userController.addResignation);
 router.post('/checkin', authenticateToken, userController.postCheckin);
 router.put('/checkout', authenticateToken, userController.putCheckout);
-router.get('/notify-expiring-contracts', authenticateToken, userController.notifyExpiringContracts);
 module.exports = router;

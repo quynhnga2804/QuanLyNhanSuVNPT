@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Layout, List, Modal, Button, Typography, Popconfirm, message, Select, Tooltip } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import axiosClient from '../../api/axiosClient';
 import { Flex } from 'antd/es';
 import { NotificationContext } from './NotificationContext';
 
@@ -21,7 +21,7 @@ function NotificationListUser() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/user/notifications', {
+      const response = await axiosClient.get('/user/notifications', {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       
@@ -37,7 +37,7 @@ function NotificationListUser() {
   const handleDetailsClick = async (notification) => {
     try {
       setSelectedNotification(notification);
-      await axios.put(`http://localhost:5000/api/user/notifications/${notification.NotificationID}/read`, {}, {
+      await axiosClient.put(`/user/notifications/${notification.NotificationID}/read`, {}, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       setNotifications(notifications.map(n =>
@@ -51,7 +51,7 @@ function NotificationListUser() {
   // Xử lý khi nhấn "Xóa"
   const handleDeleteClick = async (notification) => {
     try {
-      await axios.delete(`http://localhost:5000/api/user/notifications/${notification.NotificationID}`, {
+      await axiosClient.delete(`/user/notifications/${notification.NotificationID}`, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       setNotifications(notifications.filter(n => n.NotificationID !== notification.NotificationID));
@@ -82,6 +82,9 @@ function NotificationListUser() {
         return notifications;
     }
   };
+
+  
+
 
   return (
     <Layout className="home-container">

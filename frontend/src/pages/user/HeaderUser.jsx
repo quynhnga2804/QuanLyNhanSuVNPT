@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ChangePasswordModal from "./ChangePasswordModal";
 import { NotificationContext } from "./NotificationContext";
 import { ModalContext } from "../../api/ModalContext";
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 import { UserContext } from "../../api/UserContext";
 
 const HeaderUser = ({ employeeinfo }) => {
@@ -44,7 +44,7 @@ const HeaderUser = ({ employeeinfo }) => {
             const fetchImage = async () => {
                 try {
                     const token = localStorage.getItem("token"); // Lấy token
-                    const response = await axios.get(
+                    const response = await axiosClient.get(
                         `http://localhost:5000/uploads/${employeeinfo.Image}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },

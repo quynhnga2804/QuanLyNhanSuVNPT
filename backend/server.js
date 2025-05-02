@@ -10,6 +10,10 @@ const authenticateToken = require('./middleware/authMiddleware');
 const app = express();
 const path = require("path");
 const { login } = require('./controllers/authController');
+const cron = require('node-cron');
+const Contract = require('./models/employeecontractModel');
+const Employee = require('./models/employeeModel');
+const Notification = require('./models/notificationModel');
 
 app.use(helmet({crossOriginResourcePolicy: false}));
 
@@ -58,4 +62,45 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+//thông báo tự động
+cron.schedule('0 0 * * *', async () => {
+  console.log("Cron đang chạy...");
+  const today = new Date();
+
+  const contracts = await Contract.findAll();
+
+  for (const contract of contracts) {
+    const endDate = new Date(contract.EndDate);
+
+    // Tính số ngày còn lại
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysLeft = Math.ceil((endDate - today) / msPerDay);
+
+    if (daysLeft === 30) {
+      const sendID = `HD${contract.employcontractID}`;
+
+      const existingNotification = await Notification.findOne({ where: { sentID: sendID } });
+      if (!existingNotification) {
+        const user = await Employee.findByPk(contract.EmployeeID);
+        console.log("user: ", user);
+        console.log("sendID: ", sendID);
+        console.log("sendID: ", sendID);
+        if (user) {
+          await Notification.create({
+            sentID: sendID,
+            receivedID: user.EmployeeID,
+            Title: 'Thông báo hợp đồng',
+            Type: 'Nhắc nhở',
+            Message: `Hợp đồng ${sendID} của bạn sẽ hết hạn sau 30 ngày.`,
+            CreatedAt: new Date(),
+            ExpiredAt: endDate
+          });
+          console.log("Bạn đã gửi thông báo thành công!");
+        }
+        console.log("Đã đến đây!");
+      }
+    }
+  }
 });

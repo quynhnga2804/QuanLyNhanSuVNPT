@@ -1,6 +1,6 @@
 import { Table, Flex, Modal, Descriptions, message, Space, Button } from 'antd';
 import { LoginOutlined, LogoutOutlined } from '@ant-design/icons';
-import axios from "axios";
+import axiosClient from '../../api/axiosClient';
 import React, { useState, useEffect } from "react";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -35,7 +35,7 @@ const AttendanceUser = ({employeeinfo}) => {
 
     const fetchAttendenceUser = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/user/attendances', {
+            const response = await axiosClient.get('/user/attendances', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setAttendanceUser(response.data);
@@ -46,7 +46,7 @@ const AttendanceUser = ({employeeinfo}) => {
 
     const checkExistingCheckIn = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/user/attendances`, 
+            const response = await axiosClient.get(`/user/attendances`, 
             { headers: { Authorization: `Bearer ${token}` } });
             if (response.data.filter(record => dayjs(record.AttendancesDate).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")).length > 0) {
                 message.warning("Bạn đã check in hôm nay rồi!");
@@ -77,7 +77,7 @@ const AttendanceUser = ({employeeinfo}) => {
                 const canCheckIn = await checkExistingCheckIn();
                 if (!canCheckIn) return;
                 const checkinTime = dayjs().format('HH:mm:ss');
-                const res = await axios.post(`http://localhost:5000/api/user/checkin`, 
+                const res = await axiosClient.post(`/user/checkin`, 
                     {
                         EmployeeID: employeeinfo?.EmployeeID, 
                         checkInLocation: checkInLocation,
@@ -128,7 +128,7 @@ const AttendanceUser = ({employeeinfo}) => {
                 const checkOutTime = dayjs(`${today} ${dayjs().format('HH:mm:ss')}`);
                 const totalSecondsWorked = checkOutTime.diff(checkInTime, 'second'); 
                 const totalHoursWorked = totalSecondsWorked / 3600;  
-                const res = await axios.put(`http://localhost:5000/api/user/checkout`, 
+                const res = await axiosClient.put(`/user/checkout`, 
                     {
                         EmployeeID: employeeinfo?.EmployeeID, 
                         today: today,

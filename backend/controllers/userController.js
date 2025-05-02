@@ -334,7 +334,6 @@ exports.postCheckin = async(req, res) => {
         });
         res.status(201).json({ message: "Check-in thành công!", data: newCheckIn });
     } catch (error) {
-        console.error("Lỗi khi Check-in:", error);
         res.status(500).json({ message: "Lỗi server khi Check-in!" });
     }
 };
@@ -460,7 +459,6 @@ exports.addLeaveRequest = async (req, res) => {
 
         res.json({ message: 'Tạo thông tin nghỉ phép thành công!' });
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: 'Có lỗi xảy ra khi lưu tăng nghỉ phép!' });
     }
 };
@@ -541,7 +539,6 @@ exports.getMonthlySalaryUser = async (req, res) => {
     }
 };
 
-
 // yêu cầu nghỉ việc
 exports.addResignation = async (req, res) => {
     try {
@@ -551,145 +548,6 @@ exports.addResignation = async (req, res) => {
         });
         res.json({ message: 'Tạo yêu cầu nghỉ việc thành công!' });
     } catch (error) {
-        console.error("❌ Lỗi khi tạo resign:", error);
         res.status(500).json({ message: 'Có lỗi xảy ra khi lưu yêu cầu nghỉ việc!' });
     }
 };
-
-// exports.notifyExpiringContracts = async (req, res) => {
-//     try {
-//         const today = new Date();
-//         const oneMonthLater = new Date();
-//         oneMonthLater.setMonth(today.getMonth() + 1); // cộng thêm 1 tháng
-
-//         const expiringContracts = await EmployeeContract.findAll({
-//             where: {
-//                 EndDate: {
-//                     [Op.lte]: oneMonthLater, // hợp đồng sẽ hết hạn trong 1 tháng tới
-//                     [Op.gte]: today // hợp đồng còn hiệu lực
-//                 }
-//             }
-//         });
-
-//         for (const contract of expiringContracts) {
-//             const employeeId = contract.EmployeeID;
-//             const endDate = new Date(contract.EndDate); // Chuyển EndDate thành đối tượng Date
-//             const endDateStr = endDate.toLocaleDateString('vi-VN'); // Định dạng ngày cho tiếng Việt
-
-//             const alreadySent = await Notification.findOne({
-//                 where: {
-//                     Title: 'Thông báo hết hạn hợp đồng',
-//                     Message: {
-//                         [Op.like]: `%${employeeId}%`
-//                     },
-//                     CreatedAt: {
-//                         [Op.gte]: fifteenDaysAgo
-//                     }
-//                 }
-//             });
-
-//             if (!alreadySent) {
-//                 const newNotification = await Notification.create({
-//                     sentID: 'E003',
-//                     receivedID: employeeId,
-//                     Title: 'Thông báo hết hạn hợp đồng',
-//                     Message: `Hợp đồng của bạn sẽ hết hạn vào ngày ${endDateStr}. Vui lòng liên hệ phòng nhân sự để được hỗ trợ.`,
-//                     Type: 'Contract',
-//                     CreatedAt: today,
-//                     ExpiredAt: endDate
-//                 });
-
-//                 await UserNotification.create({
-//                     EmployeeID: employeeId,
-//                     NotificationID: newNotification.NotificationID,
-//                     IsDeleted: false,
-//                     IsRead: false
-//                 });
-//                 console.log('new Notification: ', newNotification);
-//             }
-//         }
-        
-
-//         res.status(200).json({
-//             message: 'Đã gửi thông báo hết hạn hợp đồng cho các nhân viên liên quan.'
-//         });
-//     } catch (error) {
-//         console.error('Lỗi khi gửi thông báo:', error);
-//         res.status(500).json({ message: 'Có lỗi xảy ra khi xử lý thông báo.' });
-//     }
-// };
-
-exports.notifyExpiringContracts = async (req, res) => {
-    try {
-      const today = new Date();
-      const fifteenDaysAgo = new Date(today.getTime() - 15 * 24 * 60 * 60 * 1000);
-      const oneMonthLater = new Date(today);
-      oneMonthLater.setMonth(today.getMonth() + 1);
-  
-      console.log('Hôm nay:', today.toLocaleDateString('vi-VN'));
-      console.log('15 ngày trước:', fifteenDaysAgo.toLocaleDateString('vi-VN'));
-      console.log('1 tháng sau:', oneMonthLater.toLocaleDateString('vi-VN'));
-  
-      // Lấy danh sách hợp đồng sắp hết hạn
-      const expiringContracts = await EmployeeContract.findAll({
-        where: {
-          EndDate: {
-            [Op.lte]: oneMonthLater,
-            [Op.gte]: today
-          }
-        }
-      });
-  
-      console.log(`Tổng số hợp đồng sắp hết hạn: ${expiringContracts.length}`);
-  
-      for (const contract of expiringContracts) {
-        const employeeId = contract.EmployeeID;
-        const endDate = new Date(contract.EndDate);
-        const endDateStr = endDate.toLocaleDateString('vi-VN');
-  
-        // Kiểm tra đã gửi thông báo trong 15 ngày gần đây chưa
-        const alreadySent = await Notification.findOne({
-          where: {
-            Title: 'Thông báo hết hạn hợp đồng',
-            Message: {
-              [Op.like]: `%${employeeId}%`
-            },
-            CreatedAt: {
-              [Op.gte]: fifteenDaysAgo
-            }
-          }
-        });
-  
-        if (!alreadySent) {
-          const newNotification = await Notification.create({
-            sentID: 'E003', // Bạn nhớ xác nhận E003 là ai nhé
-            receivedID: employeeId,
-            Title: 'Thông báo hết hạn hợp đồng',
-            Message: `Hợp đồng của bạn sẽ hết hạn vào ngày ${endDateStr}. Vui lòng liên hệ phòng nhân sự để được hỗ trợ.`,
-            Type: 'Contract',
-            CreatedAt: today,
-            ExpiredAt: endDate
-          });
-  
-          await UserNotification.create({
-            EmployeeID: employeeId,
-            NotificationID: newNotification.NotificationID,
-            IsDeleted: false,
-            IsRead: false
-          });
-  
-          console.log(`Đã tạo thông báo cho nhân viên ${employeeId}`);
-        } else {
-          console.log(`Đã gửi thông báo cho nhân viên ${employeeId} trong 15 ngày qua, bỏ qua.`);
-        }
-      }
-  
-      res.status(200).json({
-        message: 'Đã gửi thông báo hết hạn hợp đồng cho các nhân viên liên quan.'
-      });
-    } catch (error) {
-      console.error('Lỗi khi gửi thông báo:', error);
-      res.status(500).json({ message: 'Có lỗi xảy ra khi xử lý thông báo.', error: error.message });
-    }
-  };
-  

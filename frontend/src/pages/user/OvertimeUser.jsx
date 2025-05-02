@@ -1,7 +1,7 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message, Row, Col, TimePicker, DatePicker, Descriptions } from 'antd';
 import Search from 'antd/es/transfer/search';
 import { FieldTimeOutlined } from '@ant-design/icons';
-import axios from "axios";
+import axiosClient from '../../api/axiosClient';
 import { debounce, filter } from 'lodash';
 import dayjs from 'dayjs';
 import React, { useState, useEffect } from "react";
@@ -26,13 +26,10 @@ const OvertimeUser = ({employeeinfo}) => {
     const [dateRange, setDateRange] = useState([]);
     const [addForm] = Form.useForm();
 
-    // const [selectedPayroll, setSelectedPayroll] = useState([]);
-    // const [selectedManager, setSelectedManager] = useState([]);
     const [selectedOTType, setSelectedOTType] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState([]);
     const token = localStorage.getItem('token');
 
-    // const uniquePayroll = Array.from( new Map(mappedOvertimeData.map(ov => [ov.ID_PayrollCycle, { text: ov.PayrollCycle?.PayrollName, value: ov.ID_PayrollCycle }])).values());
     const uniqueOTType = [...new Set(mappedOvertimeData.map(ov => ov.OTType))];
     const uniqueStatus = [...new Set(mappedOvertimeData.map(ov => ov.Status))];
 
@@ -54,23 +51,9 @@ const OvertimeUser = ({employeeinfo}) => {
         setIsAddModalOpen(true);
     };
 
-    // const filteredAttendanceUser = attendanceUser.filter(att => {
-    //     if (dateRange && dateRange.length === 2) {
-    //         const date = dayjs(att.AttendancesDate);
-    //         return date.isSameOrAfter(dateRange[0].startOf('day')) && date.isSameOrBefore(dateRange[1].endOf('day'));
-    //     }
-    //     return true;
-    // });
-
     const handleAddCancel = () => {
-        // Modal.confirm({
-        //     title: 'Xác nhận hủy?',
-        //     content: 'Mọi thông tin bạn đã nhập sẽ bị xoá.',
-        //     onOk: () => {
-                setIsAddModalOpen(false);
-                addForm.resetFields();
-        //     },
-        // });
+        setIsAddModalOpen(false);
+        addForm.resetFields();
     };
 
     const showModal = (record) => {
@@ -94,7 +77,7 @@ const OvertimeUser = ({employeeinfo}) => {
 
     const fetchOvertimeUser = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/user/overtimes', {
+            const response = await axiosClient.get('/user/overtimes', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setOvertimeUser(response.data);
@@ -105,7 +88,7 @@ const OvertimeUser = ({employeeinfo}) => {
 
     const fetchLatestPayrollCycle = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/user/latest-payrollcycle`, {
+            const response = await axiosClient.get(`/user/latest-payrollcycle`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setLatestPayrollCycle(response.data);
@@ -116,7 +99,7 @@ const OvertimeUser = ({employeeinfo}) => {
 
     const fetchManagerList = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/user/get-managers`, {
+            const response = await axiosClient.get(`/user/get-managers`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setManagerList(response.data);
@@ -142,6 +125,15 @@ const OvertimeUser = ({employeeinfo}) => {
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
+            if (!values.reason || !values.reason.trim()) {
+                message.error("Vui lòng điền lý do tăng ca!");
+                return;
+            }
+            const today = new Date();
+            if (today >= values.otDate.toDate()) {
+                message.error("Ngày OT không hợp lệ!");
+                return;
+            }
             const newOT = {
                 EmployeeID: values.employeeId,   
                 ManagerID: values.managerId,
@@ -154,7 +146,7 @@ const OvertimeUser = ({employeeinfo}) => {
                 CreatedAt: new Date(),
                 
             };
-            await axios.post('http://localhost:5000/api/user/req-overtime', newOT, {
+            await axiosClient.post('/user/req-overtime', newOT, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -198,11 +190,6 @@ const OvertimeUser = ({employeeinfo}) => {
             width: 150,
             align: 'center',
             ellipsis: true,
-            // filters: uniquePayroll,
-            // filterMode: 'tree',
-            // filterSearch: true,
-            // onFilter: (value, record) => record.ID_PayrollCycle === value,
-            // onFilter: (value, record) => selectedPayroll.length === value || selectedPayroll.includes(record.ID_PayrollCycle),
             render: (payroll) => payroll?.PayrollName || '',
         },
         {
@@ -211,13 +198,6 @@ const OvertimeUser = ({employeeinfo}) => {
             width: 180,
             align: 'center',
             ellipsis: true,
-            // filters: managerList.map(manager => ({
-            //     text: manager.FullName,
-            //     value: manager.FullName.toLowerCase(),
-            // })),
-            // onFilter: (value, record) => record.ManagerName?.toLowerCase().includes(value),
-            // onFilter: (value, record) => selectedManager.length === value || selectedManager.includes(record?.ManagerName),
-            // filterSearch: true,
             render: (managerName) => managerName || 'Chưa có',
         },
         {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Layout, Spin, message, Typography, Flex, Row, Col, Image, Form, Modal, Input, DatePicker, Select, Button } from "antd";
 import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 import dayjs from "dayjs";
 
 const { Header } = Layout;
@@ -19,7 +20,6 @@ const EmployeeProfile = ({ employeeinfo, contractUsers }) => {
     const [showJobInfo, setShowJobInfo] = useState(false);
     const [showPersonalInfo, setShowPersonalInfo] = useState(false);
     const [showFamilyInfo, setShowFamilyInfo] = useState(false);
-    // const [showResignStatus, setShowResignStatus] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const firstContract = contractUsers.length > 0 ? contractUsers[0] : null;
@@ -33,37 +33,38 @@ const EmployeeProfile = ({ employeeinfo, contractUsers }) => {
     const fetchData = async () => {
         try {
             // Gọi API lấy thông tin công việc
-            const jobResponse = await fetch("http://localhost:5000/api/user/jobinfo", {
+            const jobResponse = await axiosClient.get("/user/jobinfo", {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const jobData = await jobResponse.json();
+            const jobData = await jobResponse.data;
             // if (!jobResponse.ok) throw new Error(jobData.message);
             setJobProfile(jobData.jobProfile);
             setResignation(jobData.resignation);
 
             //Gọi API lấy manager
-            const managerResponse = await fetch("http://localhost:5000/api/user/get-managers", {
+            const managerResponse = await axiosClient.get("/user/get-managers", {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const managerData = await managerResponse.json();
+            const managerData = await managerResponse.data;
             if (!managerResponse.ok) throw new Error(managerData.message);
             setManagerList(managerData);
 
             // Gọi API lấy thông tin cá nhân
-            const personalResponse = await fetch("http://localhost:5000/api/user/personalinfo", {
+            const personalResponse = await axiosClient.get("/user/personalinfo", {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const personalData = await personalResponse.json();
+            const personalData = await personalResponse.data;
             setPersonalProfile(personalData);
             // Gọi API lấy thông tin thành viên gia đình
-            const familyResponse = await fetch("http://localhost:5000/api/user/familymembers", {
+            const familyResponse = await axiosClient.get("/user/familymembers", {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const familyData = await familyResponse.json();
+            const familyData = await familyResponse.data;
             setFamilyMembers(familyData);
 
         } catch (error) {
-            message.error(error.message);
+            // message.error(error.message);
+            console.log("Lỗi: ", error.response?.message);
         } finally {
             setLoading(false);
         }

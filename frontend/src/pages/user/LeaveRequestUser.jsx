@@ -1,7 +1,7 @@
 import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message, Row, Col, DatePicker, Descriptions } from 'antd';
 import Search from 'antd/es/transfer/search';
 import { CalendarOutlined } from '@ant-design/icons';
-import axios from "axios";
+import axiosClient from '../../api/axiosClient';
 import { debounce, filter } from 'lodash';
 import dayjs from 'dayjs';
 import React, { useState, useEffect } from "react";
@@ -62,7 +62,7 @@ const LeaveRequestUser = ({ employeeinfo}) => {
 
     const fetchLeaveInfo = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/user/leaves', {
+            const response = await axiosClient.get('/user/leaves', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setLeaveUser(response.data);
@@ -74,7 +74,7 @@ const LeaveRequestUser = ({ employeeinfo}) => {
 
     const fetchManagerList = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/user/get-managers`, {
+            const response = await axiosClient.get(`/user/get-managers`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setManagerList(response.data);
@@ -99,6 +99,16 @@ const LeaveRequestUser = ({ employeeinfo}) => {
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
+            if (!values.reason || !values.reason.trim()) {
+                message.error('Vui lòng điền lý do nghỉ phép!');
+                return;
+            }
+            const ngaybd = values.startDate.toDate();
+            const ngaykt = values.endDate.toDate();
+            if (ngaykt <= ngaybd) {
+                message.error("Ngày kết thúc phải lớn hơn ngày bắt đầu!");
+                return;
+            }
             const newLeaveRe = {
                 EmployeeID: values.employeeId,   
                 ManagerID: values.managerId,
@@ -108,7 +118,7 @@ const LeaveRequestUser = ({ employeeinfo}) => {
                 Status: 'Pending',
                 
             };
-            await axios.post('http://localhost:5000/api/user/leave-req', newLeaveRe, {
+            await axiosClient.post('/user/leave-req', newLeaveRe, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
