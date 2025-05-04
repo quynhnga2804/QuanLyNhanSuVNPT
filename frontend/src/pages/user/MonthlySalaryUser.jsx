@@ -1,6 +1,5 @@
-import { Table, Flex, message } from 'antd';
-import axios from "axios";
-import React, { useState, useEffect } from "react";
+import { Table, Flex,  } from 'antd';
+import React from "react";
 
 const MonthlySalaryUser = ({monthlySalaryUser}) => {
     const uniquePayroll = Array.from( new Map(monthlySalaryUser.map(s => [s.ID_PayrollCycle, { text: s.PayrollCycle?.PayrollName, value: s.ID_PayrollCycle }])).values());

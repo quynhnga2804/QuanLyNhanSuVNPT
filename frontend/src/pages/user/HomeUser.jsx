@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Layout, Card, Typography, Avatar, Table, Flex } from "antd";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { Layout, Card, Typography, Avatar, Table, Flex, message } from "antd";
 import { ClockCircleOutlined, FileTextOutlined, DollarOutlined, BarChartOutlined } from "@ant-design/icons";
 import { Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar } from "recharts";
-import '../../App.css';
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 import { Link, useNavigate } from "react-router-dom";
 import { NotificationContext } from "./NotificationContext";
 
@@ -15,6 +14,8 @@ const HomeUser = ({employeeinfo, monthlySalaryUser, contractUsers}) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [salaryChartData, setSalaryChartData] = useState([]);
   const {notifications, fetchNotifications } = useContext(NotificationContext);
+  const token = localStorage.getItem('token');
+  const hasNotified = useRef(false);
   
   const navigate = useNavigate(); 
   const getEqualStepDomainPF = (data, keys, padding = 500000, stepCount = 5) => {
@@ -75,7 +76,7 @@ const HomeUser = ({employeeinfo, monthlySalaryUser, contractUsers}) => {
       const fetchImage = async () => {
         try {
           const token = localStorage.getItem("token"); // Lấy token
-          const response = await axios.get(`http://localhost:5000/uploads/${employeeinfo.Image}`,
+          const response = await axiosClient.get(`http://localhost:5000/uploads/${employeeinfo.Image}`,
             {
               headers: { Authorization: `Bearer ${token}` },
               responseType: "blob",

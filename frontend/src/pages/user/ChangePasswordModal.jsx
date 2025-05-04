@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Modal, Input, Button, Form, message } from "antd";
 import { ModalContext } from "../../api/ModalContext";
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 
 const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
     const [form] = Form.useForm();
@@ -45,8 +45,8 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
                 return;
             }
 
-            await axios.post(
-                "http://localhost:5000/api/user/send-otp",
+            await axiosClient.post(
+                "/user/send-otp",
                 { 
                     oldPassword: oldPassword,
                     newPassword: newPassword,
@@ -78,8 +78,8 @@ const ChangePasswordModal = ({ visible, onClose, messageText, isForced }) => {
 
     const handleChangePassword = async (values) => {
         try {
-            await axios.post(
-                "http://localhost:5000/api/user/change-password",
+            await axiosClient.post(
+                "/user/change-password",
                 {
                     oldPassword: values.oldPassword,
                     newPassword: values.newPassword,

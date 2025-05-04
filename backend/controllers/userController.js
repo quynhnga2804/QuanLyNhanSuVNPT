@@ -19,6 +19,7 @@ const Resignation = require("../models/resignationModel");
 const Division = require("../models/divisionModel");
 const Leave = require("../models/leaveModel");
 require("dotenv").config();
+const { Op } = require('sequelize'); 
 
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
@@ -333,7 +334,6 @@ exports.postCheckin = async(req, res) => {
         });
         res.status(201).json({ message: "Check-in thành công!", data: newCheckIn });
     } catch (error) {
-        console.error("Lỗi khi Check-in:", error);
         res.status(500).json({ message: "Lỗi server khi Check-in!" });
     }
 };
@@ -459,7 +459,6 @@ exports.addLeaveRequest = async (req, res) => {
 
         res.json({ message: 'Tạo thông tin nghỉ phép thành công!' });
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: 'Có lỗi xảy ra khi lưu tăng nghỉ phép!' });
     }
 };
@@ -540,7 +539,6 @@ exports.getMonthlySalaryUser = async (req, res) => {
     }
 };
 
-
 // yêu cầu nghỉ việc
 exports.addResignation = async (req, res) => {
     try {
@@ -550,7 +548,6 @@ exports.addResignation = async (req, res) => {
         });
         res.json({ message: 'Tạo yêu cầu nghỉ việc thành công!' });
     } catch (error) {
-        console.error("❌ Lỗi khi tạo resign:", error);
         res.status(500).json({ message: 'Có lỗi xảy ra khi lưu yêu cầu nghỉ việc!' });
     }
 };

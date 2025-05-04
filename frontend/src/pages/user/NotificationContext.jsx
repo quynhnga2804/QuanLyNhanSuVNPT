@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import axios from "axios";
-
+import axiosClient from "../../api/axiosClient";
 export const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
@@ -10,8 +9,8 @@ export const NotificationProvider = ({ children }) => {
 
   const fetchNotifications = async (onlyUnread = false) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/user/notifications?onlyUnread=${onlyUnread}`,
+      const response = await axiosClient.get(
+        `/user/notifications?onlyUnread=${onlyUnread}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNotifications(response.data.notifications);
