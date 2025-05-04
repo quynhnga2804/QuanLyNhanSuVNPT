@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mysql',
-    timezone: '+07:00', // Đổi sang múi giờ của bạn, mới thêm hôm 03/04/2025
+    timezone: '+07:00',
     // logging: false
   }
 );
