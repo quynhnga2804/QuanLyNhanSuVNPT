@@ -29,9 +29,6 @@ const Tax_Insurance = () => {
 
     const fetchTaxes = async () => {
         try {
-            // const response = await axios.get('http://localhost:5000/api/admin/incometaxes', {
-            //     headers: { "Authorization": `Bearer ${token}` }
-            // });
             const response = await get('/admin/incometaxes');
             const sortedData = response.data.sort((a, b) => {
                 const aVal = a.MaxValue === null ? Infinity : Number(a.MaxValue);
@@ -137,6 +134,11 @@ const Tax_Insurance = () => {
     const handleAddInsSave = async () => {
         try {
             const values = await addInsForm.validateFields();
+            if (values.InsuranceType.trim() === '') {
+                message.error(`Trường 'Loại bảo hiểm' không được để khoảng trắng!`);
+                return;
+            }
+            values.InsuranceType = values.InsuranceType.trim();
             values.ChangeDate = today;
             await post('/admin/insurances', values);
             fetchInsurances();
@@ -261,8 +263,8 @@ const Tax_Insurance = () => {
             minWidth: 90,
             render: (_, record) => (
                 <>
-                    <Button type="link" onClick={() => handleEditTax(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-                    <Button type="link" danger onClick={() => handleDeleteTax(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+                    <Button type='link' onClick={() => handleEditTax(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
+                    <Button type='link' danger onClick={() => handleDeleteTax(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
                 </>
             ),
         }
@@ -286,7 +288,7 @@ const Tax_Insurance = () => {
             title: 'NGƯỜI LAO ĐỘNG',
             dataIndex: 'Employee',
             align: 'center',
-            with: 60,
+            minWidth: 80,
             render: (value) => `${(value * 100).toFixed(0)}%`,
         },
         {
@@ -312,8 +314,8 @@ const Tax_Insurance = () => {
             fixed: 'right',
             render: (_, record) => (
                 <>
-                    <Button type="link" onClick={() => handleEditIns(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
-                    <Button type="link" danger onClick={() => handleDeleteIns(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
+                    <Button type='link' onClick={() => handleEditIns(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Sửa</Button>
+                    <Button type='link' danger onClick={() => handleDeleteIns(record)} style={{ border: 'none', height: '20px', width: '45px' }}>Xóa</Button>
                 </>
             ),
         }
@@ -382,11 +384,11 @@ const Tax_Insurance = () => {
             {/* Thêm mới thuế */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Mức Thuế</div>} open={isAddTaxModalOpen} onOk={handleAddTaxSave} onCancel={handleAddTaxCancel} centered>
                 <Form form={addTaxForm} layout='vertical'>
-                    <Form.Item label='Thu nhập áp dụng tối đa' name='MaxValue'>
-                        <Input type='number' />
+                    <Form.Item label='Thu nhập áp dụng tối đa' name='MaxValue' rules={[{ required: true, message: 'Vui lòng nhập thu nhập!' }]}>
+                        <Input type='number' max={9999999999999999n} />
                     </Form.Item>
-                    <Form.Item label='Thuế suất' name='TaxRate' rules={[{ required: true }]}>
-                        <Input type='number' />
+                    <Form.Item label='Thuế suất' name='TaxRate' rules={[{ required: true, message: 'Vui lòng nhập thuế suất!' }]}>
+                        <Input type='number' max={1} min={0} placeholder='Tỉ lệ phần trăm' />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -394,14 +396,14 @@ const Tax_Insurance = () => {
             {/* Thêm mới bảo hiểm */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Mức Bảo Hiểm</div>} open={isAddInsModalOpen} onOk={handleAddInsSave} onCancel={handleAddInsCancel} centered>
                 <Form form={addInsForm} layout='vertical'>
-                    <Form.Item label='Loại bảo hiểm' name='InsuranceType' rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item label='Loại bảo hiểm' name='InsuranceType' rules={[{ required: true, message: 'Vui lòng nhập loại bảo hiểm!' }]}>
+                        <Input maxLength={10} />
                     </Form.Item>
-                    <Form.Item label='Người lao động' name='Employee' rules={[{ required: true }]}>
-                        <InputNumber min={0} max={100} style={{ width: '100%' }} />
+                    <Form.Item label='Người lao động' name='Employee' rules={[{ required: true, message: 'Vui lòng giá trị!' }]}>
+                        <Input type='number' min={0} max={1} style={{ width: '100%' }} placeholder='Tỉ lệ phần trăm' />
                     </Form.Item>
-                    <Form.Item label='Người sử dụng lao động' name='Employer' rules={[{ required: true }]}>
-                        <InputNumber min={0} max={100} style={{ width: '100%' }} />
+                    <Form.Item label='Người sử dụng lao động' name='Employer' rules={[{ required: true, message: 'Vui lòng giá trị!' }]}>
+                        <Input type='number' min={0} max={1} style={{ width: '100%' }} placeholder='Tỉ lệ phần trăm' />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -409,26 +411,26 @@ const Tax_Insurance = () => {
             {/* Chỉnh sửa thuế */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Mức Thuế</div>} open={isEditTaxModalOpen} onOk={handleEditTaxSave} onCancel={handleEditTaxCancel} centered >
                 <Form form={editTaxForm} layout='vertical'>
-                    <Form.Item label='Thu nhập áp dụng tối đa' name='MaxValue'>
-                        <Input type='number' />
+                    <Form.Item label='Thu nhập áp dụng tối đa' name='MaxValue' rules={[{ required: true, message: 'Vui lòng nhập thu nhập!' }]}>
+                        <Input type='number' max={9999999999999999n} />
                     </Form.Item>
-                    <Form.Item label='Thuế suất' name='TaxRate' rules={[{ required: true }]}>
-                        <Input type='number' />
+                    <Form.Item label='Thuế suất' name='TaxRate' rules={[{ required: true, message: 'Vui lòng nhập thuế suất!' }]}>
+                        <Input type='number' max={1} min={0} />
                     </Form.Item>
                 </Form>
             </Modal>
 
-            {/* Chỉnh sửa thuế */}
+            {/* Chỉnh sửa bảo hiểm */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Bảo Hiểm</div>} open={isEditInsModalOpen} onOk={handleEditInsSave} onCancel={handleEditInsCancel} centered >
                 <Form form={editInsForm} layout='vertical'>
-                    <Form.Item label='Loại bảo hiểm' name='InsuranceType' rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item label='Loại bảo hiểm' name='InsuranceType' rules={[{ required: true, message: 'Vui lòng nhập loại bảo hiểm!' }]}>
+                        <Input disabled maxLength={10} />
                     </Form.Item>
-                    <Form.Item label='Người lao động' name='Employee' rules={[{ required: true }]}>
-                        <InputNumber min={0} max={100} style={{ width: '100%' }} addonAfter="%" />
+                    <Form.Item label='Người lao động' name='Employee' rules={[{ required: true, message: 'Vui lòng giá trị!' }]}>
+                        <Input type='number' min={0} max={1} style={{ width: '100%' }} placeholder='Tỉ lệ phần trăm' />
                     </Form.Item>
-                    <Form.Item label='Người sử dụng lao động' name='Employer' rules={[{ required: true }]}>
-                        <InputNumber min={0} max={100} style={{ width: '100%' }} addonAfter="%" />
+                    <Form.Item label='Người sử dụng lao động' name='Employer' rules={[{ required: true, message: 'Vui lòng giá trị!' }]}>
+                        <Input type='number' min={0} max={1} style={{ width: '100%' }} placeholder='Tỉ lệ phần trăm' />
                     </Form.Item>
                 </Form>
             </Modal>

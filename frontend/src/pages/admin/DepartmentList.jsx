@@ -37,6 +37,11 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
+            if (values.DepartmentName.trim() === '') {
+                message.error(`Trường 'Tên phòng ban' không được để khoảng trắng!`);
+                return;
+            }
+            values.DepartmentName = values.DepartmentName.trim();
             await put(`/admin/departments/${editingDepartment.DepartmentID}`, values);
             fetchDepartments();
             message.success('Chỉnh sửa thành công!');
@@ -74,12 +79,30 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
         addForm.resetFields();
     };
 
+    const fieldTitles = {
+        DepartmentID: 'Mã phòng ban',
+        DepartmentName: 'Tên phòng ban',
+    };
+
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
+
+            for (const key in values) {
+                const value = values[key];
+                if (typeof value === 'string') {
+                    if (value.trim() === '') {
+                        const fieldTitle = fieldTitles[key] || key;
+                        message.error(`Trường '${fieldTitle}' không được để khoảng trắng!`);
+                        return;
+                    }
+                    values[key] = value.trim();
+                }
+            }
+
             const formData = new FormData();
             Object.keys(values).forEach(key => {
-                formData.append(key, values[key]);
+                formData.append(key, values[key] || '');
             });
 
             await post('/admin/departments', formData);
@@ -87,7 +110,7 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
             message.success('Thêm mới thành công!');
             handleAddCancel();
         } catch (error) {
-            message.error('Đã xảy ra lỗi, vui lòng kiểm tra lại!');
+            message.error('Lỗi xử lý dữ liệu, vui lòng kiểm tra lại!');
         }
     };
 
@@ -203,13 +226,13 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
             {/* Thêm mới phòng ban */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Phòng Ban</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered >
                 <Form form={addForm} layout='vertical'>
-                    <Form.Item label='Mã phòng ban' name='DepartmentID' rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item label='Mã phòng ban' name='DepartmentID' rules={[{ required: true, message: 'Vui lòng nhập mã phòng ban!' }]}>
+                        <Input maxLength={10} placeholder='Ví dụ: DEP01' />
                     </Form.Item>
-                    <Form.Item label='Tên phòng ban' name='DepartmentName' rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item label='Tên phòng ban' name='DepartmentName' rules={[{ required: true, message: 'Vui lòng nhập tên phòng ban!' }]}>
+                        <Input maxLength={100} />
                     </Form.Item>
-                    <Form.Item label='Tên bộ phận' name='DivisionID' rules={[{ required: true }]}>
+                    <Form.Item label='Tên bộ phận' name='DivisionID' rules={[{ required: true, message: 'Vui lòng chọn bộ phận!' }]}>
                         <Select>
                             {divisions.map(divs => (
                                 <Select.Option key={divs.DivisionID} value={divs.DivisionID}>{divs.DivisionsName}</Select.Option>
@@ -222,13 +245,13 @@ const DepartmentList = ({ departments, employees, divisions, fetchDepartments })
             {/* Chỉnh sửa phòng ban */}
             <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Phòng Ban</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
                 <Form form={editForm} layout='vertical'>
-                    <Form.Item label='Mã phòng ban' name='DepartmentID' rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item label='Mã phòng ban' name='DepartmentID' rules={[{ required: true, message: 'Vui lòng không để trống!' }]}>
+                        <Input disabled maxLength={10} />
                     </Form.Item>
-                    <Form.Item label='Tên phòng ban' name='DepartmentName' rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item label='Tên phòng ban' name='DepartmentName' rules={[{ required: true, message: 'Vui lòng không để trống!' }]}>
+                        <Input maxLength={100} />
                     </Form.Item>
-                    <Form.Item label='Tên bộ phận' name='DivisionID' rules={[{ required: true }]}>
+                    <Form.Item label='Tên bộ phận' name='DivisionID' rules={[{ required: true, message: 'Vui lòng chọn bộ phận!' }]}>
                         <Select>
                             {divisions.map(divs => (
                                 <Select.Option key={divs.DivisionID} value={divs.DivisionID}>{divs.DivisionsName}</Select.Option>

@@ -27,6 +27,11 @@ const LaborContractList = ({ laborcontracts, fetchLaborContracts }) => {
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
+            if (values.ContractType.trim() === '') {
+                message.error(`Trường 'Loại hợp đồng' không được để khoảng trắng!`);
+                return;
+            }
+            values.ContractType = values.ContractType.trim();
             await put(`/admin/laborcontracts/${editingLaborContract.ID_Contract}`, values);
             fetchLaborContracts();
             message.success('Chỉnh sửa thành công!');
@@ -45,9 +50,32 @@ const LaborContractList = ({ laborcontracts, fetchLaborContracts }) => {
         addForm.resetFields();
     };
 
+    const fieldTitles = {
+        ID_Contract: 'Mã hợp đồng',
+        ContractType: 'Loại hợp đồng',
+    };
+
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
+
+            for (const key in values) {
+                const value = values[key];
+                if (typeof value === 'string') {
+                    if (value.trim() === '') {
+                        const fieldTitle = fieldTitles[key] || key;
+                        message.error(`Trường '${fieldTitle}' không được để khoảng trắng!`);
+                        return;
+                    }
+                    values[key] = value.trim();
+                }
+            }
+
+            const formData = new FormData();
+            Object.keys(values).forEach(key => {
+                formData.append(key, values[key] || '');
+            });
+
             await post('/admin/laborcontracts', values);
             fetchLaborContracts();
             message.success('Thêm mới thành công!');

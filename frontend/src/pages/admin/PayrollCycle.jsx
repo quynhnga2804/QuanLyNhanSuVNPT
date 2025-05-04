@@ -224,7 +224,7 @@ const PayrollCycle = ({ monthlysalaries, payrollcycles, departments, employees }
                             <div key={index} style={{ display: 'flex', alignItems: 'center', marginTop: 22 }}>
                                 <Flex vertical gap='small'>
                                     {/* <Tooltip title={`${parseFloat(dept.percent.toFixed(2))}%`}> */}
-                                    <Progress percent={parseFloat(dept.percent.toFixed(2))} size={[435, 16]} strokeColor={colors[index % colors.length]} style={{ fontSize: '12px' }} />
+                                    <Progress percent={parseFloat(dept.percent.toFixed(2))} size={[435, 12]} strokeColor={colors[index % colors.length]} style={{ fontSize: '12px' }} />
                                     {/* </Tooltip> */}
                                 </Flex>
                             </div>

@@ -8,11 +8,10 @@ export const UserProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    if (user) {
+    if (user)
       localStorage.setItem('user', JSON.stringify(user));
-    } else {
+    else
       localStorage.removeItem('user');
-    }
   }, [user]);
 
   return (

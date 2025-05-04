@@ -119,7 +119,7 @@ const Login = () => {
           <Image src={logo} alt='logo' width={60} height={60} />
         </Form.Item>
 
-        <Form.Item label='Email' name='email' rules={[{ required: true, message: 'Vui lòng nhập email!' }]}>
+        <Form.Item label='Email' name='email' rules={[{ type: 'email', required: true, message: 'Vui lòng nhập email!' }]}>
           <Input placeholder='example@gmail.com' disabled={showOtpField} />
         </Form.Item>
 

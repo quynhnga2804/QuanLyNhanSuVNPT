@@ -69,7 +69,7 @@ const HumanReport = ({ employees, departments }) => {
                 activeKey={activeKey}
                 onChange={setActiveKey}
                 items={[
-                    role === 'manager' &&
+                    (role === 'manager' || role === 'hr') &&
                     { key: '1', label: 'THỐNG KÊ VÀ BÁO CÁO NHÂN SỰ', children: <HRStatisticsReports key={activeKey} onClick={() => setActiveKey('1')} employeecontracts={employeecontracts} resignations={resignations} jobprofiles={jobprofiles} personalprofiles={personalprofiles} departments={departments} employees={employees} /> },
                     { key: '2', label: 'BIỂU ĐỒ PHÂN TÍCH NHÂN SỰ', children: <HRAnalysisChart onClick={() => setActiveKey('2')} resignations={resignations} departments={departments} employees={employees} jobprofiles={jobprofiles} personalprofiles={personalprofiles} /> },
                 ]}

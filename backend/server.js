@@ -8,7 +8,7 @@ const adminRoutes = require('./routes/adminRoute');
 const userRoutes = require('./routes/userRoute');
 const authenticateToken = require('./middleware/authMiddleware');
 const app = express();
-const path = require("path");
+const path = require('path');
 const { login } = require('./controllers/authController');
 
 app.use(helmet({crossOriginResourcePolicy: false}));
@@ -46,13 +46,13 @@ app.use('/api/user', userRoutes);
 
 // Xử lý lỗi 404
 app.use((req, res) => {
-  res.status(404).json({ message: "Không tìm thấy trang!" });
+  res.status(404).json({ message: 'Không tìm thấy trang!' });
 });
 
 // Xử lý lỗi 500
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: "Lỗi server!", error: err.message });
+  res.status(500).json({ message: 'Lỗi server!', error: err.message });
 });
 
 const PORT = process.env.PORT || 5000;

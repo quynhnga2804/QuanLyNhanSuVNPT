@@ -330,7 +330,7 @@ const EmployeeContractList = ({ employees, fetchEmployeeContracts, employeecontr
                     items: [
                         { key: 'details', label: 'Chi tiết', onClick: () => handleDetails(record) },
                         { key: 'edit', label: isExpired ? <span style={{ color: 'gray' }}>Chỉnh sửa</span> : 'Chỉnh sửa', onClick: () => { if (!isExpired) handleEdit(record) }, disabled: isExpired },
-                        { key: 'delete', label: isExpired ? <span style={{ color: 'gray' }}>Xóa</span> : 'Xóa', onClick: () => handleDelete(record) },
+                        { key: 'delete', label: isExpired ? <span style={{ color: 'gray' }}>Xóa</span> : 'Xóa', onClick: () => { if (!isExpired) handleDelete(record) }, disabled: isExpired },
                     ],
                 };
 

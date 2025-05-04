@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Flex, Layout, message } from 'antd';
+import { Button, Flex, Layout } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import './App.css';
 import Sidebar from './pages/admin/Sidebar';
@@ -186,7 +186,7 @@ const App = () => {
               <Route path='employees' element={<ProtectedRoute element={<Employee fetchDepartments={fetchDepartments} departments={dtDepartments} employees={dtEmployees} fetchEmployees={fetchEmployees} />} allowedRoles={['admin', 'director', 'manager', 'hr', 'accountant']} />} />
               <Route path='contracts' element={<ProtectedRoute element={<Contract departments={dtDepartments} employees={dtEmployees} employeecontracts={dtEmployeeContracts} fetchEmployeeContracts={fetchEmployeeContracts} />} allowedRoles={['admin', 'director', 'manager', 'hr']} />} />
               <Route path='periodicsalaries' element={<ProtectedRoute element={<PeriodicSalary departments={dtDepartments} employees={dtEmployees} />} allowedRoles={['admin', 'director', 'accountant']} />} />
-              <Route path='humanreports' element={<ProtectedRoute element={<HumanReport departments={dtDepartments} employees={dtEmployees} />} allowedRoles={['admin', 'director', 'manager']} />} />
+              <Route path='humanreports' element={<ProtectedRoute element={<HumanReport departments={dtDepartments} employees={dtEmployees} />} allowedRoles={['admin', 'director', 'manager', 'hr']} />} />
               <Route path='organizationalstructures' element={<OrganizationalStructure employees={dtEmployees} />} />
               <Route path='attendance&overtime' element={<ProtectedRoute element={<Attendance_Overtime employees={dtEmployees} departments={dtDepartments} />} allowedRoles={['admin', 'director', 'manager', 'hr']} />} />
               <Route path='tax&insurance' element={<ProtectedRoute element={<Tax_Insurance />} allowedRoles={['admin', 'director']} />} />

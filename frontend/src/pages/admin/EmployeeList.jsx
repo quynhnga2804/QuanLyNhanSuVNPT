@@ -121,7 +121,6 @@ const EmployeeList = ({ employees, departments, users, fetchEmployees, fetchUser
 
                 if (requiredFields.includes(key)) {
                     const value = values[key];
-
                     if (typeof value === 'string') {
                         if (value.trim() === '') {
                             const fieldTitle = fieldTitles[key] || key;
@@ -619,7 +618,7 @@ const EmployeeList = ({ employees, departments, users, fetchEmployees, fetchUser
                                 </Upload>
                             </Form.Item>
                             <Form.Item label='Số điện thoại' name='PhoneNumber' rules={[{ required: true }]}>
-                                <Input maxLength={11} placeholder='Tối đa 11 ký tự' />
+                                <Input maxLength={10} placeholder='Tối đa 10 ký tự' />
                             </Form.Item>
                             <Form.Item label='Ngày sinh' name='DateOfBirth'>
                                 <DatePicker format="DD/MM/YYYY" placeholder="Chọn ngày" style={{ width: '100%' }} />
@@ -672,12 +671,13 @@ const EmployeeList = ({ employees, departments, users, fetchEmployees, fetchUser
             <Modal className='editfrm' width={'70%'} title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Nhân Sự</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered >
                 <Form form={addForm} layout='vertical'>
                     <Row gutter={24}>
-                        <Col span={12}>
+                        <Col></Col>
+                        <Col span={11}>
                             <Form.Item label='Mã nhân viên' name='EmployeeID' rules={[{ required: true }]}>
                                 <Input placeholder='Ví dụ: E001' />
                             </Form.Item>
                             <Form.Item label='Họ và tên' name='FullName' rules={[{ required: true }]}>
-                                <Input maxLength={100} />
+                                <Input maxLength={100} placeholder='Nguyễn Văn A' />
                             </Form.Item>
                             <Form.Item label='Ảnh đại diện'>
                                 <div>
@@ -700,7 +700,7 @@ const EmployeeList = ({ employees, departments, users, fetchEmployees, fetchUser
                                 </Upload>
                             </Form.Item>
                             <Form.Item label='Số điện thoại' name='PhoneNumber' rules={[{ required: true }]}>
-                                <Input maxLength={11} placeholder='Tối đa 11 ký tự' />
+                                <Input maxLength={10} placeholder='Tối đa 10 ký tự' />
                             </Form.Item>
                             <Form.Item label='Ngày sinh' name='DateOfBirth'>
                                 <DatePicker format="DD/MM/YYYY" placeholder="Chọn ngày" style={{ width: '100%' }} />
@@ -712,7 +712,8 @@ const EmployeeList = ({ employees, departments, users, fetchEmployees, fetchUser
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col span={12}>
+                        <Col></Col>
+                        <Col span={11}>
                             <Form.Item label='Địa chỉ' name='Address'>
                                 <Input />
                             </Form.Item>

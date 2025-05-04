@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { message } from 'antd';
 
 const axiosClient = axios.create({
   baseURL: 'http://localhost:5000/api',
@@ -11,6 +12,18 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403) {
+      message.error('Phiên đăng nhập đã hết hạn!');
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

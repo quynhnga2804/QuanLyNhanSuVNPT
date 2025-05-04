@@ -4,13 +4,13 @@ import { UserContext } from './UserContext';
 
 const ProtectedRoute = ({ element, allowedRoles }) => {
     const { user } = useContext(UserContext);
-
-    if (!user) return <Navigate to="/login" replace />
     const userRole = user.role?.toLowerCase();
     const normalizedRoles = allowedRoles.map(role => role.toLowerCase());
+
+    if (!user) return <Navigate to="/login" replace />    
+
     if (normalizedRoles.includes(userRole))
         return element;
-    
     return <Navigate to="/unauthorized" replace />;
 };
 

@@ -1,4 +1,4 @@
-import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message } from 'antd';
+import { Table, Button, Flex, Select, Space, Typography, Modal, Form, Input, message, Row, Col } from 'antd';
 import React, { useState, useEffect, useContext } from 'react';
 import Search from 'antd/es/transfer/search';
 import { UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -274,110 +274,126 @@ const PersonalProfile = ({ employees, fetchPersonalProfiles, personalprofiles, d
             />
 
             {/* Thêm mới */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Hồ Sơ Cá Nhân</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
+            <Modal className='editfrm' width={'70%'} title={<div style={{ textAlign: 'center', width: '100%' }}>Thêm Mới Hồ Sơ Cá Nhân</div>} open={isAddModalOpen} onOk={handleAddSave} onCancel={handleAddCancel} centered>
                 <Form form={addForm} layout='vertical'>
-                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
-                        <Select placeholder="Chọn nhân viên">
-                            {employees.filter(emp => !personalprofiles.some(profile => profile.EmployeeID === emp.EmployeeID)).map(emp => (
-                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
-                                    {emp.FullName} ({emp.EmployeeID})
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label='Quốc tịch' name='Nationality' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Quê quán' name='PlaceOfBirth' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Số sổ bảo hiểm' name='InsurancesNumber'>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Mã định danh' name='ID_Card' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Nơi cấp' name='ID_CardIssuedPlace' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Học vấn' name='Education' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Bằng cấp' name='Degree' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Chuyên ngành' name='Major' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Kinh nghiệm làm việc' name='WorkExperience'>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Mã số thuế' name='TaxCode' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Số tài khoản ngân hàng' name='BankAccount' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Tên ngân hàng' name='BankName' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Tình trạng hôn nhân' name='MaritalStatus'>
-                        <Input />
-                    </Form.Item>
+                    <Row gutter={24}>
+                        <Col></Col>
+                        <Col span={11}>
+                            <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
+                                <Select placeholder="Chọn nhân viên">
+                                    {employees.filter(emp => !personalprofiles.some(profile => profile.EmployeeID === emp.EmployeeID)).map(emp => (
+                                        <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                                            {emp.FullName} ({emp.EmployeeID})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item label='Quốc tịch' name='Nationality' rules={[{ required: true }]}>
+                                <Input maxLength={39} />
+                            </Form.Item>
+                            <Form.Item label='Quê quán' name='PlaceOfBirth' rules={[{ required: true }]}>
+                                <Input maxLength={100} />
+                            </Form.Item>
+                            <Form.Item label='Số sổ bảo hiểm' name='InsurancesNumber'>
+                                <Input maxLength={10} />
+                            </Form.Item>
+                            <Form.Item label='Mã định danh' name='ID_Card' rules={[{ required: true }]}>
+                                <Input maxLength={12} />
+                            </Form.Item>
+                            <Form.Item label='Nơi cấp' name='ID_CardIssuedPlace' rules={[{ required: true }]}>
+                                <Input maxLength={30} />
+                            </Form.Item>
+                            <Form.Item label='Học vấn' name='Education' rules={[{ required: true }]}>
+                                <Input maxLength={30} />
+                            </Form.Item>
+                        </Col>
+                        <Col></Col>
+                        <Col span={11}>
+                            <Form.Item label='Bằng cấp' name='Degree' rules={[{ required: true }]}>
+                                <Input maxLength={30} />
+                            </Form.Item>
+                            <Form.Item label='Chuyên ngành' name='Major' rules={[{ required: true }]}>
+                                <Input maxLength={100} />
+                            </Form.Item>
+                            <Form.Item label='Kinh nghiệm làm việc' name='WorkExperience'>
+                                <Input maxLength={255} />
+                            </Form.Item>
+                            <Form.Item label='Mã số thuế' name='TaxCode' rules={[{ required: true }]}>
+                                <Input maxLength={13} />
+                            </Form.Item>
+                            <Form.Item label='Số tài khoản ngân hàng' name='BankAccount' rules={[{ required: true }]}>
+                                <Input maxLength={16} />
+                            </Form.Item>
+                            <Form.Item label='Tên ngân hàng' name='BankName' rules={[{ required: true }]}>
+                                <Input maxLength={100} />
+                            </Form.Item>
+                            <Form.Item label='Tình trạng hôn nhân' name='MaritalStatus'>
+                                <Input maxLength={20} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
 
             {/* Chỉnh sửa */}
-            <Modal className='editfrm' title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Hồ Sơ</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
+            <Modal className='editfrm' width={'70%'} title={<div style={{ textAlign: 'center', width: '100%' }}>Chỉnh Sửa Hồ Sơ</div>} open={isEditModalOpen} onOk={handleEditSave} onCancel={handleEditCancel} centered >
                 <Form form={editForm} layout='vertical'>
-                    <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
-                        <Select placeholder="Chọn nhân viên">
-                            {employees.map(emp => (
-                                <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
-                                    {emp.FullName} ({emp.EmployeeID})
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label='Quốc tịch' name='Nationality' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Quê quán' name='PlaceOfBirth' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Số sổ bảo hiểm' name='InsurancesNumber'>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Mã định danh' name='ID_Card' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Nơi cấp' name='ID_CardIssuedPlace' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Học vấn' name='Education' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Bằng cấp' name='Degree' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Chuyên ngành' name='Major' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Kinh nghiệm làm việc' name='WorkExperience'>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Mã số thuế' name='TaxCode' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Số tài khoản ngân hàng' name='BankAccount' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Tên ngân hàng' name='BankName' rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='Tình trạng hôn nhân' name='MaritalStatus'>
-                        <Input />
-                    </Form.Item>
+                    <Row gutter={24}>
+                        <Col></Col>
+                        <Col span={11}>
+                            <Form.Item label='Tên nhân viên' name='EmployeeID' rules={[{ required: true }]}>
+                                <Select placeholder="Chọn nhân viên">
+                                    {employees.map(emp => (
+                                        <Select.Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                                            {emp.FullName} ({emp.EmployeeID})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item label='Quốc tịch' name='Nationality' rules={[{ required: true }]}>
+                                <Input maxLength={39} />
+                            </Form.Item>
+                            <Form.Item label='Quê quán' name='PlaceOfBirth' rules={[{ required: true }]}>
+                                <Input maxLength={100} />
+                            </Form.Item>
+                            <Form.Item label='Số sổ bảo hiểm' name='InsurancesNumber'>
+                                <Input maxLength={10} />
+                            </Form.Item>
+                            <Form.Item label='Mã định danh' name='ID_Card' rules={[{ required: true }]}>
+                                <Input maxLength={12} />
+                            </Form.Item>
+                            <Form.Item label='Nơi cấp' name='ID_CardIssuedPlace' rules={[{ required: true }]}>
+                                <Input maxLength={30} />
+                            </Form.Item>
+                            <Form.Item label='Học vấn' name='Education' rules={[{ required: true }]}>
+                                <Input maxLength={30} />
+                            </Form.Item>
+                        </Col>
+                        <Col></Col>
+                        <Col span={11}>
+                            <Form.Item label='Bằng cấp' name='Degree' rules={[{ required: true }]}>
+                                <Input maxLength={30} />
+                            </Form.Item>
+                            <Form.Item label='Chuyên ngành' name='Major' rules={[{ required: true }]}>
+                                <Input maxLength={100} />
+                            </Form.Item>
+                            <Form.Item label='Kinh nghiệm làm việc' name='WorkExperience'>
+                                <Input maxLength={255} />
+                            </Form.Item>
+                            <Form.Item label='Mã số thuế' name='TaxCode' rules={[{ required: true }]}>
+                                <Input maxLength={13} />
+                            </Form.Item>
+                            <Form.Item label='Số tài khoản ngân hàng' name='BankAccount' rules={[{ required: true }]}>
+                                <Input maxLength={16} />
+                            </Form.Item>
+                            <Form.Item label='Tên ngân hàng' name='BankName' rules={[{ required: true }]}>
+                                <Input maxLength={100} />
+                            </Form.Item>
+                            <Form.Item label='Tình trạng hôn nhân' name='MaritalStatus'>
+                                <Input maxLength={20} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
         </>

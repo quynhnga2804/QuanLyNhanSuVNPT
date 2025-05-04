@@ -31,6 +31,11 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
     const handleEditSave = async () => {
         try {
             const values = await editForm.validateFields();
+            if (values.DivisionsName.trim() === '') {
+                message.error(`Trường 'Tên bộ phận' không được để khoảng trắng!`);
+                return;
+            }
+            values.DivisionsName = values.DivisionsName.trim();
             await put(`/admin/divisions/${editingDivision.DivisionID}`, values);
             fetchDivisions();
             message.success('Chỉnh sửa thành công!');
@@ -49,9 +54,32 @@ const DivisionList = ({ divisions, fetchDivisions }) => {
         addForm.resetFields();
     };
 
+    const fieldTitles = {
+        DivisionID: 'Mã bộ phận',
+        DivisionsName: 'Tên bộ phận',
+    };
+
     const handleAddSave = async () => {
         try {
             const values = await addForm.validateFields();
+
+            for (const key in values) {
+                const value = values[key];
+                if (typeof value === 'string') {
+                    if (value.trim() === '') {
+                        const fieldTitle = fieldTitles[key] || key;
+                        message.error(`Trường '${fieldTitle}' không được để khoảng trắng!`);
+                        return;
+                    }
+                    values[key] = value.trim();
+                }
+            }
+
+            const formData = new FormData();
+            Object.keys(values).forEach(key => {
+                formData.append(key, values[key] || '');
+            });
+
             await post('/admin/divisions', values);
             fetchDivisions();
             message.success('Thêm mới thành công!');
